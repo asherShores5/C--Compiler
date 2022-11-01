@@ -1,0 +1,183 @@
+%option noyywrap
+
+%{
+
+#include <stdio.h>
+#include <string.h>
+
+#define YY_DECL int yylex()
+#include "parser.tab.h"
+
+int words = 0;
+int chars = 0;
+int lines = 0;
+
+%}
+
+letter      [a-zA-Z]
+digit       [0-9]
+ID          {letter}({letter}|{digit})*
+delim       [ \t\n]
+NUMBER      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
+CHARACTER   ["'"]({letter}|{digit})["'"]
+/* ws          {delim}+
+boolean     [true] */
+
+
+%%
+
+
+"/*"    				{
+							int c;
+							while((c = input()) != 0) {
+								if(c == '*') {
+									if((c = input()) == '/')
+										break;
+									else
+										unput(c);
+								}
+							}
+						}
+						
+"int"	{words++; chars += strlen(yytext);
+			printf("%s : INT\n", yytext);
+			yylval.string = strdup(yytext); 
+			return INT;
+		}
+
+"char"	{words++; chars += strlen(yytext);
+			printf("%s : CHAR\n", yytext);
+			yylval.string = strdup(yytext); 
+			return CHAR;
+		}
+
+"float"	{words++; chars += strlen(yytext);
+			printf("%s : FLOAT\n", yytext);
+			yylval.string = strdup(yytext); 
+			return FLOAT;
+		}
+
+"write"	{words++; chars += strlen(yytext);
+			printf("%s : WRITE\n", yytext);
+			yylval.string = strdup(yytext); 
+			return WRITE;
+		}
+
+"return"	{words++; chars += strlen(yytext);
+			printf("%s : RETURN\n", yytext);
+			yylval.string = strdup(yytext); 
+			return RETURN;
+		}
+
+"writeln"	{words++; chars += strlen(yytext);
+			printf("%s : WRITELN\n", yytext);
+			yylval.string = strdup(yytext); 
+			return WRITELN;
+		}
+
+"func" 		{words++; chars += strlen(yytext);
+			printf("%s : FUNC\n", yytext);
+			yylval.string = strdup(yytext); 
+			return FUNC;
+		}
+
+{ID}	{words++; chars += strlen(yytext);
+			  printf("%s : IDENTIFIER\n",yytext);
+			  yylval.string = strdup(yytext); 
+			  return ID;
+			}
+			
+{NUMBER}		{words++; chars += strlen(yytext);
+			  printf("%s : NUMBER\n",yytext);
+			  yylval.number = atoi(strdup(yytext)); 
+			  return NUMBER;
+			}
+
+{CHARACTER}		{words++; chars += strlen(yytext);
+			  printf("%s : CHARACTER\n",yytext);
+			  yylval.character = atoi(strdup(yytext)); 
+			  return CHARACTER;
+			}
+			
+";"		{chars++;
+		  //printf("%s : SEMICOLON\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return SEMICOLON;
+		}
+		
+"="		{chars++;
+		  printf("%s : EQ\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return EQ;
+		}
+
+
+
+"+"		{chars++;
+		  printf("%s : PLUS\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return PLUS;
+		}
+
+"-"		{chars++;
+		  printf("%s : MINUS\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return MINUS;
+		}
+
+"*"		{chars++;
+		  printf("%s : TIMES\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return TIMES;
+		}
+
+"/"		{chars++;
+		  printf("%s : DIVIDE\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return DIVIDE;
+		}
+
+"["		{chars++;
+		  printf("%s : LBRACKET\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LBRACKET;
+		}
+
+"]"		{chars++;
+		  printf("%s : RBRACKET\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return RBRACKET;
+		}
+
+"("		{chars++;
+		  printf("%s : LPAREN\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LPAREN;
+		}
+
+")"		{chars++;
+		  printf("%s : RPAREN\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return RPAREN;
+		}
+
+"{"		{chars++;
+		  printf("%s : LCURLY\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LCURLY;
+		}
+
+"}"		{chars++;
+		  printf("%s : RCURLY\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return RCURLY;
+		}
+
+[\n]	{lines++; chars=0;}
+[ \t]	{chars++;}
+.		{chars++;
+         printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);
+		}
+		
+
+%%

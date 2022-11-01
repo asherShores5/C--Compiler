@@ -1,0 +1,23 @@
+int x;
+int y[2];
+int z;
+
+func int myFunction(int newInteger){
+    int w;
+    char c;
+    w = 69;
+    return w;
+}
+
+func int main (){
+    char a;
+    x = 2;
+    y[0] = 1;
+    y[1] = 2;
+    a = 'b';
+    write x;
+    writeln;
+    z = myFunction(x); 
+    write z;
+    return 0;
+}

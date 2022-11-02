@@ -74,105 +74,135 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 //All the program grammar that will come up
-%type <ast> Program VarDeclList FunDeclList VarDecl FunDecl FuncRun ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp
+%type <ast> Program VarDeclList FunDeclList VarDecl ArrDecl FunDecl FuncRun ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp
 
 %start Program
 
 %%
 
 // Program ------> VarDeclList FunDeclList 
-Program: VarDeclList {} 
-FunDeclList {}
+Program: 
+	VarDeclList FunDeclList {
+
+		printf("Program started:\n");
+
+		// ------ AST ------ //
+		struct AST* rightMost = getEndNode($1);
+		rightMost->right = $2; 
+		$$ = $1;
+
+		
+		printAST($$, 3);
+	}
 ;
 
 //==========================================
 
 //VarDeclList --> epsilon 
 //                VarDecl VarDeclList
-VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n"); */}
-		|	VarDecl VarDeclList	{}
+VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
+
+	|	VarDecl VarDeclList	{
+		$1->right = $2;
+		$$ = $1;
+	}
+
 ;
 
 //==========================================
 
 //VarDecl ------> Type id ;
 //               Type id [num] ; // array fdecl
-VarDecl: Type ID SEMICOLON {printf("\nRECOGNIZED RULE: VARIABLE declaration %s\n\n", $2);
-
-							//Asher's Semantic Checks
-							//Symbol Table
-							symTabAccess();
-							//Var Decl Check
-							int inSymTab = found($2, currentScope);
-							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
-							if (inSymTab == 0) {
-								addItem($2, "Var", $1, 0, currentScope);
-							} else {
-								printf("\nSEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
-							} 
-							showSymTable();
-}
+VarDecl: Type ID SEMICOLON {printf("\nRECOGNIZED RULE: VARIABLE declaration %s\n\n", $2);}
 		| Type ID LBRACKET NUMBER RBRACKET SEMICOLON {printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
-		
-							//Asher's Semantic Checks
-							//Symbol Table
-							symTabAccess();
-							int inSymTab = found($2, currentScope);
-							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
-							if (inSymTab == 0) {
-								addItem($2, "ARRAY", $1, $4, currentScope);
-							} else {
-								printf("\nSEMANTIC ERROR: ARR %s is already in the symbol table\n", $2);
-							} 
-							showSymTable();
-}
+		}
 ;
 
 //==========================================
 
 //FunDeclList --> FunDecl 
 //                FunDecl FunDeclList
-FunDeclList: FunDecl {$$ = $1;}
-			| FunDecl FunDeclList {$$ = $1;}
+FunDeclList: 
+	FunDecl 
+
+	| FunDecl FunDeclList {
+
+		//TODO AST stuff idk what to do about this yet
+
+	}
 ;
 
 //=========================================
 // For reference --> void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLength, char scope[50])
 
 //FunDecl ------> Type id ( ParamDecList ) Block
-FunDecl: FUNC Type ID {strcpy(currentScope, $3);} FuncRun
-;
+FunDecl:
+	FUNC Type ID LPAREN ParamDecList RPAREN Block {
+
+		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
+
+
+		// ----- SYMBOL TABLE ----- //
+		symTabAccess();
+
+		int inSymTab = found($3, currentScope);
+
+
+		// ------ SEMANTIC CHECKS ------ //
+ 		if (inSymTab == 0) {
+			
+			addItem($3, "FUNC", $2, currentScope);
+
+			showSymTable();
+
+		} else {
+			printf("SEMANTIC ERROR: Function %s is already in the symbol table\n", $2);
+		}
+
+
+		// ----- AST ----- //
+		$$ = AST_assignment("FUNC", $2, $3);		
+
+		strcpy(currentScope, $3);
+
+		// printf("CurrentScope = %s\n", currentScope);
+	}
 
 FuncRun: LPAREN ParamDecList RPAREN Block {
-			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
-			//Asher's Semantic Checks
-			//Symbol Table
-			symTabAccess();
-			int inSymTab = found(currentScope, currentScope);
-			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
-			if (inSymTab == 0) {
-				addItem(currentScope, "FUNC", "Func", 0, currentScope);
-			} else {
-				printf("\nSEMANTIC ERROR: FUNC %s is already in the symbol table\n", $2);
-			} 
-			showSymTable();
-			strcpy(currentScope, "GLOBAL");
-	}
+		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
+		//Asher's Semantic Checks
+		//Symbol Table
+		symTabAccess();
+		int inSymTab = found(currentScope, currentScope);
+		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+		if (inSymTab == 0) {
+			addItem(currentScope, "FUNC", "Func", 0, currentScope);
+		} else {
+			printf("\nSEMANTIC ERROR: FUNC %s is already in the symbol table\n", $2);
+		} 
+		showSymTable();
+		strcpy(currentScope, "GLOBAL");
+}
 
 //==========================================
 
 //ParamDeclList --> epsilon 
 //                  ParamDeclListTail
-ParamDecList: /* EPSILON */ {printf("No ParamDeclList (EPSILON)\n");}
-			| ParamDecListTail {}
+ParamDecList: /* EPSILON */ {printf("No ParamDeclList (EPSILON)\n\n");}
+
+	| ParamDecListTail {}
+
 ;
 
 //==========================================
 
 //ParamDeclListTail --> ParamDecl 
 //                      ParamDecl, ParamDeclListTail 
-ParamDecListTail: ParamDecl {}
-				| ParamDecl ParamDecListTail {}
+ParamDecListTail: 
+	ParamDecl {}
+
+	| ParamDecl ParamDecListTail {$1->right = $2; $$ = $1;}
+
 ;
 
 //==========================================
@@ -239,11 +269,24 @@ StmtList: Stmt {}
 //                read id ;
 //                write Expr ;
 //                writeln ;
-Stmt: SEMICOLON {}
+Stmt: 
+	SEMICOLON {
+		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);	
+	}
+
 	| Expr SEMICOLON {}
-	| RETURN Expr SEMICOLON {printf("\nRECOGNIZED RULE: Return Statement\n");}
-	| WRITE Expr SEMICOLON {printf("\nRECOGNIZED RULE: Write Statement\n");}
-	| WRITELN SEMICOLON {printf("\nRECOGNIZED RULE: Write Line %s\n", $1);}
+
+	| RETURN Expr SEMICOLON {}
+
+	| WRITE Expr SEMICOLON {
+		printf("\nRECOGNIZED RULE: Write Statement\n");
+	}
+
+	| WRITELN SEMICOLON {
+		printf("\nRECOGNIZED RULE: Write Line %s\n", $1);
+	}
+
+	| RETURN Expr SEMICOLON
 ;
 
 //==========================================

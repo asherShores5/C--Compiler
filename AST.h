@@ -9,6 +9,7 @@ struct AST{
     
     struct AST * left;
     struct AST * right;
+
     // review pointers to structs in C
     // complete the tree struct with pointers
 };
@@ -22,6 +23,9 @@ struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
     strcpy(ASTassign->nodeType, nodeType);
     strcpy(ASTassign->LHS, LHS);
     strcpy(ASTassign->RHS, RHS);
+
+    // rightmost = ASTassign;
+    // printf("rightmost: %s", rightmost);
     
 
 /*
@@ -81,14 +85,27 @@ void printDots(int num)
         printf("      ");
 }
 
+struct AST* getEndNode(struct AST* node) {
+    struct AST* curr = node;
+    printf("Debug test 2\n");
+
+    while (strcmp("TYPE", curr->right) != 0) {
+        printf("strcmp: %d\n", strcmp("null", curr->right));
+        printf("curr.right = %s\n", curr->nodeType);
+        curr = curr->right;
+    }
+    printf("final node = %s", curr->nodeType);
+    return curr;
+}
+
 void printAST(struct AST* tree, int level){
     if (tree == NULL) return;
     printDots(level);
     printf("%s\n", tree->nodeType);
     printDots(level);
     printf("%s %s\n", tree->LHS, tree->RHS);
-    if(tree->left != NULL) printAST(tree->left, level+1); else return;
     if(tree->right != NULL) printAST(tree->right, level+1); else return;
+    if(tree->left != NULL) printAST(tree->left, level+1); else return;
     
 }
 

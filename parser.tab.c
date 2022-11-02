@@ -1433,7 +1433,59 @@ yyreduce:
 		lastVar->right = (yyvsp[0].ast);
 		(yyval.ast) = (yyvsp[-1].ast);
 		
+<<<<<<< HEAD
 		printAST((yyval.ast), 3);
+=======
+							//Asher's Semantic Checks
+							//Symbol Table
+							symTabAccess();
+							int inSymTab = found((yyvsp[-4].string), currentScope);
+							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+							if (inSymTab == 0) {
+								addItem((yyvsp[-4].string), "ARRAY", (yyvsp[-5].ast), (yyvsp[-2].number), currentScope);
+							} else {
+								printf("\nSEMANTIC ERROR: ARR %s is already in the symbol table\n", (yyvsp[-4].string));
+							} 
+							showSymTable();
+}
+#line 1258 "parser.tab.c"
+    break;
+
+  case 8: /* FunDeclList: FunDecl  */
+#line 135 "parser.y"
+                     {(yyval.ast) = (yyvsp[0].ast);}
+#line 1264 "parser.tab.c"
+    break;
+
+  case 9: /* FunDeclList: FunDecl FunDeclList  */
+#line 136 "parser.y"
+                                              {(yyval.ast) = (yyvsp[-1].ast);}
+#line 1270 "parser.tab.c"
+    break;
+
+  case 10: /* $@2: %empty  */
+#line 143 "parser.y"
+                      {strcpy(currentScope, (yyvsp[0].string));}
+#line 1276 "parser.tab.c"
+    break;
+
+  case 12: /* FuncRun: LPAREN ParamDecList RPAREN Block  */
+#line 146 "parser.y"
+                                          {
+			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
+			//Asher's Semantic Checks
+			//Symbol Table
+			symTabAccess();
+			int inSymTab = found(currentScope, currentScope);
+			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+			if (inSymTab == 0) {
+				addItem(currentScope, "FUNC", "Func", 0, "GLOBAL");
+			} else {
+				printf("\nSEMANTIC ERROR: FUNC %s is already in the symbol table\n", (yyvsp[-2].ast));
+			} 
+			showSymTable();
+			strcpy(currentScope, "GLOBAL");
+>>>>>>> abc2afd (sync stuff I was working on earlier idk what chang)
 	}
 #line 1439 "parser.tab.c"
     break;

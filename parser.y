@@ -200,6 +200,7 @@ FunDecl:
 ;
 
 FuncRun: LPAREN ParamDecList RPAREN Block {
+<<<<<<< HEAD
 
 		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
 		//Asher's Semantic Checks
@@ -214,6 +215,21 @@ FuncRun: LPAREN ParamDecList RPAREN Block {
 		} 
 		showSymTable();
 		strcpy(currentScope, "GLOBAL");
+=======
+			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
+			//Asher's Semantic Checks
+			//Symbol Table
+			symTabAccess();
+			int inSymTab = found(currentScope, currentScope);
+			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+			if (inSymTab == 0) {
+				addItem(currentScope, "FUNC", "Func", 0, "GLOBAL");
+			} else {
+				printf("\nSEMANTIC ERROR: FUNC %s is already in the symbol table\n", $2);
+			} 
+			showSymTable();
+			strcpy(currentScope, "GLOBAL");
+>>>>>>> abc2afd (sync stuff I was working on earlier idk what chang)
 	}
 
 ;	

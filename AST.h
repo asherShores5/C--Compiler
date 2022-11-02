@@ -6,7 +6,6 @@ struct AST{
     char nodeType[50];
     char LHS[50];
     char RHS[50];
-    =rightmost;
     
     struct AST * left;
     struct AST * right;
@@ -25,8 +24,8 @@ struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
     strcpy(ASTassign->LHS, LHS);
     strcpy(ASTassign->RHS, RHS);
 
-    rightmost = ASTassign;
-    printf("rightmost: %s", rightmost);
+    // rightmost = ASTassign;
+    // printf("rightmost: %s", rightmost);
     
 
 /*
@@ -90,7 +89,7 @@ struct AST* getEndNode(struct AST* node) {
     struct AST* curr = node;
     printf("Debug test 2\n");
 
-    while (strcmp("null", curr->right) != 0) {
+    while (strcmp("TYPE", curr->right) != 0) {
         printf("strcmp: %d\n", strcmp("null", curr->right));
         printf("curr.right = %s\n", curr->nodeType);
         curr = curr->right;

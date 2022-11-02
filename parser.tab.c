@@ -556,11 +556,11 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    84,    84,   103,   105,   116,   142,   147,   190,   192,
-     203,   239,   241,   250,   252,   261,   263,   269,   277,   278,
-     279,   285,   286,   298,   302,   304,   306,   310,   314,   320,
-     322,   324,   326,   328,   330,   333,   334,   334,   340,   341,
-     342,   343,   345,   348,   349,   350,   351
+       0,    84,    84,   102,   104,   115,   141,   146,   189,   191,
+     202,   238,   240,   249,   251,   260,   262,   268,   276,   277,
+     278,   284,   285,   297,   301,   303,   305,   309,   313,   319,
+     321,   323,   325,   327,   329,   332,   333,   333,   339,   340,
+     341,   342,   344,   347,   348,   349,   350
 };
 #endif
 
@@ -1427,34 +1427,33 @@ yyreduce:
 		printf("Program started:\n");
 
 		// ------ AST ------ //
-		// struct AST* rightMost = getEndNode($1);
-		printf("Rightmost node = %s\n", rightMost);
+		struct AST* rightMost = getEndNode((yyvsp[-1].ast));
 		rightMost->right = (yyvsp[0].ast); 
 		(yyval.ast) = (yyvsp[-1].ast);
 
 		
 		printAST((yyval.ast), 3);
 	}
-#line 1439 "parser.tab.c"
+#line 1438 "parser.tab.c"
     break;
 
   case 3:
-#line 103 "parser.y"
+#line 102 "parser.y"
                            { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
-#line 1445 "parser.tab.c"
+#line 1444 "parser.tab.c"
     break;
 
   case 4:
-#line 105 "parser.y"
+#line 104 "parser.y"
                                         {
 		(yyvsp[-1].ast)->right = (yyvsp[0].ast);
 		(yyval.ast) = (yyvsp[-1].ast);
 	}
-#line 1454 "parser.tab.c"
+#line 1453 "parser.tab.c"
     break;
 
   case 5:
-#line 116 "parser.y"
+#line 115 "parser.y"
                           {
 
 		printf("\n VARDECL RECOGNIZED ----> %s \n", (yyvsp[-1].string));
@@ -1480,17 +1479,17 @@ yyreduce:
 		(yyval.ast) = AST_Type("TYPE", (yyvsp[-2].ast), (yyvsp[-1].string));
 		//printf("--------> Node:%s, %s\n", $$->nodeType, $$->RHS);
 	}
-#line 1484 "parser.tab.c"
+#line 1483 "parser.tab.c"
     break;
 
   case 6:
-#line 142 "parser.y"
+#line 141 "parser.y"
                   {printf("ARRDECL TO VARDECL\n");}
-#line 1490 "parser.tab.c"
+#line 1489 "parser.tab.c"
     break;
 
   case 7:
-#line 147 "parser.y"
+#line 146 "parser.y"
                                                    {
 
 		// printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
@@ -1527,21 +1526,21 @@ yyreduce:
 		// emitArrayDecl($2, $4, getItemID($2, currentScope));
 
 	}
-#line 1531 "parser.tab.c"
+#line 1530 "parser.tab.c"
     break;
 
   case 9:
-#line 192 "parser.y"
+#line 191 "parser.y"
                               {
 
 		//TODO AST stuff idk what to do about this yet
 
 	}
-#line 1541 "parser.tab.c"
+#line 1540 "parser.tab.c"
     break;
 
   case 10:
-#line 203 "parser.y"
+#line 202 "parser.y"
                                                       {
 
 		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", (yyvsp[-4].string));
@@ -1572,221 +1571,221 @@ yyreduce:
 
 		// printf("CurrentScope = %s\n", currentScope);
 	}
-#line 1576 "parser.tab.c"
+#line 1575 "parser.tab.c"
     break;
 
   case 11:
-#line 239 "parser.y"
+#line 238 "parser.y"
                             {printf("No ParamDeclList (EPSILON)\n\n");}
-#line 1582 "parser.tab.c"
+#line 1581 "parser.tab.c"
     break;
 
   case 12:
-#line 241 "parser.y"
+#line 240 "parser.y"
                            {}
-#line 1588 "parser.tab.c"
+#line 1587 "parser.tab.c"
     break;
 
   case 13:
-#line 250 "parser.y"
+#line 249 "parser.y"
                   {}
-#line 1594 "parser.tab.c"
+#line 1593 "parser.tab.c"
     break;
 
   case 14:
-#line 252 "parser.y"
+#line 251 "parser.y"
                                      {(yyvsp[-1].ast)->right = (yyvsp[0].ast); (yyval.ast) = (yyvsp[-1].ast);}
-#line 1600 "parser.tab.c"
+#line 1599 "parser.tab.c"
     break;
 
   case 15:
-#line 261 "parser.y"
+#line 260 "parser.y"
                 {printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", (yyvsp[0].string));}
-#line 1606 "parser.tab.c"
+#line 1605 "parser.tab.c"
     break;
 
   case 16:
-#line 263 "parser.y"
+#line 262 "parser.y"
                                     {printf("\n RECOGNIZED RULE: Parameter ARRAY declaration %s\n", (yyvsp[-2].string));}
-#line 1612 "parser.tab.c"
+#line 1611 "parser.tab.c"
     break;
 
   case 17:
-#line 269 "parser.y"
+#line 268 "parser.y"
                                           {}
-#line 1618 "parser.tab.c"
+#line 1617 "parser.tab.c"
     break;
 
   case 18:
-#line 277 "parser.y"
+#line 276 "parser.y"
           {}
-#line 1624 "parser.tab.c"
+#line 1623 "parser.tab.c"
     break;
 
   case 19:
-#line 278 "parser.y"
+#line 277 "parser.y"
                 {}
-#line 1630 "parser.tab.c"
+#line 1629 "parser.tab.c"
     break;
 
   case 20:
-#line 279 "parser.y"
+#line 278 "parser.y"
                {}
-#line 1636 "parser.tab.c"
+#line 1635 "parser.tab.c"
     break;
 
   case 21:
-#line 285 "parser.y"
+#line 284 "parser.y"
                {}
-#line 1642 "parser.tab.c"
+#line 1641 "parser.tab.c"
     break;
 
   case 22:
-#line 286 "parser.y"
+#line 285 "parser.y"
                         {}
-#line 1648 "parser.tab.c"
+#line 1647 "parser.tab.c"
     break;
 
   case 23:
-#line 298 "parser.y"
+#line 297 "parser.y"
                   {
 		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", (yyvsp[0].string));	
 	}
-#line 1656 "parser.tab.c"
+#line 1655 "parser.tab.c"
     break;
 
   case 24:
-#line 302 "parser.y"
+#line 301 "parser.y"
                          {}
-#line 1662 "parser.tab.c"
+#line 1661 "parser.tab.c"
     break;
 
   case 25:
-#line 304 "parser.y"
+#line 303 "parser.y"
                                 {}
-#line 1668 "parser.tab.c"
+#line 1667 "parser.tab.c"
     break;
 
   case 26:
-#line 306 "parser.y"
+#line 305 "parser.y"
                                {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 	}
-#line 1676 "parser.tab.c"
+#line 1675 "parser.tab.c"
     break;
 
   case 27:
-#line 310 "parser.y"
+#line 309 "parser.y"
                             {
 		printf("\nRECOGNIZED RULE: Write Line %s\n", (yyvsp[-1].string));
 	}
-#line 1684 "parser.tab.c"
+#line 1683 "parser.tab.c"
     break;
 
   case 29:
-#line 320 "parser.y"
+#line 319 "parser.y"
                 {}
-#line 1690 "parser.tab.c"
+#line 1689 "parser.tab.c"
     break;
 
   case 30:
-#line 322 "parser.y"
+#line 321 "parser.y"
                        {}
-#line 1696 "parser.tab.c"
+#line 1695 "parser.tab.c"
     break;
 
   case 31:
-#line 324 "parser.y"
+#line 323 "parser.y"
                           {}
-#line 1702 "parser.tab.c"
+#line 1701 "parser.tab.c"
     break;
 
   case 32:
-#line 326 "parser.y"
+#line 325 "parser.y"
                      {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", (yyvsp[-2].string));}
-#line 1708 "parser.tab.c"
+#line 1707 "parser.tab.c"
     break;
 
   case 33:
-#line 328 "parser.y"
+#line 327 "parser.y"
                                      {printf("\nRECOGNIZED RULE: Function Call %s\n", (yyvsp[-3].string));}
-#line 1714 "parser.tab.c"
+#line 1713 "parser.tab.c"
     break;
 
   case 34:
-#line 330 "parser.y"
+#line 329 "parser.y"
                                             {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", (yyvsp[-5].string));}
-#line 1720 "parser.tab.c"
+#line 1719 "parser.tab.c"
     break;
 
   case 36:
-#line 334 "parser.y"
+#line 333 "parser.y"
                   {printf("\nRECOGNIZED RULE: Parameter %s\n", (yyvsp[0].ast));}
-#line 1726 "parser.tab.c"
+#line 1725 "parser.tab.c"
     break;
 
   case 37:
-#line 334 "parser.y"
+#line 333 "parser.y"
                                                                                {}
-#line 1732 "parser.tab.c"
+#line 1731 "parser.tab.c"
     break;
 
   case 38:
-#line 340 "parser.y"
+#line 339 "parser.y"
             {}
-#line 1738 "parser.tab.c"
+#line 1737 "parser.tab.c"
     break;
 
   case 39:
-#line 341 "parser.y"
+#line 340 "parser.y"
                          {}
-#line 1744 "parser.tab.c"
+#line 1743 "parser.tab.c"
     break;
 
   case 40:
-#line 342 "parser.y"
+#line 341 "parser.y"
                             {}
-#line 1750 "parser.tab.c"
+#line 1749 "parser.tab.c"
     break;
 
   case 41:
-#line 343 "parser.y"
+#line 342 "parser.y"
                                      {}
-#line 1756 "parser.tab.c"
+#line 1755 "parser.tab.c"
     break;
 
   case 42:
-#line 345 "parser.y"
+#line 344 "parser.y"
                {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", (yyvsp[0].string));}
-#line 1762 "parser.tab.c"
+#line 1761 "parser.tab.c"
     break;
 
   case 43:
-#line 348 "parser.y"
+#line 347 "parser.y"
             {}
-#line 1768 "parser.tab.c"
+#line 1767 "parser.tab.c"
     break;
 
   case 44:
-#line 349 "parser.y"
+#line 348 "parser.y"
             {}
-#line 1774 "parser.tab.c"
+#line 1773 "parser.tab.c"
     break;
 
   case 45:
-#line 350 "parser.y"
+#line 349 "parser.y"
                 {}
-#line 1780 "parser.tab.c"
+#line 1779 "parser.tab.c"
     break;
 
   case 46:
-#line 351 "parser.y"
+#line 350 "parser.y"
                  {}
-#line 1786 "parser.tab.c"
+#line 1785 "parser.tab.c"
     break;
 
 
-#line 1790 "parser.tab.c"
+#line 1789 "parser.tab.c"
 
       default: break;
     }
@@ -2018,7 +2017,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 353 "parser.y"
+#line 352 "parser.y"
 
 
 int main(int argc, char**argv)

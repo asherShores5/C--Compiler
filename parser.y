@@ -86,8 +86,7 @@ Program:
 		printf("Program started:\n");
 
 		// ------ AST ------ //
-		// struct AST* rightMost = getEndNode($1);
-		printf("Rightmost node = %s\n", rightMost);
+		struct AST* rightMost = getEndNode($1);
 		rightMost->right = $2; 
 		$$ = $1;
 

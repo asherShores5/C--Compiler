@@ -48,6 +48,7 @@ func float ambFunc (float a float b float c){
 }
 
 func int main() {
+-test;
 justAverage = average(12.5 13.7 25.8);
 aNumber = disMes();
 write justAverage;

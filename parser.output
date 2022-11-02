@@ -1,11 +1,5 @@
-Rules useless in parser due to conflicts
-
-   29 Stmt: RETURN Expr SEMICOLON
-
-
 State 67 conflicts: 4 shift/reduce
 State 68 conflicts: 4 shift/reduce
-State 75 conflicts: 10 reduce/reduce
 State 76 conflicts: 4 shift/reduce
 State 82 conflicts: 4 shift/reduce
 
@@ -56,60 +50,59 @@ Grammar
    26     | RETURN Expr SEMICOLON
    27     | WRITE Expr SEMICOLON
    28     | WRITELN SEMICOLON
-   29     | RETURN Expr SEMICOLON
 
-   30 Expr: Primary
-   31     | UnaryOp Expr
-   32     | Expr BinOp Expr
-   33     | ID EQ Expr
-   34     | ID LPAREN ParamList RPAREN
-   35     | ID LBRACKET Expr RBRACKET EQ Expr
+   29 Expr: Primary
+   30     | UnaryOp Expr
+   31     | Expr BinOp Expr
+   32     | ID EQ Expr
+   33     | ID LPAREN ParamList RPAREN
+   34     | ID LBRACKET Expr RBRACKET EQ Expr
 
-   36 ParamList: ε
+   35 ParamList: ε
 
-   37 $@3: ε
+   36 $@3: ε
 
-   38 ParamList: Primary $@3 ParamList
+   37 ParamList: Primary $@3 ParamList
 
-   39 Primary: ID
-   40        | NUMBER
-   41        | CHARACTER
-   42        | LPAREN Expr RPAREN
+   38 Primary: ID
+   39        | NUMBER
+   40        | CHARACTER
+   41        | LPAREN Expr RPAREN
 
-   43 UnaryOp: MINUS
+   42 UnaryOp: MINUS
 
-   44 BinOp: PLUS
-   45      | MINUS
-   46      | TIMES
-   47      | DIVIDE
+   43 BinOp: PLUS
+   44      | MINUS
+   45      | TIMES
+   46      | DIVIDE
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     error (256)
-    ID <string> (258) 5 6 10 16 17 33 34 35 39
-    SEMICOLON <string> (259) 5 6 24 25 26 27 28 29
-    EQ <string> (260) 33 35
-    PLUS <string> (261) 44
-    NUMBER <number> (262) 6 40
+    ID <string> (258) 5 6 10 16 17 32 33 34 38
+    SEMICOLON <string> (259) 5 6 24 25 26 27 28
+    EQ <string> (260) 32 34
+    PLUS <string> (261) 43
+    NUMBER <number> (262) 6 39
     WRITE <string> (263) 27
     FUNC <string> (264) 10
-    MINUS <string> (265) 43 45
-    TIMES <string> (266) 46
-    DIVIDE <string> (267) 47
-    LBRACKET <string> (268) 6 17 35
-    RBRACKET <string> (269) 6 17 35
-    LPAREN <string> (270) 11 34 42
-    RPAREN <string> (271) 11 34 42
+    MINUS <string> (265) 42 44
+    TIMES <string> (266) 45
+    DIVIDE <string> (267) 46
+    LBRACKET <string> (268) 6 17 34
+    RBRACKET <string> (269) 6 17 34
+    LPAREN <string> (270) 11 33 41
+    RPAREN <string> (271) 11 33 41
     LCURLY <string> (272) 18
     RCURLY <string> (273) 18
     INT <string> (274) 19
     CHAR <string> (275) 21
     FLOAT <string> (276) 20
-    RETURN <string> (277) 26 29
+    RETURN <string> (277) 26
     WRITELN <string> (278) 28
-    CHARACTER <string> (279) 41
+    CHARACTER <string> (279) 40
 
 
 Nonterminals, with rules where they appear
@@ -137,7 +130,7 @@ Nonterminals, with rules where they appear
     $@2 (32)
         on left: 9
         on right: 10
-    FuncRun (33)
+    FuncRun <ast> (33)
         on left: 11
         on right: 10
     ParamDecList <ast> (34)
@@ -159,26 +152,26 @@ Nonterminals, with rules where they appear
         on left: 22 23
         on right: 18 23
     Stmt <ast> (40)
-        on left: 24 25 26 27 28 29
+        on left: 24 25 26 27 28
         on right: 22 23
     Expr <ast> (41)
-        on left: 30 31 32 33 34 35
-        on right: 25 26 27 29 31 32 33 35 42
+        on left: 29 30 31 32 33 34
+        on right: 25 26 27 30 31 32 34 41
     ParamList <ast> (42)
-        on left: 36 38
-        on right: 34 38
+        on left: 35 37
+        on right: 33 37
     $@3 (43)
-        on left: 37
-        on right: 38
+        on left: 36
+        on right: 37
     Primary <ast> (44)
-        on left: 39 40 41 42
-        on right: 30 38
+        on left: 38 39 40 41
+        on right: 29 37
     UnaryOp <ast> (45)
-        on left: 43
-        on right: 31
+        on left: 42
+        on right: 30
     BinOp <ast> (46)
-        on left: 44 45 46 47
-        on right: 32
+        on left: 43 44 45 46
+        on right: 31
 
 
 State 0
@@ -534,16 +527,16 @@ State 37
 
 State 38
 
-   33 Expr: ID • EQ Expr
-   34     | ID • LPAREN ParamList RPAREN
-   35     | ID • LBRACKET Expr RBRACKET EQ Expr
-   39 Primary: ID •
+   32 Expr: ID • EQ Expr
+   33     | ID • LPAREN ParamList RPAREN
+   34     | ID • LBRACKET Expr RBRACKET EQ Expr
+   38 Primary: ID •
 
     EQ        shift, and go to state 52
     LBRACKET  shift, and go to state 53
     LPAREN    shift, and go to state 54
 
-    $default  reduce using rule 39 (Primary)
+    $default  reduce using rule 38 (Primary)
 
 
 State 39
@@ -555,9 +548,9 @@ State 39
 
 State 40
 
-   40 Primary: NUMBER •
+   39 Primary: NUMBER •
 
-    $default  reduce using rule 40 (Primary)
+    $default  reduce using rule 39 (Primary)
 
 
 State 41
@@ -577,14 +570,14 @@ State 41
 
 State 42
 
-   43 UnaryOp: MINUS •
+   42 UnaryOp: MINUS •
 
-    $default  reduce using rule 43 (UnaryOp)
+    $default  reduce using rule 42 (UnaryOp)
 
 
 State 43
 
-   42 Primary: LPAREN • Expr RPAREN
+   41 Primary: LPAREN • Expr RPAREN
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -600,7 +593,6 @@ State 43
 State 44
 
    26 Stmt: RETURN • Expr SEMICOLON
-   29     | RETURN • Expr SEMICOLON
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -622,9 +614,9 @@ State 45
 
 State 46
 
-   41 Primary: CHARACTER •
+   40 Primary: CHARACTER •
 
-    $default  reduce using rule 41 (Primary)
+    $default  reduce using rule 40 (Primary)
 
 
 State 47
@@ -661,7 +653,7 @@ State 48
 State 49
 
    25 Stmt: Expr • SEMICOLON
-   32 Expr: Expr • BinOp Expr
+   31 Expr: Expr • BinOp Expr
 
     SEMICOLON  shift, and go to state 61
     PLUS       shift, and go to state 62
@@ -674,14 +666,14 @@ State 49
 
 State 50
 
-   30 Expr: Primary •
+   29 Expr: Primary •
 
-    $default  reduce using rule 30 (Expr)
+    $default  reduce using rule 29 (Expr)
 
 
 State 51
 
-   31 Expr: UnaryOp • Expr
+   30 Expr: UnaryOp • Expr
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -696,7 +688,7 @@ State 51
 
 State 52
 
-   33 Expr: ID EQ • Expr
+   32 Expr: ID EQ • Expr
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -711,7 +703,7 @@ State 52
 
 State 53
 
-   35 Expr: ID LBRACKET • Expr RBRACKET EQ Expr
+   34 Expr: ID LBRACKET • Expr RBRACKET EQ Expr
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -726,14 +718,14 @@ State 53
 
 State 54
 
-   34 Expr: ID LPAREN • ParamList RPAREN
+   33 Expr: ID LPAREN • ParamList RPAREN
 
     ID         shift, and go to state 70
     NUMBER     shift, and go to state 40
     LPAREN     shift, and go to state 43
     CHARACTER  shift, and go to state 46
 
-    $default  reduce using rule 36 (ParamList)
+    $default  reduce using rule 35 (ParamList)
 
     ParamList  go to state 71
     Primary    go to state 72
@@ -742,7 +734,7 @@ State 54
 State 55
 
    27 Stmt: WRITE Expr • SEMICOLON
-   32 Expr: Expr • BinOp Expr
+   31 Expr: Expr • BinOp Expr
 
     SEMICOLON  shift, and go to state 73
     PLUS       shift, and go to state 62
@@ -755,8 +747,8 @@ State 55
 
 State 56
 
-   32 Expr: Expr • BinOp Expr
-   42 Primary: LPAREN Expr • RPAREN
+   31 Expr: Expr • BinOp Expr
+   41 Primary: LPAREN Expr • RPAREN
 
     PLUS    shift, and go to state 62
     MINUS   shift, and go to state 63
@@ -770,8 +762,7 @@ State 56
 State 57
 
    26 Stmt: RETURN Expr • SEMICOLON
-   29     | RETURN Expr • SEMICOLON
-   32 Expr: Expr • BinOp Expr
+   31 Expr: Expr • BinOp Expr
 
     SEMICOLON  shift, and go to state 75
     PLUS       shift, and go to state 62
@@ -812,35 +803,35 @@ State 61
 
 State 62
 
-   44 BinOp: PLUS •
+   43 BinOp: PLUS •
 
-    $default  reduce using rule 44 (BinOp)
+    $default  reduce using rule 43 (BinOp)
 
 
 State 63
 
-   45 BinOp: MINUS •
+   44 BinOp: MINUS •
 
-    $default  reduce using rule 45 (BinOp)
+    $default  reduce using rule 44 (BinOp)
 
 
 State 64
 
-   46 BinOp: TIMES •
+   45 BinOp: TIMES •
 
-    $default  reduce using rule 46 (BinOp)
+    $default  reduce using rule 45 (BinOp)
 
 
 State 65
 
-   47 BinOp: DIVIDE •
+   46 BinOp: DIVIDE •
 
-    $default  reduce using rule 47 (BinOp)
+    $default  reduce using rule 46 (BinOp)
 
 
 State 66
 
-   32 Expr: Expr BinOp • Expr
+   31 Expr: Expr BinOp • Expr
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -855,125 +846,27 @@ State 66
 
 State 67
 
-   31 Expr: UnaryOp Expr •
-   32     | Expr • BinOp Expr
+   30 Expr: UnaryOp Expr •
+   31     | Expr • BinOp Expr
 
     PLUS    shift, and go to state 62
     MINUS   shift, and go to state 63
     TIMES   shift, and go to state 64
     DIVIDE  shift, and go to state 65
 
-    PLUS      [reduce using rule 31 (Expr)]
-    MINUS     [reduce using rule 31 (Expr)]
-    TIMES     [reduce using rule 31 (Expr)]
-    DIVIDE    [reduce using rule 31 (Expr)]
-    $default  reduce using rule 31 (Expr)
+    PLUS      [reduce using rule 30 (Expr)]
+    MINUS     [reduce using rule 30 (Expr)]
+    TIMES     [reduce using rule 30 (Expr)]
+    DIVIDE    [reduce using rule 30 (Expr)]
+    $default  reduce using rule 30 (Expr)
 
     BinOp  go to state 66
 
 
 State 68
 
-   32 Expr: Expr • BinOp Expr
-   33     | ID EQ Expr •
-
-    PLUS    shift, and go to state 62
-    MINUS   shift, and go to state 63
-    TIMES   shift, and go to state 64
-    DIVIDE  shift, and go to state 65
-
-    PLUS      [reduce using rule 33 (Expr)]
-    MINUS     [reduce using rule 33 (Expr)]
-    TIMES     [reduce using rule 33 (Expr)]
-    DIVIDE    [reduce using rule 33 (Expr)]
-    $default  reduce using rule 33 (Expr)
-
-    BinOp  go to state 66
-
-
-State 69
-
-   32 Expr: Expr • BinOp Expr
-   35     | ID LBRACKET Expr • RBRACKET EQ Expr
-
-    PLUS      shift, and go to state 62
-    MINUS     shift, and go to state 63
-    TIMES     shift, and go to state 64
-    DIVIDE    shift, and go to state 65
-    RBRACKET  shift, and go to state 77
-
-    BinOp  go to state 66
-
-
-State 70
-
-   39 Primary: ID •
-
-    $default  reduce using rule 39 (Primary)
-
-
-State 71
-
-   34 Expr: ID LPAREN ParamList • RPAREN
-
-    RPAREN  shift, and go to state 78
-
-
-State 72
-
-   38 ParamList: Primary • $@3 ParamList
-
-    $default  reduce using rule 37 ($@3)
-
-    $@3  go to state 79
-
-
-State 73
-
-   27 Stmt: WRITE Expr SEMICOLON •
-
-    $default  reduce using rule 27 (Stmt)
-
-
-State 74
-
-   42 Primary: LPAREN Expr RPAREN •
-
-    $default  reduce using rule 42 (Primary)
-
-
-State 75
-
-   26 Stmt: RETURN Expr SEMICOLON •
-   29     | RETURN Expr SEMICOLON •
-
-    ID         reduce using rule 26 (Stmt)
-    ID         [reduce using rule 29 (Stmt)]
-    SEMICOLON  reduce using rule 26 (Stmt)
-    SEMICOLON  [reduce using rule 29 (Stmt)]
-    NUMBER     reduce using rule 26 (Stmt)
-    NUMBER     [reduce using rule 29 (Stmt)]
-    WRITE      reduce using rule 26 (Stmt)
-    WRITE      [reduce using rule 29 (Stmt)]
-    MINUS      reduce using rule 26 (Stmt)
-    MINUS      [reduce using rule 29 (Stmt)]
-    LPAREN     reduce using rule 26 (Stmt)
-    LPAREN     [reduce using rule 29 (Stmt)]
-    RCURLY     reduce using rule 26 (Stmt)
-    RCURLY     [reduce using rule 29 (Stmt)]
-    RETURN     reduce using rule 26 (Stmt)
-    RETURN     [reduce using rule 29 (Stmt)]
-    WRITELN    reduce using rule 26 (Stmt)
-    WRITELN    [reduce using rule 29 (Stmt)]
-    CHARACTER  reduce using rule 26 (Stmt)
-    CHARACTER  [reduce using rule 29 (Stmt)]
-    $default   reduce using rule 26 (Stmt)
-
-
-State 76
-
-   32 Expr: Expr • BinOp Expr
-   32     | Expr BinOp Expr •
+   31 Expr: Expr • BinOp Expr
+   32     | ID EQ Expr •
 
     PLUS    shift, and go to state 62
     MINUS   shift, and go to state 63
@@ -989,30 +882,107 @@ State 76
     BinOp  go to state 66
 
 
+State 69
+
+   31 Expr: Expr • BinOp Expr
+   34     | ID LBRACKET Expr • RBRACKET EQ Expr
+
+    PLUS      shift, and go to state 62
+    MINUS     shift, and go to state 63
+    TIMES     shift, and go to state 64
+    DIVIDE    shift, and go to state 65
+    RBRACKET  shift, and go to state 77
+
+    BinOp  go to state 66
+
+
+State 70
+
+   38 Primary: ID •
+
+    $default  reduce using rule 38 (Primary)
+
+
+State 71
+
+   33 Expr: ID LPAREN ParamList • RPAREN
+
+    RPAREN  shift, and go to state 78
+
+
+State 72
+
+   37 ParamList: Primary • $@3 ParamList
+
+    $default  reduce using rule 36 ($@3)
+
+    $@3  go to state 79
+
+
+State 73
+
+   27 Stmt: WRITE Expr SEMICOLON •
+
+    $default  reduce using rule 27 (Stmt)
+
+
+State 74
+
+   41 Primary: LPAREN Expr RPAREN •
+
+    $default  reduce using rule 41 (Primary)
+
+
+State 75
+
+   26 Stmt: RETURN Expr SEMICOLON •
+
+    $default  reduce using rule 26 (Stmt)
+
+
+State 76
+
+   31 Expr: Expr • BinOp Expr
+   31     | Expr BinOp Expr •
+
+    PLUS    shift, and go to state 62
+    MINUS   shift, and go to state 63
+    TIMES   shift, and go to state 64
+    DIVIDE  shift, and go to state 65
+
+    PLUS      [reduce using rule 31 (Expr)]
+    MINUS     [reduce using rule 31 (Expr)]
+    TIMES     [reduce using rule 31 (Expr)]
+    DIVIDE    [reduce using rule 31 (Expr)]
+    $default  reduce using rule 31 (Expr)
+
+    BinOp  go to state 66
+
+
 State 77
 
-   35 Expr: ID LBRACKET Expr RBRACKET • EQ Expr
+   34 Expr: ID LBRACKET Expr RBRACKET • EQ Expr
 
     EQ  shift, and go to state 80
 
 
 State 78
 
-   34 Expr: ID LPAREN ParamList RPAREN •
+   33 Expr: ID LPAREN ParamList RPAREN •
 
-    $default  reduce using rule 34 (Expr)
+    $default  reduce using rule 33 (Expr)
 
 
 State 79
 
-   38 ParamList: Primary $@3 • ParamList
+   37 ParamList: Primary $@3 • ParamList
 
     ID         shift, and go to state 70
     NUMBER     shift, and go to state 40
     LPAREN     shift, and go to state 43
     CHARACTER  shift, and go to state 46
 
-    $default  reduce using rule 36 (ParamList)
+    $default  reduce using rule 35 (ParamList)
 
     ParamList  go to state 81
     Primary    go to state 72
@@ -1020,7 +990,7 @@ State 79
 
 State 80
 
-   35 Expr: ID LBRACKET Expr RBRACKET EQ • Expr
+   34 Expr: ID LBRACKET Expr RBRACKET EQ • Expr
 
     ID         shift, and go to state 38
     NUMBER     shift, and go to state 40
@@ -1035,25 +1005,25 @@ State 80
 
 State 81
 
-   38 ParamList: Primary $@3 ParamList •
+   37 ParamList: Primary $@3 ParamList •
 
-    $default  reduce using rule 38 (ParamList)
+    $default  reduce using rule 37 (ParamList)
 
 
 State 82
 
-   32 Expr: Expr • BinOp Expr
-   35     | ID LBRACKET Expr RBRACKET EQ Expr •
+   31 Expr: Expr • BinOp Expr
+   34     | ID LBRACKET Expr RBRACKET EQ Expr •
 
     PLUS    shift, and go to state 62
     MINUS   shift, and go to state 63
     TIMES   shift, and go to state 64
     DIVIDE  shift, and go to state 65
 
-    PLUS      [reduce using rule 35 (Expr)]
-    MINUS     [reduce using rule 35 (Expr)]
-    TIMES     [reduce using rule 35 (Expr)]
-    DIVIDE    [reduce using rule 35 (Expr)]
-    $default  reduce using rule 35 (Expr)
+    PLUS      [reduce using rule 34 (Expr)]
+    MINUS     [reduce using rule 34 (Expr)]
+    TIMES     [reduce using rule 34 (Expr)]
+    DIVIDE    [reduce using rule 34 (Expr)]
+    $default  reduce using rule 34 (Expr)
 
     BinOp  go to state 66

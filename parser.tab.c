@@ -505,7 +505,7 @@ union yyalloc
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  22
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  48
+#define YYNRULES  47
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  83
 
@@ -556,13 +556,13 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
        0,    84,    84,    84,    92,    93,   100,   115,   135,   136,
-     143,   143,   146,   165,   166,   173,   174,   181,   182,   188,
-     196,   197,   198,   204,   205,   216,   217,   218,   219,   220,
-     221,   226,   227,   228,   229,   230,   231,   234,   235,   235,
-     241,   242,   243,   244,   246,   249,   250,   251,   252
+     143,   143,   146,   166,   167,   174,   175,   182,   196,   214,
+     222,   223,   224,   230,   231,   242,   243,   244,   245,   246,
+     251,   252,   263,   264,   265,   266,   269,   270,   270,   276,
+     277,   278,   279,   281,   284,   285,   286,   287
 };
 #endif
 
@@ -628,12 +628,12 @@ static const yytype_int8 yydefact[] =
        4,    20,    22,    21,     0,     2,     4,     0,     1,     0,
        5,     0,     0,     3,     8,     6,     0,     0,     9,     0,
       10,     0,     0,     7,    13,    11,     0,    14,    15,     0,
-       0,    16,    17,     4,    12,     0,     0,    18,    40,    25,
-      41,     0,    44,     0,     0,     0,    42,     0,    23,     0,
-      31,     0,     0,     0,    37,     0,     0,     0,    29,    19,
-      24,    26,    45,    46,    47,    48,     0,    32,    34,     0,
-      40,     0,    38,    28,    43,    27,    33,     0,    35,    37,
-       0,    39,    36
+       0,    16,    17,     4,    12,     0,     0,    18,    39,    25,
+      40,     0,    43,     0,     0,     0,    41,     0,    23,     0,
+      30,     0,     0,     0,    36,     0,     0,     0,    29,    19,
+      24,    26,    44,    45,    46,    47,     0,    31,    33,     0,
+      39,     0,    37,    28,    42,    27,    32,     0,    34,    36,
+       0,    38,    35
 };
 
 /* YYPGOTO[NTERM-NUM].  */
@@ -704,8 +704,8 @@ static const yytype_int8 yyr1[] =
        0,    25,    27,    26,    28,    28,    29,    29,    30,    30,
       32,    31,    33,    34,    34,    35,    35,    36,    36,    37,
       38,    38,    38,    39,    39,    40,    40,    40,    40,    40,
-      40,    41,    41,    41,    41,    41,    41,    42,    43,    42,
-      44,    44,    44,    44,    45,    46,    46,    46,    46
+      41,    41,    41,    41,    41,    41,    42,    43,    42,    44,
+      44,    44,    44,    45,    46,    46,    46,    46
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -714,8 +714,8 @@ static const yytype_int8 yyr2[] =
        0,     2,     0,     3,     0,     2,     3,     6,     1,     2,
        0,     5,     4,     0,     1,     1,     2,     2,     4,     4,
        1,     1,     1,     1,     2,     1,     2,     3,     3,     2,
-       3,     1,     2,     3,     3,     4,     6,     0,     0,     3,
-       1,     1,     1,     3,     1,     1,     1,     1,     1
+       1,     2,     3,     3,     4,     6,     0,     0,     3,     1,
+       1,     1,     3,     1,     1,     1,     1,     1
 };
 
 
@@ -1285,233 +1285,263 @@ yyreduce:
 			int inSymTab = found(currentScope, currentScope);
 			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
 			if (inSymTab == 0) {
-				addItem(currentScope, "FUNC", currentScope, 0, currentScope);
+				addItem(currentScope, "FUNC", "Func", 0, currentScope);
 			} else {
 				printf("\nSEMANTIC ERROR: FUNC %s is already in the symbol table\n", (yyvsp[-2].ast));
 			} 
 			showSymTable();
+			strcpy(currentScope, "GLOBAL");
 	}
-#line 1295 "parser.tab.c"
+#line 1296 "parser.tab.c"
     break;
 
   case 13: /* ParamDecList: %empty  */
-#line 165 "parser.y"
+#line 166 "parser.y"
                             {printf("No ParamDeclList (EPSILON)\n");}
-#line 1301 "parser.tab.c"
+#line 1302 "parser.tab.c"
     break;
 
   case 14: /* ParamDecList: ParamDecListTail  */
-#line 166 "parser.y"
+#line 167 "parser.y"
                                            {}
-#line 1307 "parser.tab.c"
+#line 1308 "parser.tab.c"
     break;
 
   case 15: /* ParamDecListTail: ParamDecl  */
-#line 173 "parser.y"
+#line 174 "parser.y"
                             {}
-#line 1313 "parser.tab.c"
+#line 1314 "parser.tab.c"
     break;
 
   case 16: /* ParamDecListTail: ParamDecl ParamDecListTail  */
-#line 174 "parser.y"
+#line 175 "parser.y"
                                                              {}
-#line 1319 "parser.tab.c"
+#line 1320 "parser.tab.c"
     break;
 
   case 17: /* ParamDecl: Type ID  */
-#line 181 "parser.y"
-                   {printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", (yyvsp[0].string));}
-#line 1325 "parser.tab.c"
+#line 182 "parser.y"
+                   {printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", (yyvsp[0].string));
+			//Asher's Semantic Checks
+			//Symbol Table
+			symTabAccess();
+			//Var Decl Check
+			int inSymTab = found((yyvsp[0].string), currentScope);
+			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+			if (inSymTab == 0) {
+				addItem((yyvsp[0].string), "Var", (yyvsp[-1].ast), 0, currentScope);
+			} else {
+				printf("\nSEMANTIC ERROR: Var %s is already in the symbol table\n", (yyvsp[0].string));
+			} 
+			showSymTable();
+}
+#line 1339 "parser.tab.c"
     break;
 
   case 18: /* ParamDecl: Type ID LBRACKET RBRACKET  */
-#line 182 "parser.y"
-                                             {printf("\n RECOGNIZED RULE: Parameter ARRAY declaration %s\n", (yyvsp[-2].string));}
-#line 1331 "parser.tab.c"
+#line 196 "parser.y"
+                                             {printf("\n RECOGNIZED RULE: Parameter ARRAY declaration %s\n", (yyvsp[-2].string));
+			//Asher's Semantic Checks
+			//Symbol Table
+			symTabAccess();
+			int inSymTab = found((yyvsp[-2].string), currentScope);
+			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+			if (inSymTab == 0) {
+				addItem((yyvsp[-2].string), "ARRAY", (yyvsp[-3].ast), (yyvsp[0].string), currentScope);
+			} else {
+				printf("\nSEMANTIC ERROR: ARR %s is already in the symbol table\n", (yyvsp[-2].string));
+			} 
+			showSymTable();
+}
+#line 1357 "parser.tab.c"
     break;
 
   case 19: /* Block: LCURLY VarDeclList StmtList RCURLY  */
-#line 188 "parser.y"
+#line 214 "parser.y"
                                           {}
-#line 1337 "parser.tab.c"
+#line 1363 "parser.tab.c"
     break;
 
   case 20: /* Type: INT  */
-#line 196 "parser.y"
+#line 222 "parser.y"
           {}
-#line 1343 "parser.tab.c"
+#line 1369 "parser.tab.c"
     break;
 
   case 21: /* Type: FLOAT  */
-#line 197 "parser.y"
+#line 223 "parser.y"
                 {}
-#line 1349 "parser.tab.c"
+#line 1375 "parser.tab.c"
     break;
 
   case 22: /* Type: CHAR  */
-#line 198 "parser.y"
+#line 224 "parser.y"
                {}
-#line 1355 "parser.tab.c"
+#line 1381 "parser.tab.c"
     break;
 
   case 23: /* StmtList: Stmt  */
-#line 204 "parser.y"
+#line 230 "parser.y"
                {}
-#line 1361 "parser.tab.c"
+#line 1387 "parser.tab.c"
     break;
 
   case 24: /* StmtList: Stmt StmtList  */
-#line 205 "parser.y"
+#line 231 "parser.y"
                         {}
-#line 1367 "parser.tab.c"
+#line 1393 "parser.tab.c"
     break;
 
   case 25: /* Stmt: SEMICOLON  */
-#line 216 "parser.y"
-                {printf("\nRECOGNIZED RULE: SEMICOLON %s\n", (yyvsp[0].string));}
-#line 1373 "parser.tab.c"
+#line 242 "parser.y"
+                {}
+#line 1399 "parser.tab.c"
     break;
 
   case 26: /* Stmt: Expr SEMICOLON  */
-#line 217 "parser.y"
+#line 243 "parser.y"
                          {}
-#line 1379 "parser.tab.c"
+#line 1405 "parser.tab.c"
     break;
 
   case 27: /* Stmt: RETURN Expr SEMICOLON  */
-#line 218 "parser.y"
-                                {}
-#line 1385 "parser.tab.c"
+#line 244 "parser.y"
+                                {printf("\nRECOGNIZED RULE: Return Statement\n");}
+#line 1411 "parser.tab.c"
     break;
 
   case 28: /* Stmt: WRITE Expr SEMICOLON  */
-#line 219 "parser.y"
+#line 245 "parser.y"
                                {printf("\nRECOGNIZED RULE: Write Statement\n");}
-#line 1391 "parser.tab.c"
+#line 1417 "parser.tab.c"
     break;
 
   case 29: /* Stmt: WRITELN SEMICOLON  */
-#line 220 "parser.y"
+#line 246 "parser.y"
                             {printf("\nRECOGNIZED RULE: Write Line %s\n", (yyvsp[-1].string));}
-#line 1397 "parser.tab.c"
+#line 1423 "parser.tab.c"
     break;
 
-  case 30: /* Stmt: RETURN Expr SEMICOLON  */
-#line 221 "parser.y"
-                                {printf("\nRECOGNIZED RULE: Return Statement \n");}
-#line 1403 "parser.tab.c"
-    break;
-
-  case 31: /* Expr: Primary  */
-#line 226 "parser.y"
+  case 30: /* Expr: Primary  */
+#line 251 "parser.y"
               {}
-#line 1409 "parser.tab.c"
+#line 1429 "parser.tab.c"
     break;
 
-  case 32: /* Expr: UnaryOp Expr  */
-#line 227 "parser.y"
-                       {}
-#line 1415 "parser.tab.c"
-    break;
-
-  case 33: /* Expr: Expr BinOp Expr  */
-#line 228 "parser.y"
-                          {}
-#line 1421 "parser.tab.c"
-    break;
-
-  case 34: /* Expr: ID EQ Expr  */
-#line 229 "parser.y"
-                     {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", (yyvsp[-2].string));}
-#line 1427 "parser.tab.c"
-    break;
-
-  case 35: /* Expr: ID LPAREN ParamList RPAREN  */
-#line 230 "parser.y"
-                                     {printf("\nRECOGNIZED RULE: Function Call %s\n", (yyvsp[-3].string));}
-#line 1433 "parser.tab.c"
-    break;
-
-  case 36: /* Expr: ID LBRACKET Expr RBRACKET EQ Expr  */
-#line 231 "parser.y"
-                                            {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", (yyvsp[-5].string));}
-#line 1439 "parser.tab.c"
-    break;
-
-  case 37: /* ParamList: %empty  */
-#line 234 "parser.y"
-                {}
+  case 31: /* Expr: UnaryOp Expr  */
+#line 252 "parser.y"
+                       { //Asher's Semantic Checls
+					//Symbol Table
+				symTabAccess();
+				int inSymTab = found((yyvsp[0].ast), currentScope);
+				//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+				if (inSymTab == 0) {
+					printf("\nSEMANTIC ERROR: ARR %s is already in the symbol table\n", (yyvsp[0].ast));
+				}
+				showSymTable();
+	
+	}
 #line 1445 "parser.tab.c"
     break;
 
-  case 38: /* $@3: %empty  */
-#line 235 "parser.y"
-                  {printf("\nRECOGNIZED RULE: Parameter\n");}
+  case 32: /* Expr: Expr BinOp Expr  */
+#line 263 "parser.y"
+                          {}
 #line 1451 "parser.tab.c"
     break;
 
-  case 39: /* ParamList: Primary $@3 ParamList  */
-#line 235 "parser.y"
-                                                                        {}
+  case 33: /* Expr: ID EQ Expr  */
+#line 264 "parser.y"
+                     {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", (yyvsp[-2].string));}
 #line 1457 "parser.tab.c"
     break;
 
-  case 40: /* Primary: ID  */
-#line 241 "parser.y"
-            {}
+  case 34: /* Expr: ID LPAREN ParamList RPAREN  */
+#line 265 "parser.y"
+                                     {printf("\nRECOGNIZED RULE: Function Call %s\n", (yyvsp[-3].string));}
 #line 1463 "parser.tab.c"
     break;
 
-  case 41: /* Primary: NUMBER  */
-#line 242 "parser.y"
-                         {}
+  case 35: /* Expr: ID LBRACKET Expr RBRACKET EQ Expr  */
+#line 266 "parser.y"
+                                            {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", (yyvsp[-5].string));}
 #line 1469 "parser.tab.c"
     break;
 
-  case 42: /* Primary: CHARACTER  */
-#line 243 "parser.y"
-                            {}
+  case 36: /* ParamList: %empty  */
+#line 269 "parser.y"
+                {}
 #line 1475 "parser.tab.c"
     break;
 
-  case 43: /* Primary: LPAREN Expr RPAREN  */
-#line 244 "parser.y"
-                                     {}
+  case 37: /* $@3: %empty  */
+#line 270 "parser.y"
+                  {printf("\nRECOGNIZED RULE: Parameter\n");}
 #line 1481 "parser.tab.c"
     break;
 
-  case 44: /* UnaryOp: MINUS  */
-#line 246 "parser.y"
-               {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", (yyvsp[0].string));}
+  case 38: /* ParamList: Primary $@3 ParamList  */
+#line 270 "parser.y"
+                                                                        {}
 #line 1487 "parser.tab.c"
     break;
 
-  case 45: /* BinOp: PLUS  */
-#line 249 "parser.y"
+  case 39: /* Primary: ID  */
+#line 276 "parser.y"
             {}
 #line 1493 "parser.tab.c"
     break;
 
-  case 46: /* BinOp: MINUS  */
-#line 250 "parser.y"
-            {}
+  case 40: /* Primary: NUMBER  */
+#line 277 "parser.y"
+                         {}
 #line 1499 "parser.tab.c"
     break;
 
-  case 47: /* BinOp: TIMES  */
-#line 251 "parser.y"
-                {}
+  case 41: /* Primary: CHARACTER  */
+#line 278 "parser.y"
+                            {}
 #line 1505 "parser.tab.c"
     break;
 
-  case 48: /* BinOp: DIVIDE  */
-#line 252 "parser.y"
-                 {}
+  case 42: /* Primary: LPAREN Expr RPAREN  */
+#line 279 "parser.y"
+                                     {}
 #line 1511 "parser.tab.c"
     break;
 
+  case 43: /* UnaryOp: MINUS  */
+#line 281 "parser.y"
+               {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", (yyvsp[0].string));}
+#line 1517 "parser.tab.c"
+    break;
 
-#line 1515 "parser.tab.c"
+  case 44: /* BinOp: PLUS  */
+#line 284 "parser.y"
+            {}
+#line 1523 "parser.tab.c"
+    break;
+
+  case 45: /* BinOp: MINUS  */
+#line 285 "parser.y"
+            {}
+#line 1529 "parser.tab.c"
+    break;
+
+  case 46: /* BinOp: TIMES  */
+#line 286 "parser.y"
+                {}
+#line 1535 "parser.tab.c"
+    break;
+
+  case 47: /* BinOp: DIVIDE  */
+#line 287 "parser.y"
+                 {}
+#line 1541 "parser.tab.c"
+    break;
+
+
+#line 1545 "parser.tab.c"
 
       default: break;
     }
@@ -1704,7 +1734,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 254 "parser.y"
+#line 289 "parser.y"
 
 
 int main(int argc, char**argv)

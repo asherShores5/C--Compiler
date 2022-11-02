@@ -561,8 +561,8 @@ static const yytype_int16 yyrline[] =
        0,    84,    84,    84,    92,    93,   100,   115,   135,   136,
      143,   143,   146,   166,   167,   174,   175,   182,   196,   214,
      222,   223,   224,   230,   231,   242,   243,   244,   245,   246,
-     251,   252,   263,   264,   265,   266,   269,   270,   270,   276,
-     277,   278,   279,   281,   284,   285,   286,   287
+     251,   252,   262,   263,   278,   279,   295,   296,   296,   302,
+     303,   304,   305,   307,   310,   311,   312,   313
 };
 #endif
 
@@ -1278,7 +1278,7 @@ yyreduce:
   case 12: /* FuncRun: LPAREN ParamDecList RPAREN Block  */
 #line 146 "parser.y"
                                           {
-			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", (yyvsp[-1].string));
+			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
 			//Asher's Semantic Checks
 			//Symbol Table
 			symTabAccess();
@@ -1436,112 +1436,138 @@ yyreduce:
 				int inSymTab = found((yyvsp[0].ast), currentScope);
 				//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
 				if (inSymTab == 0) {
-					printf("\nSEMANTIC ERROR: ARR %s is already in the symbol table\n", (yyvsp[0].ast));
+					printf("\nSEMANTIC ERROR: Expr %s is NOT in the symbol table\n", (yyvsp[0].ast));
 				}
 				showSymTable();
-	
 	}
-#line 1445 "parser.tab.c"
+#line 1444 "parser.tab.c"
     break;
 
   case 32: /* Expr: Expr BinOp Expr  */
-#line 263 "parser.y"
+#line 262 "parser.y"
                           {}
-#line 1451 "parser.tab.c"
+#line 1450 "parser.tab.c"
     break;
 
   case 33: /* Expr: ID EQ Expr  */
-#line 264 "parser.y"
-                     {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", (yyvsp[-2].string));}
-#line 1457 "parser.tab.c"
+#line 263 "parser.y"
+                     {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", (yyvsp[-2].string));
+	
+							//Asher's Semantic Checks
+							//Symbol Table
+							symTabAccess();
+							//Var Decl Check
+							int inSymTab = found((yyvsp[-2].string), currentScope);
+							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+							if (inSymTab != 0) {
+								printf("\nSEMANTIC ERROR: Var %s is NOT in the symbol table\n", (yyvsp[-1].string));
+							} else {
+								printf("\nSEMANTIC PASSED");
+							}
+							showSymTable();	
+	}
+#line 1470 "parser.tab.c"
     break;
 
   case 34: /* Expr: ID LPAREN ParamList RPAREN  */
-#line 265 "parser.y"
+#line 278 "parser.y"
                                      {printf("\nRECOGNIZED RULE: Function Call %s\n", (yyvsp[-3].string));}
-#line 1463 "parser.tab.c"
+#line 1476 "parser.tab.c"
     break;
 
   case 35: /* Expr: ID LBRACKET Expr RBRACKET EQ Expr  */
-#line 266 "parser.y"
-                                            {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", (yyvsp[-5].string));}
-#line 1469 "parser.tab.c"
+#line 279 "parser.y"
+                                            {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", (yyvsp[-5].string));
+							//Asher's Semantic Checks
+							//Symbol Table
+							symTabAccess();
+							//Var Decl Check
+							int inSymTab = found((yyvsp[-5].string), currentScope);
+							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+							if (inSymTab != 0) {
+								printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", (yyvsp[-4].string));
+							} else {
+								printf("\nSEMANTIC PASSED");
+							}
+							showSymTable();	
+}
+#line 1495 "parser.tab.c"
     break;
 
   case 36: /* ParamList: %empty  */
-#line 269 "parser.y"
+#line 295 "parser.y"
                 {}
-#line 1475 "parser.tab.c"
+#line 1501 "parser.tab.c"
     break;
 
   case 37: /* $@3: %empty  */
-#line 270 "parser.y"
+#line 296 "parser.y"
                   {printf("\nRECOGNIZED RULE: Parameter\n");}
-#line 1481 "parser.tab.c"
+#line 1507 "parser.tab.c"
     break;
 
   case 38: /* ParamList: Primary $@3 ParamList  */
-#line 270 "parser.y"
+#line 296 "parser.y"
                                                                         {}
-#line 1487 "parser.tab.c"
+#line 1513 "parser.tab.c"
     break;
 
   case 39: /* Primary: ID  */
-#line 276 "parser.y"
+#line 302 "parser.y"
             {}
-#line 1493 "parser.tab.c"
+#line 1519 "parser.tab.c"
     break;
 
   case 40: /* Primary: NUMBER  */
-#line 277 "parser.y"
+#line 303 "parser.y"
                          {}
-#line 1499 "parser.tab.c"
+#line 1525 "parser.tab.c"
     break;
 
   case 41: /* Primary: CHARACTER  */
-#line 278 "parser.y"
+#line 304 "parser.y"
                             {}
-#line 1505 "parser.tab.c"
+#line 1531 "parser.tab.c"
     break;
 
   case 42: /* Primary: LPAREN Expr RPAREN  */
-#line 279 "parser.y"
+#line 305 "parser.y"
                                      {}
-#line 1511 "parser.tab.c"
+#line 1537 "parser.tab.c"
     break;
 
   case 43: /* UnaryOp: MINUS  */
-#line 281 "parser.y"
+#line 307 "parser.y"
                {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", (yyvsp[0].string));}
-#line 1517 "parser.tab.c"
+#line 1543 "parser.tab.c"
     break;
 
   case 44: /* BinOp: PLUS  */
-#line 284 "parser.y"
+#line 310 "parser.y"
             {}
-#line 1523 "parser.tab.c"
+#line 1549 "parser.tab.c"
     break;
 
   case 45: /* BinOp: MINUS  */
-#line 285 "parser.y"
+#line 311 "parser.y"
             {}
-#line 1529 "parser.tab.c"
+#line 1555 "parser.tab.c"
     break;
 
   case 46: /* BinOp: TIMES  */
-#line 286 "parser.y"
+#line 312 "parser.y"
                 {}
-#line 1535 "parser.tab.c"
+#line 1561 "parser.tab.c"
     break;
 
   case 47: /* BinOp: DIVIDE  */
-#line 287 "parser.y"
+#line 313 "parser.y"
                  {}
-#line 1541 "parser.tab.c"
+#line 1567 "parser.tab.c"
     break;
 
 
-#line 1545 "parser.tab.c"
+#line 1571 "parser.tab.c"
 
       default: break;
     }
@@ -1734,7 +1760,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 289 "parser.y"
+#line 315 "parser.y"
 
 
 int main(int argc, char**argv)

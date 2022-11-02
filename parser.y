@@ -144,7 +144,7 @@ FunDecl: FUNC Type ID {strcpy(currentScope, $3);} FuncRun
 ;
 
 FuncRun: LPAREN ParamDecList RPAREN Block {
-			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
+			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
 			//Asher's Semantic Checks
 			//Symbol Table
 			symTabAccess();
@@ -258,13 +258,38 @@ Expr: Primary {}
 					printf("\nSEMANTIC ERROR: Expr %s is NOT in the symbol table\n", $2);
 				}
 				showSymTable();
-				
-	
 	}
 	| Expr BinOp Expr {}
-	| ID EQ Expr {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);}
+	| ID EQ Expr {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);
+	
+							//Asher's Semantic Checks
+							//Symbol Table
+							symTabAccess();
+							//Var Decl Check
+							int inSymTab = found($1, currentScope);
+							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+							if (inSymTab != 0) {
+								printf("\nSEMANTIC ERROR: Var %s is NOT in the symbol table\n", $2);
+							} else {
+								printf("\nSEMANTIC PASSED");
+							}
+							showSymTable();	
+	}
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
-	| ID LBRACKET Expr RBRACKET EQ Expr {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);}
+	| ID LBRACKET Expr RBRACKET EQ Expr {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);
+							//Asher's Semantic Checks
+							//Symbol Table
+							symTabAccess();
+							//Var Decl Check
+							int inSymTab = found($1, currentScope);
+							//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+							if (inSymTab != 0) {
+								printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
+							} else {
+								printf("\nSEMANTIC PASSED");
+							}
+							showSymTable();	
+}
 ;
 
 ParamList:	{}

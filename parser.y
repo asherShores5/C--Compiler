@@ -73,47 +73,162 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 //All the program grammar that will come up
-%type <ast> Program VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp
+%type <ast> Program VarDeclList FunDeclList VarDecl ArrDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp
 
 %start Program
 
 %%
 
 // Program ------> VarDeclList FunDeclList 
-Program: VarDeclList FunDeclList {}
+Program: 
+	VarDeclList FunDeclList {
+
+		printf("Program started:\n");
+
+		// ------ AST ------ //
+		// struct AST* rightMost = getEndNode($1);
+		printf("Rightmost node = %s\n", rightMost);
+		rightMost->right = $2; 
+		$$ = $1;
+
+		
+		printAST($$, 3);
+	}
 ;
 
 //==========================================
 
 //VarDeclList --> epsilon 
 //                VarDecl VarDeclList
-VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n"); */}
-		|	VarDecl VarDeclList	{}
+VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
+
+	|	VarDecl VarDeclList	{
+		$1->right = $2;
+		$$ = $1;
+	}
+
 ;
 
 //==========================================
 
 //VarDecl ------> Type id ;
-//               Type id [num] ; // array fdecl
-VarDecl: Type ID SEMICOLON {printf("\nRECOGNIZED RULE: VARIABLE declaration %s\n\n", $2);}
-		| Type ID LBRACKET NUMBER RBRACKET SEMICOLON {printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
+VarDecl: 
+	Type ID SEMICOLON {
+
+		printf("\n VARDECL RECOGNIZED ----> %s \n", $2);
+
+
+		// ----- SYMBOL TABLE ----- //
+		symTabAccess();
+		int inSymTab = found($2, currentScope);
+		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+		
+
+		// ----- SEMANTIC CHECKS ----- //
+		if (inSymTab == 0) 
+			addItem($2, "Var", $1, currentScope);
+			
+		else 
+			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
+
+		showSymTable();
+
+		
+		// ----- AST ----- //
+		$$ = AST_Type("TYPE", $1, $2);
+		//printf("--------> Node:%s, %s\n", $$->nodeType, $$->RHS);
+	}
+
+	| ArrDecl {printf("ARRDECL TO VARDECL\n");}
+		
+;
+
+ArrDecl:
+	Type ID LBRACKET NUMBER RBRACKET SEMICOLON {
+
+		// printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
+		// printf("Testing: %s\n", $1);
+
+		printf("ARRAY DECL FOUND ----> \n");
+
+	
+		// ----- SYMBOL TABLE ----- //
+		symTabAccess();
+
+		int inSymTab = found($2, currentScope);
+
+		if (inSymTab == 0) {
+			char arrIndex[12];
+			for (int i = 0; i < $4; i++) {
+				snprintf(arrIndex, 12, "%s[%d]", $2, i);
+				addItem(arrIndex, "ARRAY", $1, currentScope);				
+			}
+			showSymTable();
+
+		} else {
+			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
 		}
+
+
+		// ----- AST ----- //
+		char intVal[50]; 
+		sprintf(intVal, "%d", $4);
+		$$ = AST_assignment("ARR", intVal, $2);
+
+
+		// ----- CODE GENERATION ----- //
+		// emitArrayDecl($2, $4, getItemID($2, currentScope));
+
+	}
 ;
 
 //==========================================
 
 //FunDeclList --> FunDecl 
 //                FunDecl FunDeclList
-FunDeclList: FunDecl {$$ = $1;}
-			| FunDecl FunDeclList {$$ = $1;}
+FunDeclList: 
+	FunDecl 
+
+	| FunDecl FunDeclList {
+
+		//TODO AST stuff idk what to do about this yet
+
+	}
 ;
 
 //==========================================
 
 //FunDecl ------> Type id ( ParamDecList ) Block
-FunDecl: FUNC Type ID LPAREN ParamDecList RPAREN Block {
-			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
-			// currentScope = $3
+FunDecl:
+	FUNC Type ID LPAREN ParamDecList RPAREN Block {
+
+		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
+
+
+		// ----- SYMBOL TABLE ----- //
+		symTabAccess();
+
+		int inSymTab = found($3, currentScope);
+
+
+		// ------ SEMANTIC CHECKS ------ //
+ 		if (inSymTab == 0) {
+			
+			addItem($3, "FUNC", $2, currentScope);
+
+			showSymTable();
+
+		} else {
+			printf("SEMANTIC ERROR: Function %s is already in the symbol table\n", $2);
+		}
+
+
+		// ----- AST ----- //
+		$$ = AST_assignment("FUNC", $2, $3);		
+
+		strcpy(currentScope, $3);
+
+		// printf("CurrentScope = %s\n", currentScope);
 	}
 
 ;
@@ -121,24 +236,31 @@ FunDecl: FUNC Type ID LPAREN ParamDecList RPAREN Block {
 
 //ParamDeclList --> epsilon 
 //                  ParamDeclListTail
-ParamDecList: /* EPSILON */ {printf("No ParamDeclList (EPSILON)\n");}
-			| ParamDecListTail {}
+ParamDecList: /* EPSILON */ {printf("No ParamDeclList (EPSILON)\n\n");}
+
+	| ParamDecListTail {}
+
 ;
 
 //==========================================
 
 //ParamDeclListTail --> ParamDecl 
 //                      ParamDecl, ParamDeclListTail 
-ParamDecListTail: ParamDecl {}
-				| ParamDecl ParamDecListTail {}
+ParamDecListTail: 
+	ParamDecl {}
+
+	| ParamDecl ParamDecListTail {$1->right = $2; $$ = $1;}
+
 ;
 
 //==========================================
 
 //ParamDecl ----> Type id
 //                Type id[]
-ParamDecl: Type ID {printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", $2);}
-		 | Type ID LBRACKET RBRACKET {printf("\n RECOGNIZED RULE: Parameter ARRAY declaration %s\n", $2);}
+ParamDecl: 
+	Type ID {printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", $2);}
+		 
+	| Type ID LBRACKET RBRACKET {printf("\n RECOGNIZED RULE: Parameter ARRAY declaration %s\n", $2);}
 ;
 
 //==========================================
@@ -172,25 +294,43 @@ StmtList: Stmt {}
 //                read id ;
 //                write Expr ;
 //                writeln ;
-Stmt: SEMICOLON {printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);}
+Stmt: 
+	SEMICOLON {
+		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);	
+	}
+
 	| Expr SEMICOLON {}
+
 	| RETURN Expr SEMICOLON {}
-	| WRITE Expr SEMICOLON {printf("\nRECOGNIZED RULE: Write Statement\n");}
-	| WRITELN SEMICOLON {printf("\nRECOGNIZED RULE: Write Line %s\n", $1);}
+
+	| WRITE Expr SEMICOLON {
+		printf("\nRECOGNIZED RULE: Write Statement\n");
+	}
+
+	| WRITELN SEMICOLON {
+		printf("\nRECOGNIZED RULE: Write Line %s\n", $1);
+	}
+
 	| RETURN Expr SEMICOLON
 ;
 
 //==========================================
 
-Expr: Primary {} 
+Expr: 
+	Primary {} 
+
 	| UnaryOp Expr {}
+
 	| Expr BinOp Expr {}
+
 	| ID EQ Expr {printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);}
+
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
+
 	| ID LBRACKET Expr RBRACKET EQ Expr {printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);}
 ;
 
-ParamList:	{}
+ParamList:	
 	| Primary {printf("\nRECOGNIZED RULE: Parameter %s\n", $1);} ParamList {}
 ;
 

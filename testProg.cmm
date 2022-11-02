@@ -1,5 +1,3 @@
-int test;
-
 int aNumber;
 float secondNumber;
 char someLetter;  /* unused variable */
@@ -11,7 +9,7 @@ func float average(float a float b float c){
 	return avg;
 }
 
-func int unreachableFunction(float x int y){
+func int unrFunc(float x int y){
    /* 
 	This function does nothing and should
 	Be removed from IR code in the optimization step
@@ -23,7 +21,7 @@ func int unreachableFunction(float x int y){
    return result;
 }
 
-func int displayMessage(){
+func int disMes(){
 	message[0] = 'I';
 	message[1] = 'x';
 	message[2] = 'c';
@@ -38,7 +36,7 @@ func int displayMessage(){
 	return 0;
 }
 
-func float ambitiousFunction (float a float b float c){
+func float ambFunc (float a float b float c){
 
    /* great optimization opportunity */
 
@@ -51,22 +49,22 @@ func float ambitiousFunction (float a float b float c){
 
 func int main() {
 justAverage = average(12.5 13.7 25.8);
-aNumber = displayMessage();
+aNumber = disMes();
 write justAverage;
 writeln;
 
 justAverage = justAverage * (justAverage + 2.0);
 justAverage = average(justAverage, 0.0 0.0);
-aNumber = displayMessage();
+aNumber = disMes();
 writeln;
 
-aNumber = displayMessage();
+aNumber = disMes();
 aNumber = aNumber / (aNumber + aNumber * aNumber);
 write aNumber;
 writeln;
 
-justAverage = ambitiousFunction(1.0 2.0 3.0);
-aNumber = displayMessage();
+justAverage = ambFunc(1.0 2.0 3.0);
+aNumber = disMes();
 write justAverage;
 writeln;
 

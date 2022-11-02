@@ -83,7 +83,7 @@ const char* getVariableType(char itemName[50], char scope[50]){
     return NULL;
 }
 
-int compareTypes(char itemName1[50], char itemName2[50],char scope[50]){
+int compareTypes(char itemName1[50], char itemName2[50], char scope[50]){
     const char* idType1 = getVariableType(itemName1, scope);
     const char* idType2 = getVariableType(itemName2, scope);
     

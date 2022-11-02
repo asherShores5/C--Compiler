@@ -78,7 +78,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 34 "parser.y"
+#line 35 "parser.y"
 
 	//Tokens declared in C so we can declare them in C--... I think
 	int number;

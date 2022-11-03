@@ -94,7 +94,7 @@ Program:
 		// struct AST* rightMost = getEndNode($1);
 		// rightMost->right = $2; 
 
-		printf("LAST DECLARED VAR = %s | RHS = %s\n", lastVar->nodeType, lastVar->RHS);
+		// printf("LAST DECLARED VAR = %s | RHS = %s\n", lastVar->nodeType, lastVar->RHS);
 		lastVar->right = $2;
 		$$ = $1;
 		
@@ -133,7 +133,7 @@ VarDecl:
 
 		// ------ SEMANTIC CHECKS ------ //
 		if (inSymTab == 0) 
-			addItem($2, "Var", $1, currentScope);
+			addItem($2, "Var", $1->nodeType, currentScope);
 		else
 			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
 
@@ -141,12 +141,45 @@ VarDecl:
 
 
 		// ------  AST  ------ //
-		$$ = AST_Type("TYPE", $1, $2);
+		$$ = AST_Type("TYPE", $1->nodeType, $2);
 		lastVar = $$;
 		//printf("--------> Node:%s, %s\n", $$->nodeType, $$->RHS);
 
 	}
-	| Type ID LBRACKET NUMBER RBRACKET SEMICOLON {printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
+
+	// ------ ARRAY DECL ------ //
+	| Type ID LBRACKET NUMBER RBRACKET SEMICOLON {
+		
+		printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
+
+		// ----- SYMBOL TABLE ----- //
+		symTabAccess();
+
+		int inSymTab = found($2, currentScope);
+
+		if (inSymTab == 0) {
+			char arrIndex[12];
+			for (int i = 0; i < $4; i++) {
+				sprintf(arrIndex, "%s[%d]", $2, i);
+				addItem(arrIndex, "ARRAY", $1->nodeType, currentScope);				
+			}
+			// addItem($2, "ARRAY", $1, $4, currentScope);
+			showSymTable();
+		} else {
+			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
+		}
+
+
+		// ----- AST ----- //
+		char intVal[50]; 
+		sprintf(intVal, "%d", $4);
+		$$ = AST_assignment("ARR", intVal, $2);
+
+		lastVar = $$;
+
+
+// 		// ----- CODE GENERATION ----- //
+// 		// emitArrayDecl($2, $4, getItemID($2, currentScope));
 		} 
 	// | ArrDecl
 ;
@@ -170,16 +203,17 @@ FunDeclList:
 //FunDecl ------> Type id ( ParamDecList ) Block
 FunDecl:
 	FUNC Type ID LPAREN {
-			printf("ID = %s\n", $3);
-			addItem($3, "FUNC", $2, currentScope);
-			strcpy(currentScope, $3);
-			printf("\n-------------------");
-			printf(" Scope Change --> ");
-			printf("%s", currentScope);
-			printf(" -------------------\n");
-		} 
+		printf("ID = %s\n", $3);
+		addItem($3, "FUNC", $2, currentScope);
+		strcpy(currentScope, $3);
+		printf("\n-------------------");
+		printf(" Scope Change --> ");
+		printf("%s", currentScope);
+		printf(" -------------------\n");
+	} 
 
-		ParamDecList RPAREN Block {
+	ParamDecList RPAREN Block {
+
 		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
 		
 		// ----- SYMBOL TABLE ----- //
@@ -197,6 +231,9 @@ FunDecl:
 		}
 		// ----- AST ----- //
 		$$ = AST_assignment("FUNC", $2, $3);		
+
+		printf("%s", $6->nodeType);
+		$$ -> right = $6;
 
 	}
 ;
@@ -298,8 +335,8 @@ ParamDecl:
 //Block --------> { VarDeclList StmtList } 
 Block: 
 	LCURLY VarDeclList StmtList RCURLY {
-		// $2->right = $3;
-		// $$ = $1;
+		$2->right = $3;
+		$$ = $1;
 	}
 ;
 
@@ -335,10 +372,17 @@ Stmt:
 
 	| Expr SEMICOLON {}
 
-	| RETURN Expr SEMICOLON {}
+	| RETURN Expr SEMICOLON {
+
+		
+
+	}
 
 	| WRITE Expr SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
+
+		printf("EXpr: %s\n", $2);
+		// $$ = AST_Write("WRITE", )
 	}
 
 	| WRITELN SEMICOLON {
@@ -404,10 +448,12 @@ Stmt:
 ; */
 
 Expr: 
-	Primary {}
+	Primary {printf("Test\n");}
 
-	| UnaryOp Expr { //Asher's Semantic Checls
-					//Symbol Table
+	| UnaryOp Expr { 
+
+		//Asher's Semantic Checls
+		// ------- SYMBOL TABLE ------- //
 		symTabAccess();
 		int inSymTab = found($2, currentScope);
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
@@ -422,32 +468,32 @@ Expr:
 		printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);
 	
 		//Asher's Semantic Checks
-		//Symbol Table
+		// ------- SYMBOL TABLE ------- //
 		symTabAccess();
 		//Var Decl Check
 		int inSymTab = found($1, currentScope);
-		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
-		if (inSymTab != 0) {
+		printf("Debug\n");
+		printf("Test $3 = %s\n", $3->nodeType);
+		if (inSymTab != 0 && compareTypes($1, $3, currentScope) != 0) {
 			printf("\nSEMANTIC ERROR: Var %s is NOT in the symbol table\n", $2);
 		} else {
 			printf("\nSEMANTIC \n");
 		}
-		showSymTable();
+
 
 		// IR CODE ATTEMPT DONT KYS - evan Yes kms - Asher no dont kys - evan
-		emitAssignment($1, $3);
+		// emitAssignment($1, $3);
 
 	}
 
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
 	
 	
-	| ID LBRACKET NUMBER RBRACKET EQ Expr {
+	| ID LBRACKET NUMBER RBRACKET EQ Primary {
 
 		printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);
 
 		//Asher's Semantic Checks
-		// ------ SYMBOL TABLE ------ //
 		symTabAccess();
 		int inSymTab = found($1, currentScope);
 
@@ -455,12 +501,21 @@ Expr:
 			printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
 			semanticCheckPassed = 0;
 		} else {
-			printf("\nSEMANTIC PASSED");
+			printf("\nSEMANTIC PASSED\n");
 			
 			//emitArrayAssignment();
 		}
-		showSymTable();
-		
+		// ------ SYMBOL TABLE ------ //
+
+		// Setting array value in the symbol table
+		char arrayStmt[10]; char newVal[10];
+		sprintf(arrayStmt, "%s%s%d%s", $1, $2, $3, $4);
+		sprintf(newVal, "%d", $6);
+		setItemValue(arrayStmt, newVal, currentScope);
+
+
+		// ----- AST ----- //
+		$$ = AST_assignment("=", arrayStmt, newVal);		
 
 	}
 ;

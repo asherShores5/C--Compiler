@@ -24,9 +24,9 @@ struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
     strcpy(ASTassign->LHS, LHS);
     strcpy(ASTassign->RHS, RHS);
 
-    if (!ASTassign->right) {
-        printf("right is null: %s\n", ASTassign->right);
-    }
+    // if (!ASTassign->right) {
+    //     printf("right is null: %s\n", ASTassign->right);
+    // }
     
 
 /*
@@ -86,22 +86,22 @@ void printDots(int num)
         printf("      ");
 }
 
-struct AST* getEndNode(struct AST* node) {
-    struct AST* curr = node;
+// struct AST* getEndNode(struct AST* node) {
+//     struct AST* curr = node;
 
-    while (1) {
-        printf("curr.right = %s\n", curr->right);
-        if (!curr->right) {
-            printf("curr.right = %s\n", curr->right);
-        } else {
-            printf("not end of node!\n");
-            curr = curr->right;
-        }
-        // printf("strcmp: %d\n", strcmp("null", curr->right));
-    }
-    printf("final node = %s\n", curr->nodeType);
-    return curr;
-}
+//     while (1) {
+//         printf("curr.right = %s\n", curr->right);
+//         if (!curr->right) {
+//             printf("curr.right = %s\n", curr->right);
+//         } else {
+//             printf("not end of node!\n");
+//             curr = curr->right;
+//         }
+//         // printf("strcmp: %d\n", strcmp("null", curr->right));
+//     }
+//     printf("final node = %s\n", curr->nodeType);
+//     return curr;
+// }
 
 void printAST(struct AST* tree, int level){
     if (tree == NULL) return;

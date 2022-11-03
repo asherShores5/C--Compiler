@@ -77,10 +77,11 @@ int getSymTabIndex() {
 int setItemValue(char itemName[50], char itemValue[50], char scope[50]) {
 	
 	for (int i = 0; i < SYMTAB_SIZE; i++) {
+		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
 		int str1 = strcmp(symTabItems[i].itemName, itemName); 
 		int str2 = strcmp(symTabItems[i].scope,scope);
 		
-		if (str1 == 0 && str2 == 0) {
+		if (str1 == 0 && (isGlobal == 0 || str2 == 0)) {
 			strcpy(symTabItems[i].itemValue, itemValue);
 			printf("\nValue: %s added to %s\n", itemValue, symTabItems[i].itemName);
 			showSymTable();
@@ -88,7 +89,7 @@ int setItemValue(char itemName[50], char itemValue[50], char scope[50]) {
 		}
 	}
 
-	printf("Item %s was not found", itemName);	
+	printf("Item %s was not found\n", itemName);	
 	return 0;
 }
 

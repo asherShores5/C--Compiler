@@ -12,6 +12,9 @@
 // Need tp add IR + MIPS Code??
 #include "symbolTable.h"
 #include "AST.h"
+#include "IRcode.h"
+#include "MIPScode.h"
+#include "Calculator.h"
 
 //Bison stuff I assume... IDK what it does
 extern int yylex();
@@ -75,7 +78,7 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 //All the program grammar that will come up
-%type <ast> Program VarDeclList FunDeclList VarDecl ArrDecl FunDecl FuncRun ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp
+%type <ast> Program VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp 
 
 %start Program
 
@@ -143,9 +146,9 @@ VarDecl:
 		//printf("--------> Node:%s, %s\n", $$->nodeType, $$->RHS);
 
 	}
-		/* | Type ID LBRACKET NUMBER RBRACKET SEMICOLON {printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
-		} */
-	| ArrDecl
+	| Type ID LBRACKET NUMBER RBRACKET SEMICOLON {printf("\nRECOGNIZED RULE: ARRAY declaration %s\n\n", $2);
+		} 
+	// | ArrDecl
 ;
 
 //==========================================
@@ -163,20 +166,25 @@ FunDeclList:
 ;
 
 //=========================================
-// For reference --> void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLength, char scope[50])
 
 //FunDecl ------> Type id ( ParamDecList ) Block
 FunDecl:
-	FUNC Type ID LPAREN ParamDecList RPAREN Block {
+	FUNC Type ID LPAREN {
+			printf("ID = %s\n", $3);
+			addItem($3, "FUNC", $2, currentScope);
+			strcpy(currentScope, $3);
+			printf("\n-------------------");
+			printf(" Scope Change --> ");
+			printf("%s", currentScope);
+			printf(" -------------------\n");
+		} 
 
+		ParamDecList RPAREN Block {
 		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
-
-
+		
 		// ----- SYMBOL TABLE ----- //
 		symTabAccess();
-
 		int inSymTab = found($3, currentScope);
-
 
 		// ------ SEMANTIC CHECKS ------ //
  		if (inSymTab == 0) {
@@ -184,72 +192,48 @@ FunDecl:
 			addItem($3, "FUNC", $2, currentScope);
 
 			showSymTable();
-
 		} else {
 			printf("SEMANTIC ERROR: Function %s is already in the symbol table\n", $2);
 		}
-
-
 		// ----- AST ----- //
 		$$ = AST_assignment("FUNC", $2, $3);		
 
-		strcpy(currentScope, $3);
-
-		// printf("CurrentScope = %s\n", currentScope);
 	}
 ;
 
-FuncRun: LPAREN ParamDecList RPAREN Block {
-			printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", currentScope);
-			//Asher's Semantic Checks
-			//Symbol Table
-			symTabAccess();
-			int inSymTab = found(currentScope, currentScope);
-			//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
-			if (inSymTab == 0) {
-				addItem(currentScope, "FUNC", "Func", 0, "GLOBAL");
-			} else {
-				printf("\nSEMANTIC ERROR: FUNC %s is already in the symbol table\n", $2);
-			} 
-			showSymTable();
-			strcpy(currentScope, "GLOBAL");
-	}
+// ArrDecl:
+// 	Type ID LBRACKET NUMBER RBRACKET SEMICOLON {
 
-;	
+// 		printf("ARRAY DECL FOUND ----> \n");
+// 		// ----- SYMBOL TABLE ----- //
+// 		symTabAccess();
 
-ArrDecl:
-	Type ID LBRACKET NUMBER RBRACKET SEMICOLON {
+// 		int inSymTab = found($2, currentScope);
 
-		printf("ARRAY DECL FOUND ----> \n");
-		// ----- SYMBOL TABLE ----- //
-		symTabAccess();
-
-		int inSymTab = found($2, currentScope);
-
-		if (inSymTab == 0) {
-			char arrIndex[12];
-			for (int i = 0; i < $4; i++) {
-				snprintf(arrIndex, 12, "%s[%d]", $2, i);
-				addItem(arrIndex, "ARRAY", $1, currentScope);				
-			}
-			// addItem($2, "ARRAY", $1, $4, currentScope);
-			showSymTable();
-		} else {
-			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
-		}
+// 		if (inSymTab == 0) {
+// 			char arrIndex[12];
+// 			for (int i = 0; i < $4; i++) {
+// 				snprintf(arrIndex, 12, "%s[%d]", $2, i);
+// 				addItem(arrIndex, "ARRAY", $1, currentScope);				
+// 			}
+// 			// addItem($2, "ARRAY", $1, $4, currentScope);
+// 			showSymTable();
+// 		} else {
+// 			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
+// 		}
 
 
-		// ----- AST ----- //
-		char intVal[50]; 
-		sprintf(intVal, "%d", $4);
-		$$ = AST_assignment("ARR", intVal, $2);
+// 		// ----- AST ----- //
+// 		char intVal[50]; 
+// 		sprintf(intVal, "%d", $4);
+// 		$$ = AST_assignment("ARR", intVal, $2);
 
 
-		// ----- CODE GENERATION ----- //
-		// emitArrayDecl($2, $4, getItemID($2, currentScope));
+// 		// ----- CODE GENERATION ----- //
+// 		// emitArrayDecl($2, $4, getItemID($2, currentScope));
 
-	}
-;
+// 	}
+// ;
 
 //==========================================
 
@@ -366,6 +350,59 @@ Stmt:
 
 //==========================================
 
+
+/* AddExpr:
+	ID BinOp AddExpr {
+		
+		int idValue = getValue($1, currentScope);
+		printf("idValue = %d\n", idValue);
+		// printf("$2 = %c\n", '+');
+		addNumToArray(idValue, $2);
+
+
+		// -------- SEMANTIC CHECK -------- //
+		// printf("ID is an int! rv = %s", getNodeType($1, currentScope));
+		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
+			semanticCheckPassed = 0;
+		}
+
+	}
+
+	| NUMBER BinOp AddExpr {
+		
+		// printf("Binop: %s\n", $2);
+		addNumToArray($1, $2);
+		
+		// char sum[50];
+		// sprintf(sum, "%d", returnSum());
+		//returnSum();
+	}
+
+	| ID {
+
+		char* noOp;
+		//Get value of ID from symbol table
+		int idValue = getValue($1, currentScope);
+		addNumToArray(idValue, noOp);
+
+		// -------- SEMANTIC CHECK -------- //
+		//printf("ID is an int! rv = %s", getNodeType($1, currentScope));
+
+		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
+			semanticCheckPassed = 0;
+		}
+
+	}
+
+	| NUMBER {
+
+		char* noOp;
+		// printf("Number recog\n");
+		addNumToArray($1, noOp);
+	}
+
+; */
+
 Expr: 
 	Primary {}
 
@@ -380,8 +417,6 @@ Expr:
 		showSymTable();
 	}
 
-	| Expr BinOp Expr {}
-
 
 	| ID EQ Expr {
 		printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);
@@ -395,29 +430,38 @@ Expr:
 		if (inSymTab != 0) {
 			printf("\nSEMANTIC ERROR: Var %s is NOT in the symbol table\n", $2);
 		} else {
-			printf("\nSEMANTIC PASSED");
+			printf("\nSEMANTIC \n");
 		}
-		showSymTable();	
+		showSymTable();
+
+		// IR CODE ATTEMPT DONT KYS - evan Yes kms - Asher no dont kys - evan
+		emitAssignment($1, $3);
+
 	}
 
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
 	
 	
-	| ID LBRACKET Expr RBRACKET EQ Expr {
+	| ID LBRACKET NUMBER RBRACKET EQ Expr {
 
 		printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);
+
 		//Asher's Semantic Checks
-		//Symbol Table
+		// ------ SYMBOL TABLE ------ //
 		symTabAccess();
-		//Var Decl Check
 		int inSymTab = found($1, currentScope);
-		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+
 		if (inSymTab != 0) {
 			printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
+			semanticCheckPassed = 0;
 		} else {
 			printf("\nSEMANTIC PASSED");
+			
+			//emitArrayAssignment();
 		}
-		showSymTable();	
+		showSymTable();
+		
+
 	}
 ;
 
@@ -452,18 +496,10 @@ int main(int argc, char**argv)
 */
 	printf("\n\n##### COMPILER STARTED #####\n\n");
 
-	// Initialize currentScope = "GLOBAL"
-
-	/* IRcode = fopen("IRcode.ir", "w");
-	printf("IR File Opened");
-	GarbageMIPS = fopen("GarbageMIPS.asm", "w");
-	printf("MIPS File Opened");
-
-	//print basic MIPS crap into the file
-	fprintf (GarbageMIPS, ".text\n");
-	fprintf (GarbageMIPS, "main:\n");
-
-	//fprintf(MIPS, " .text"); */
+	// Initialize IR File
+	initIRcodeFile();
+	// Initialize MIPS.h
+	initAssemblyFile();
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))

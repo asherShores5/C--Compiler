@@ -24,8 +24,9 @@ struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
     strcpy(ASTassign->LHS, LHS);
     strcpy(ASTassign->RHS, RHS);
 
-    // rightmost = ASTassign;
-    // printf("rightmost: %s", rightmost);
+    if (!ASTassign->right) {
+        printf("right is null: %s\n", ASTassign->right);
+    }
     
 
 /*
@@ -87,14 +88,18 @@ void printDots(int num)
 
 struct AST* getEndNode(struct AST* node) {
     struct AST* curr = node;
-    printf("Debug test 2\n");
 
-    while (strcmp("TYPE", curr->right) != 0) {
-        printf("strcmp: %d\n", strcmp("null", curr->right));
-        printf("curr.right = %s\n", curr->nodeType);
-        curr = curr->right;
+    while (1) {
+        printf("curr.right = %s\n", curr->right);
+        if (!curr->right) {
+            printf("curr.right = %s\n", curr->right);
+        } else {
+            printf("not end of node!\n");
+            curr = curr->right;
+        }
+        // printf("strcmp: %d\n", strcmp("null", curr->right));
     }
-    printf("final node = %s", curr->nodeType);
+    printf("final node = %s\n", curr->nodeType);
     return curr;
 }
 

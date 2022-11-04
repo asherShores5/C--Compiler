@@ -73,12 +73,17 @@ int count = 0;
 
 %token <string> CHARACTER
 
+%left '*'
+%left '/'
+%left '-'
+%left '+'
+
 //Idk what this does
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 //All the program grammar that will come up
-%type <ast> Program VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr ParamList Primary UnaryOp BinOp 
+%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr MathExpr ParamList Primary UnaryOp BinOp 
 
 %start Program
 
@@ -86,7 +91,7 @@ int count = 0;
 
 // Program ------> VarDeclList FunDeclList 
 Program: 
-	VarDeclList FunDeclList {
+	/* VarDeclList FunDeclList {
 
 		printf("Program started:\n");
 
@@ -97,9 +102,41 @@ Program:
 		// printf("LAST DECLARED VAR = %s | RHS = %s\n", lastVar->nodeType, lastVar->RHS);
 		lastVar->right = $2;
 		$$ = $1;
+		printf("$$ right: %s", $1->right);
 		
 		printAST($$, 3);
+	} */
+
+	DeclList {
+		
+		$$ = $1;
+		printAST($$, 3);
+
 	}
+;
+
+DeclList:	
+	Decl DeclList { 
+
+		// printf("\nTest debug DECLDECLLIST\n");
+		$1->right = $2;
+		$$ = $1;
+	
+	// } | StmtList DeclList  { 
+
+	// 	// printf("Test debug STMTDECLLIST\n");
+	// 	$1->right = $2;
+	// 	$$ = $1;
+
+	} 
+
+	| Decl {
+		$$ = $1;
+		// printf("DECL\n");
+	}
+	
+	| FunDeclList
+
 ;
 
 //==========================================
@@ -113,6 +150,16 @@ VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
 		$$ = $1;
 	}
 
+	| VarDecl 
+
+;
+
+
+Decl: 		
+	VarDecl 
+	| StmtList
+	| FunDecl
+	
 ;
 
 //==========================================
@@ -192,7 +239,7 @@ FunDeclList:
 	FunDecl 
 
 	| FunDecl FunDeclList {
-
+		
 		//TODO AST stuff idk what to do about this yet
 
 	}
@@ -203,19 +250,14 @@ FunDeclList:
 //FunDecl ------> Type id ( ParamDecList ) Block
 FunDecl:
 	FUNC Type ID LPAREN {
+		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
 		printf("ID = %s\n", $3);
-		addItem($3, "FUNC", $2, currentScope);
 		strcpy(currentScope, $3);
-		printf("\n-------------------");
-		printf(" Scope Change --> ");
+		printf("\n------------------- Scope Change --> ");
 		printf("%s", currentScope);
 		printf(" -------------------\n");
-	} 
 
-	ParamDecList RPAREN Block {
 
-		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
-		
 		// ----- SYMBOL TABLE ----- //
 		symTabAccess();
 		int inSymTab = found($3, currentScope);
@@ -224,13 +266,17 @@ FunDecl:
  		if (inSymTab == 0) {
 			
 			addItem($3, "FUNC", $2, currentScope);
-
 			showSymTable();
 		} else {
 			printf("SEMANTIC ERROR: Function %s is already in the symbol table\n", $2);
 		}
+	} 
+
+	ParamDecList RPAREN Block {
+
 		// ----- AST ----- //
 		$$ = AST_assignment("FUNC", $2, $3);		
+		
 
 		printf("%s", $6->nodeType);
 		$$ -> right = $6;
@@ -238,41 +284,9 @@ FunDecl:
 	}
 ;
 
-// ArrDecl:
-// 	Type ID LBRACKET NUMBER RBRACKET SEMICOLON {
-
-// 		printf("ARRAY DECL FOUND ----> \n");
-// 		// ----- SYMBOL TABLE ----- //
-// 		symTabAccess();
-
-// 		int inSymTab = found($2, currentScope);
-
-// 		if (inSymTab == 0) {
-// 			char arrIndex[12];
-// 			for (int i = 0; i < $4; i++) {
-// 				snprintf(arrIndex, 12, "%s[%d]", $2, i);
-// 				addItem(arrIndex, "ARRAY", $1, currentScope);				
-// 			}
-// 			// addItem($2, "ARRAY", $1, $4, currentScope);
-// 			showSymTable();
-// 		} else {
-// 			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
-// 		}
-
-
-// 		// ----- AST ----- //
-// 		char intVal[50]; 
-// 		sprintf(intVal, "%d", $4);
-// 		$$ = AST_assignment("ARR", intVal, $2);
-
-
-// 		// ----- CODE GENERATION ----- //
-// 		// emitArrayDecl($2, $4, getItemID($2, currentScope));
-
-// 	}
-// ;
 
 //==========================================
+
 
 //ParamDeclList --> epsilon 
 //                  ParamDeclListTail
@@ -372,83 +386,31 @@ Stmt:
 
 	| Expr SEMICOLON {}
 
-	| RETURN Expr SEMICOLON {
-
+	| RETURN Expr SEMICOLON {		
+		printf("%s\n", $2);
+		$$ = AST_assignment("RETURN", "", $2);
 		
-
 	}
 
 	| WRITE Expr SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 
-		printf("EXpr: %s\n", $2);
-		// $$ = AST_Write("WRITE", )
+		// printf("EXpr: %s\n", $2);
+		$$ = AST_Write("WRITE", "", $2);
 	}
 
 	| WRITELN SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Line %s\n", $1);
 	}
 
-	| RETURN Expr SEMICOLON
 ;
+
 
 //==========================================
 
 
-/* AddExpr:
-	ID BinOp AddExpr {
-		
-		int idValue = getValue($1, currentScope);
-		printf("idValue = %d\n", idValue);
-		// printf("$2 = %c\n", '+');
-		addNumToArray(idValue, $2);
-
-
-		// -------- SEMANTIC CHECK -------- //
-		// printf("ID is an int! rv = %s", getNodeType($1, currentScope));
-		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
-			semanticCheckPassed = 0;
-		}
-
-	}
-
-	| NUMBER BinOp AddExpr {
-		
-		// printf("Binop: %s\n", $2);
-		addNumToArray($1, $2);
-		
-		// char sum[50];
-		// sprintf(sum, "%d", returnSum());
-		//returnSum();
-	}
-
-	| ID {
-
-		char* noOp;
-		//Get value of ID from symbol table
-		int idValue = getValue($1, currentScope);
-		addNumToArray(idValue, noOp);
-
-		// -------- SEMANTIC CHECK -------- //
-		//printf("ID is an int! rv = %s", getNodeType($1, currentScope));
-
-		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
-			semanticCheckPassed = 0;
-		}
-
-	}
-
-	| NUMBER {
-
-		char* noOp;
-		// printf("Number recog\n");
-		addNumToArray($1, noOp);
-	}
-
-; */
-
 Expr: 
-	Primary {printf("Test\n");}
+	Primary {}
 
 	| UnaryOp Expr { 
 
@@ -464,7 +426,7 @@ Expr:
 	}
 
 
-	| ID EQ Expr {
+	| ID EQ MathExpr {
 		printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);
 	
 		//Asher's Semantic Checks
@@ -472,13 +434,33 @@ Expr:
 		symTabAccess();
 		//Var Decl Check
 		int inSymTab = found($1, currentScope);
-		printf("Debug\n");
-		printf("Test $3 = %s\n", $3->nodeType);
-		if (inSymTab != 0 && compareTypes($1, $3, currentScope) != 0) {
+		int mathVal = atoi($3);
+
+
+		// ------ SEMANTIC CHECKS ------ //
+		if (inSymTab == 0) {
 			printf("\nSEMANTIC ERROR: Var %s is NOT in the symbol table\n", $2);
+			semanticCheckPassed = 0;
 		} else {
-			printf("\nSEMANTIC \n");
+			printf("\nITEM IS IN SYMTABLE\n");
 		}
+
+		if (strcmp(getVariableType($1, currentScope), "int") == 0) {
+			printf("TYPES ARE COMPATIBLE\n");
+		} else {
+			printf("Error: INCOMPATIBLE TYPES\n");
+			semanticCheckPassed = 0;
+		}
+
+		// ------- SYMBOL TABLE ------- //
+		if (semanticCheckPassed) {
+			setItemValue($1, $3, currentScope);
+		}
+		
+
+		// ------ AST ------ //
+		$$ = AST_assignment("=", $1, $3);
+		printNode($$);
 
 
 		// IR CODE ATTEMPT DONT KYS - evan Yes kms - Asher no dont kys - evan
@@ -520,6 +502,65 @@ Expr:
 	}
 ;
 
+MathExpr:
+	ID BinOp MathExpr {
+		
+		int idValue = getValue($1, currentScope);
+		printf("idValue = %d\n", idValue);
+		// printf("$2 = %c\n", '+');
+		// addNumToArray(idValue, $2);
+
+
+		// -------- SEMANTIC CHECK -------- //
+		// printf("ID is an int! rv = %s", getNodeType($1, currentScope));
+		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
+			semanticCheckPassed = 0;
+		}
+
+	}
+
+	| NUMBER BinOp MathExpr {
+		
+		char newVal[10];
+		// printf("Binop: %s\n", $2);
+		// addNumToArray($1, $2);
+		
+		// char sum[50];
+		// sprintf(sum, "%d", returnSum());
+		//returnSum();
+		sprintf(newVal, "%d", $1 + atoi($3));
+
+		$$ = AST_assignment(newVal, "", "");
+
+		printf("$3 = %s\n", $3->nodeType);
+	}
+
+	| ID {
+
+		char* noOp;
+		//Get value of ID from symbol table
+		int idValue = getValue($1, currentScope);
+		// addNumToArray(idValue, noOp);
+
+		// -------- SEMANTIC CHECK -------- //
+		//printf("ID is an int! rv = %s", getNodeType($1, currentScope));
+
+		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
+			semanticCheckPassed = 0;
+		}
+
+	}
+
+	| NUMBER {
+		char val[5];
+		sprintf(val, "%d", $1);
+		$$ = AST_assignment(val, "", "");
+		// char* noOp;
+		// // printf("Number recog\n");
+		// addNumToArray($1, noOp);
+	}
+
+;
 ParamList:	{}
 	| Primary {printf("\nRECOGNIZED RULE: Parameter\n");} ParamList {}
 ;
@@ -527,10 +568,14 @@ ParamList:	{}
 
 //==========================================
 
-Primary: ID {}
-		| NUMBER {}
-		| CHARACTER {}
-		| LPAREN Expr RPAREN {}
+Primary: ID 
+		| NUMBER {
+			char numVal[10];
+			sprintf(numVal, "%d", $1);
+			$$ = numVal;
+		}
+		| CHARACTER 
+		| LPAREN Expr RPAREN 
 
 UnaryOp: MINUS {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", $1);}
 

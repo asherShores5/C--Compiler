@@ -1,3 +1,10 @@
+
+const char* getSum(char num1[10], char num2[10]) {
+
+    
+
+}
+
 // // ---- Contains Calculations for Parser ---- //
 
 // int numArray[50];

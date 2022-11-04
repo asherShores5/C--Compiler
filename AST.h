@@ -114,6 +114,17 @@ void printAST(struct AST* tree, int level){
     
 }
 
+void printNode(struct AST* node) {
+
+    printf("Current node ---->\n");
+    printDots(3);
+    printf("%s\n", node->nodeType);
+    printDots(3);
+    printf("%s %s\n\n", node->LHS, node->RHS);
+
+}
+
+
 
 
 

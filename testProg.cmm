@@ -1,8 +1,13 @@
 int x; 
+int foo[5];
 
 func int main(int z) {
-	int y;
-	y = 1 + 5 + 2;
+	int help;
+	x = 5;
+	help = 1 + 7 + 2 + x;
+	write help;
+/*	foo[0] = 1; */
+/*	foo[1] = 4; */
 	return 0;
 }
 

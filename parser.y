@@ -110,7 +110,7 @@ Program:
 	DeclList {
 		
 		$$ = $1;
-		printAST($$, 3);
+		// printAST($$, 3);
 
 	}
 ;
@@ -121,6 +121,8 @@ DeclList:
 		// printf("\nTest debug DECLDECLLIST\n");
 		$1->right = $2;
 		$$ = $1;
+		// printf("LINK DECLLIST\n");
+		// printNode($$->right);
 	
 	// } | StmtList DeclList  { 
 
@@ -278,9 +280,8 @@ FunDecl:
 		$$ = AST_assignment("FUNC", $2, $3);		
 		
 
-		printf("%s", $6->nodeType);
+		// printf("TEST %s\n", $6);
 		$$ -> right = $6;
-
 	}
 ;
 
@@ -348,37 +349,32 @@ ParamDecl:
 
 //Block --------> { VarDeclList StmtList } 
 Block: 
-	LCURLY VarDeclList StmtList RCURLY {
-		$2->right = $3;
-		$$ = $1;
+	LCURLY DeclList RCURLY {
+		$$ = $2;
+		// printf("right: %s\n", $$->right->RHS);
 	}
 ;
 
 //=================f=========================
 
-//Type ---------> int
-//                char
-//                float
 Type: INT {}
 	| FLOAT {}
 	| CHAR {}
 
 //==========================================
 
-//StmtList -----> Stmt 
-//                Stmt StmtList 
-StmtList: Stmt {}
-	| Stmt StmtList {}
+StmtList: 
+	Stmt 
+
+	| Stmt StmtList {
+		$1->right = $2;
+		$$ = $1;
+		// printNode($$);
+	}
 ;
 
 //==========================================
 
-//Stmt ---------> ;
-//                Expr ; 
-//                return Expr ;
-//                read id ;
-//                write Expr ;
-//                writeln ;
 Stmt: 
 	SEMICOLON {
 		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);	
@@ -387,8 +383,8 @@ Stmt:
 	| Expr SEMICOLON {}
 
 	| RETURN Expr SEMICOLON {		
-		printf("%s\n", $2);
 		$$ = AST_assignment("RETURN", "", $2);
+		// printNode($$);
 		
 	}
 
@@ -397,6 +393,10 @@ Stmt:
 
 		// printf("EXpr: %s\n", $2);
 		$$ = AST_Write("WRITE", "", $2);
+		
+
+		// ------ CODE GENERATION ------ //
+		// emitMIPSWrite
 	}
 
 	| WRITELN SEMICOLON {
@@ -410,7 +410,7 @@ Stmt:
 
 
 Expr: 
-	Primary {}
+	Primary  
 
 	| UnaryOp Expr { 
 
@@ -423,10 +423,13 @@ Expr:
 			printf("\nSEMANTIC ERROR: Expr %s is NOT in the symbol table\n", $2->nodeType);
 		}
 		showSymTable();
+
+		$$ = $2;
+
 	}
 
 
-	| ID EQ MathExpr {
+	/* | ID EQ MathExpr {
 		printf("\nRECOGNIZED RULE: Assignment Statement %s\n", $1);
 	
 		//Asher's Semantic Checks
@@ -463,9 +466,50 @@ Expr:
 		printNode($$);
 
 
+		// ------ CODE GENERATION ------ //
 		// IR CODE ATTEMPT DONT KYS - evan Yes kms - Asher no dont kys - evan
 		// emitAssignment($1, $3);
 
+
+		semanticCheckPassed = 1;
+	} */
+
+	| ID EQ Expr {
+		printf("\nRECOGNIZED RULE: Assignment Statement ----> %s\n", $1);
+		int inSymTab = found($1, currentScope);
+	
+
+		// ------ SEMANTIC CHECKS ------ //
+		if (inSymTab == 0) {
+			printf("\nSEMANTIC ERROR: Var %s is NOT in the symbol table\n", $2);
+			semanticCheckPassed = 0;
+		} else {
+			printf("\nITEM IS IN SYMTABLE\n");
+		}
+
+		printNode($3);
+		if (strcmp(getVariableType($1, currentScope), $3) == 0) {
+			printf("TYPES ARE COMPATIBLE\n");
+		} else {
+			printf("Error: INCOMPATIBLE TYPES\n");
+			semanticCheckPassed = 0;
+		}
+
+
+		// ------- SYMBOL TABLE ------- //
+		if (semanticCheckPassed) {
+			setItemValue($1, $3->RHS, currentScope);
+		}
+		
+
+		// ------ AST ------ //
+		$$ = AST_assignment("=", $1, $3->RHS);
+		// printNode($$);
+
+
+		// ------ CODE GENERATION ------ //
+
+		semanticCheckPassed = 1;
 	}
 
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
@@ -483,7 +527,7 @@ Expr:
 			printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
 			semanticCheckPassed = 0;
 		} else {
-			printf("\nSEMANTIC PASSED\n");
+			printf("\nSEMANTIC CHECK PASSED\n");
 			
 			//emitArrayAssignment();
 		}
@@ -492,14 +536,17 @@ Expr:
 		// Setting array value in the symbol table
 		char arrayStmt[10]; char newVal[10];
 		sprintf(arrayStmt, "%s%s%d%s", $1, $2, $3, $4);
-		sprintf(newVal, "%d", $6);
-		setItemValue(arrayStmt, newVal, currentScope);
+		// printf("setVal %s\n", $6);
+		// sprintf(newVal, "%d", $6);
+		setItemValue(arrayStmt, $6, currentScope);
 
 
 		// ----- AST ----- //
 		$$ = AST_assignment("=", arrayStmt, newVal);		
 
 	}
+
+	| MathExpr
 ;
 
 MathExpr:
@@ -528,11 +575,11 @@ MathExpr:
 		// char sum[50];
 		// sprintf(sum, "%d", returnSum());
 		//returnSum();
-		sprintf(newVal, "%d", $1 + atoi($3));
+		sprintf(newVal, "%d", $1 + atoi($3->RHS));
 
-		$$ = AST_assignment(newVal, "", "");
+		$$ = AST_assignment("int", "", newVal);
 
-		printf("$3 = %s\n", $3->nodeType);
+		printf("$3 = %s\n", $3->RHS);
 	}
 
 	| ID {
@@ -552,9 +599,10 @@ MathExpr:
 	}
 
 	| NUMBER {
+		// printf("Number in mathExpr detected\n");
 		char val[5];
 		sprintf(val, "%d", $1);
-		$$ = AST_assignment(val, "", "");
+		$$ = AST_assignment("int", "", val);
 		// char* noOp;
 		// // printf("Number recog\n");
 		// addNumToArray($1, noOp);
@@ -570,9 +618,10 @@ ParamList:	{}
 
 Primary: ID 
 		| NUMBER {
+			printf("num detected\n");
 			char numVal[10];
 			sprintf(numVal, "%d", $1);
-			$$ = numVal;
+			$$ = AST_assignment("int", "", numVal);
 		}
 		| CHARACTER 
 		| LPAREN Expr RPAREN 

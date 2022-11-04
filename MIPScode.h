@@ -69,7 +69,7 @@ void emitMIPSWriteId(char * id){
     
     //fprintf(MIPScode, "li $a0,%s\n", id);
     fprintf(MIPScode, "# Printing -----------\n");
-    fprintf(MIPScode, "move $a0,%s\n", "$t0");
+    fprintf(MIPScode, "move $a0, $t%s\n", id);
     fprintf(MIPScode, "li $v0, 4\n");
     fprintf(MIPScode, "syscall\n");
 

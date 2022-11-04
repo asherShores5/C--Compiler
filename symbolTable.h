@@ -55,13 +55,15 @@ int found(char itemName[50], char scope[50]) {
 
     for(int i=0; i < SYMTAB_SIZE; i++){
 
+		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
+
         int str1 = strcmp(symTabItems[i].itemName, itemName);
         //printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 
         int str2 = strcmp(symTabItems[i].scope,scope);
         //printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 
-        if( str1 == 0 && str2 == 0){
+        if( str1 == 0 && (str2 == 0 || isGlobal == 0)) {
             return 1; // found the ID in the table
         }
     }
@@ -99,10 +101,11 @@ int getValue(char itemName[50], char scope[50]) {
 	int returnValue;
 
 	for(int i=0; i<100; i++) {
+		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
 		int str1 = strcmp(symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[i].scope,scope);
 
-		if( str1 == 0 && str2 == 0){
+		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
 			returnValue = atoi(symTabItems[i].itemValue);
 			// printf("Item Value:%d\n", returnValue);
 			return returnValue;
@@ -116,9 +119,10 @@ int getValue(char itemName[50], char scope[50]) {
 int getItemID(char itemName[50], char scope[50]) {
 
 	for(int i=0; i<100; i++) {
+		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
 		int str1 = strcmp(symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[i].scope, scope);
-		if( str1 == 0 && str2 == 0){
+		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
 			return symTabItems[i].itemID;
 		}
 	}
@@ -129,13 +133,15 @@ int getItemID(char itemName[50], char scope[50]) {
 const char* getVariableType(char itemName[50], char scope[50]){
     //char *name = "int";
     //return name;
-
     for(int i=0; i<SYMTAB_SIZE; i++){
+
+		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
         int str1 = strcmp(symTabItems[i].itemName, itemName);
         //printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
         int str2 = strcmp(symTabItems[i].scope,scope);
         //printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
-        if( str1 == 0 && str2 == 0){
+        if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
+			printf("Debug\n\n");
             return symTabItems[i].itemType; // found the ID in the table
         }
     }

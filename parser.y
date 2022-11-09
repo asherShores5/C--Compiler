@@ -25,6 +25,7 @@ FILE * IRcode;
 FILE * GarbageMIPS;
 
 //Some global variables
+const char* computeEquation(int val1, int val2, char operator);
 void yyerror(const char* s);
 char currentScope[50] = "GLOBAL"; // global or the name of the function
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
@@ -48,11 +49,11 @@ int count = 0;
 %token <string> ID
 %token <string> SEMICOLON
 %token <string> EQ
-%token <string> PLUS
 %token <number> NUMBER
 %token <string> WRITE
 %token <string> FUNC
 
+%token <string> PLUS
 %token <string> MINUS
 %token <string> TIMES
 %token <string> DIVIDE
@@ -73,10 +74,10 @@ int count = 0;
 
 %token <string> CHARACTER
 
-%left '*'
-%left '/'
-%left '-'
-%left '+'
+%left TIMES
+%left DIVIDE
+/* %left '-'
+%left '+' */
 
 //Idk what this does
 %printer { fprintf(yyoutput, "%s", $$); } ID;
@@ -195,6 +196,7 @@ VarDecl:
 		//printf("--------> Node:%s, %s\n", $$->nodeType, $$->RHS);
 
 	}
+	
 
 	// ------ ARRAY DECL ------ //
 	| Type ID LBRACKET NUMBER RBRACKET SEMICOLON {
@@ -568,18 +570,40 @@ MathExpr:
 
 	| NUMBER BinOp MathExpr {
 		
-		char newVal[10];
-		// printf("Binop: %s\n", $2);
-		// addNumToArray($1, $2);
-		
-		// char sum[50];
-		// sprintf(sum, "%d", returnSum());
-		//returnSum();
-		sprintf(newVal, "%d", $1 + atoi($3->RHS));
+		char newVal[5];
+
+		// Evaluate expression
+		char opArray[3];
+		sprintf(opArray, "%s", $2);
+		char operator = opArray[0];
+
+		strcpy(newVal, computeEquation($1, atoi($3->RHS), operator));
+		printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
+	
 
-		printf("$3 = %s\n", $3->RHS);
+		// switch (operator) {
+		// 	case '+':
+		// 		sprintf(newVal, "%d", $1 + atoi($3->RHS));
+		// 		printf("Addtion Expr found!\n");
+		// 		break;
+		// 	case '-':
+		// 		sprintf(newVal, "%d", $1 - atoi($3->RHS));
+		// 		printf("Subtraction Expr found!\n");
+		// 		break;
+		// 	case '*':
+		// 		sprintf(newVal, "%d", $1 * atoi($3->RHS));
+		// 		printf("Multiplication Expr found!\n");
+		// 		break;
+		// 	case '/':
+		// 		sprintf(newVal, "%d", $1 / atoi($3->RHS));
+		// 		printf("Division Expr found!\n");
+		// 		break;
+		// }
+
+
+		// printf("$3 = %s\n", $3->RHS);
 	}
 
 	| ID {
@@ -663,6 +687,38 @@ int main(int argc, char**argv)
 
 
 	/* fprintf (GarbageMIPS, "syscall\n"); */
+}
+
+const char* computeEquation(int val1, int val2, char operator) {
+
+	char newVal[3];
+
+	switch (operator) {
+		case '+':
+			/* newVal = val1 + val2; */
+			sprintf(newVal, "%d", val1 + val2);
+			printf("Addtion Expr found!\n");
+			break;
+		case '-':
+			/* newVal = val1 - val2; */
+			sprintf(newVal, "%d", val1 - val2);
+			printf("Subtraction Expr found!\n");
+			break;
+		case '*':
+			/* newVal = val1 * val2; */
+			sprintf(newVal, "%d", val1 * val2);
+			printf("Multiplication Expr found!\n");
+			break;
+		case '/':
+			/* newVal = val1 / val2; */
+			sprintf(newVal, "%d", val1 / val2);
+			printf("Division Expr found!\n");
+			break;
+	}
+
+	printf("Newval = %s\n", newVal);
+	return newVal;
+
 }
 
 void yyerror(const char* s) {

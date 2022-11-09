@@ -85,7 +85,7 @@ int setItemValue(char itemName[50], char itemValue[50], char scope[50]) {
 		
 		if (str1 == 0 && (isGlobal == 0 || str2 == 0)) {
 			strcpy(symTabItems[i].itemValue, itemValue);
-			printf("\nValue: %s added to %s\n", itemValue, symTabItems[i].itemName);
+			printf("\nValue: %s added to item: %s\n\n", itemValue, symTabItems[i].itemName);
 			showSymTable();
 			return 1; //value added 
 		}
@@ -141,7 +141,7 @@ const char* getVariableType(char itemName[50], char scope[50]){
         int str2 = strcmp(symTabItems[i].scope,scope);
         //printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
         if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
-			printf("Debug\n\n");
+			// printf("Debug\n\n");
             return symTabItems[i].itemType; // found the ID in the table
         }
     }

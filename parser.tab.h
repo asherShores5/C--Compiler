@@ -52,10 +52,10 @@ extern int yydebug;
     ID = 258,
     SEMICOLON = 259,
     EQ = 260,
-    PLUS = 261,
-    NUMBER = 262,
-    WRITE = 263,
-    FUNC = 264,
+    NUMBER = 261,
+    WRITE = 262,
+    FUNC = 263,
+    PLUS = 264,
     MINUS = 265,
     TIMES = 266,
     DIVIDE = 267,
@@ -78,7 +78,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 38 "parser.y"
+#line 39 "parser.y"
 
 	//Tokens declared in C so we can declare them in C--... I think
 	int number;

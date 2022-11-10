@@ -107,7 +107,7 @@ int getValue(char itemName[50], char scope[50]) {
 
 		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
 			returnValue = atoi(symTabItems[i].itemValue);
-			// printf("Item Value:%d\n", returnValue);
+			printf("Item Value:%d\n", returnValue);
 			return returnValue;
 		}
 	}

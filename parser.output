@@ -5,15 +5,17 @@ Nonterminals useless in grammar
 
 Rules useless in grammar
 
-   52 VarDeclList: %empty
-   53            | VarDecl VarDeclList
-   54            | VarDecl
+   58 VarDeclList: %empty
+   59            | VarDecl VarDeclList
+   60            | VarDecl
 
 
-State 1 conflicts: 2 reduce/reduce
+State 1 conflicts: 2 shift/reduce, 2 reduce/reduce
 State 3 conflicts: 2 reduce/reduce
 State 19 conflicts: 1 shift/reduce, 2 reduce/reduce
 State 22 conflicts: 9 shift/reduce
+State 27 conflicts: 2 reduce/reduce
+State 60 conflicts: 2 shift/reduce, 2 reduce/reduce
 
 
 Grammar
@@ -71,47 +73,55 @@ Grammar
    35     | MathExpr
 
    36 MathExpr: ID BinOp MathExpr
-   37         | NUMBER BinOp MathExpr
+   37         | AddSub
    38         | ID
    39         | NUMBER
 
-   40 ParamList: %empty
+   40 AddSub: MultDiv
+   41       | AddSub MINUS MultDiv
+   42       | AddSub PLUS MultDiv
 
-   41 $@2: %empty
+   43 MultDiv: Primary
+   44        | NUMBER TIMES MultDiv
+   45        | NUMBER DIVIDE MultDiv
 
-   42 ParamList: Primary $@2 ParamList
+   46 ParamList: %empty
 
-   43 Primary: ID
-   44        | NUMBER
-   45        | CHARACTER
-   46        | LPAREN Expr RPAREN
+   47 $@2: %empty
 
-   47 UnaryOp: MINUS
+   48 ParamList: Primary $@2 ParamList
 
-   48 BinOp: PLUS
-   49      | MINUS
-   50      | TIMES
-   51      | DIVIDE
+   49 Primary: ID
+   50        | NUMBER
+   51        | CHARACTER
+   52        | LPAREN Expr RPAREN
+
+   53 UnaryOp: MINUS
+
+   54 BinOp: PLUS
+   55      | MINUS
+   56      | TIMES
+   57      | DIVIDE
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     error (256)
-    ID <string> (258) 8 9 13 18 32 33 34 36 38 43
+    ID <string> (258) 8 9 13 18 32 33 34 36 38 49
     SEMICOLON <string> (259) 8 9 25 26 27 28 29
     EQ <string> (260) 32 34
-    NUMBER <number> (261) 9 34 37 39 44
+    NUMBER <number> (261) 9 34 39 44 45 50
     WRITE <string> (262) 28
     FUNC <string> (263) 13
-    PLUS <string> (264) 48
-    MINUS <string> (265) 47 49
-    TIMES <string> (266) 50
-    DIVIDE <string> (267) 51
+    PLUS <string> (264) 42 54
+    MINUS <string> (265) 41 53 55
+    TIMES <string> (266) 44 56
+    DIVIDE <string> (267) 45 57
     LBRACKET <string> (268) 9 34
     RBRACKET <string> (269) 9 34
-    LPAREN <string> (270) 13 33 46
-    RPAREN <string> (271) 13 33 46
+    LPAREN <string> (270) 13 33 52
+    RPAREN <string> (271) 13 33 52
     LCURLY <string> (272) 19
     RCURLY <string> (273) 19
     INT <string> (274) 20
@@ -119,7 +129,7 @@ Terminals, with rules where they appear
     FLOAT <string> (276) 21
     RETURN <string> (277) 27
     WRITELN <string> (278) 29
-    CHARACTER <string> (279) 45
+    CHARACTER <string> (279) 51
 
 
 Nonterminals, with rules where they appear
@@ -170,25 +180,31 @@ Nonterminals, with rules where they appear
         on right: 23 24
     Expr <ast> (40)
         on left: 30 31 32 33 34 35
-        on right: 26 27 28 31 32 46
+        on right: 26 27 28 31 32 52
     MathExpr <ast> (41)
         on left: 36 37 38 39
-        on right: 35 36 37
-    ParamList <ast> (42)
-        on left: 40 42
-        on right: 33 42
-    $@2 (43)
-        on left: 41
-        on right: 42
-    Primary <ast> (44)
-        on left: 43 44 45 46
-        on right: 30 34 42
-    UnaryOp <ast> (45)
+        on right: 35 36
+    AddSub <ast> (42)
+        on left: 40 41 42
+        on right: 37 41 42
+    MultDiv <ast> (43)
+        on left: 43 44 45
+        on right: 40 41 42 44 45
+    ParamList <ast> (44)
+        on left: 46 48
+        on right: 33 48
+    $@2 (45)
         on left: 47
+        on right: 48
+    Primary <ast> (46)
+        on left: 49 50 51 52
+        on right: 30 34 43 48
+    UnaryOp <ast> (47)
+        on left: 53
         on right: 31
-    BinOp <ast> (46)
-        on left: 48 49 50 51
-        on right: 36 37
+    BinOp <ast> (48)
+        on left: 54 55 56 57
+        on right: 36
 
 
 State 0
@@ -220,8 +236,10 @@ State 0
     Stmt         go to state 22
     Expr         go to state 23
     MathExpr     go to state 24
-    Primary      go to state 25
-    UnaryOp      go to state 26
+    AddSub       go to state 25
+    MultDiv      go to state 26
+    Primary      go to state 27
+    UnaryOp      go to state 28
 
 
 State 1
@@ -231,23 +249,25 @@ State 1
    34     | ID . LBRACKET NUMBER RBRACKET EQ Primary
    36 MathExpr: ID . BinOp MathExpr
    38         | ID .
-   43 Primary: ID .
+   49 Primary: ID .
 
-    EQ        shift, and go to state 27
-    PLUS      shift, and go to state 28
-    MINUS     shift, and go to state 29
-    TIMES     shift, and go to state 30
-    DIVIDE    shift, and go to state 31
-    LBRACKET  shift, and go to state 32
-    LPAREN    shift, and go to state 33
+    EQ        shift, and go to state 29
+    PLUS      shift, and go to state 30
+    MINUS     shift, and go to state 31
+    TIMES     shift, and go to state 32
+    DIVIDE    shift, and go to state 33
+    LBRACKET  shift, and go to state 34
+    LPAREN    shift, and go to state 35
 
     SEMICOLON  reduce using rule 38 (MathExpr)
-    SEMICOLON  [reduce using rule 43 (Primary)]
+    SEMICOLON  [reduce using rule 49 (Primary)]
+    PLUS       [reduce using rule 49 (Primary)]
+    MINUS      [reduce using rule 49 (Primary)]
     RPAREN     reduce using rule 38 (MathExpr)
-    RPAREN     [reduce using rule 43 (Primary)]
+    RPAREN     [reduce using rule 49 (Primary)]
     $default   reduce using rule 38 (MathExpr)
 
-    BinOp  go to state 34
+    BinOp  go to state 36
 
 
 State 2
@@ -259,22 +279,21 @@ State 2
 
 State 3
 
-   37 MathExpr: NUMBER . BinOp MathExpr
-   39         | NUMBER .
-   44 Primary: NUMBER .
+   39 MathExpr: NUMBER .
+   44 MultDiv: NUMBER . TIMES MultDiv
+   45        | NUMBER . DIVIDE MultDiv
+   50 Primary: NUMBER .
 
-    PLUS    shift, and go to state 28
-    MINUS   shift, and go to state 29
-    TIMES   shift, and go to state 30
-    DIVIDE  shift, and go to state 31
+    TIMES   shift, and go to state 37
+    DIVIDE  shift, and go to state 38
 
     SEMICOLON  reduce using rule 39 (MathExpr)
-    SEMICOLON  [reduce using rule 44 (Primary)]
+    SEMICOLON  [reduce using rule 50 (Primary)]
+    PLUS       reduce using rule 50 (Primary)
+    MINUS      reduce using rule 50 (Primary)
     RPAREN     reduce using rule 39 (MathExpr)
-    RPAREN     [reduce using rule 44 (Primary)]
+    RPAREN     [reduce using rule 50 (Primary)]
     $default   reduce using rule 39 (MathExpr)
-
-    BinOp  go to state 35
 
 
 State 4
@@ -287,10 +306,12 @@ State 4
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    Expr      go to state 36
+    Expr      go to state 39
     MathExpr  go to state 24
-    Primary   go to state 25
-    UnaryOp   go to state 26
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 27
+    UnaryOp   go to state 28
 
 
 State 5
@@ -301,19 +322,19 @@ State 5
     CHAR   shift, and go to state 9
     FLOAT  shift, and go to state 10
 
-    Type  go to state 37
+    Type  go to state 40
 
 
 State 6
 
-   47 UnaryOp: MINUS .
+   53 UnaryOp: MINUS .
 
-    $default  reduce using rule 47 (UnaryOp)
+    $default  reduce using rule 53 (UnaryOp)
 
 
 State 7
 
-   46 Primary: LPAREN . Expr RPAREN
+   52 Primary: LPAREN . Expr RPAREN
 
     ID         shift, and go to state 1
     NUMBER     shift, and go to state 3
@@ -321,10 +342,12 @@ State 7
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    Expr      go to state 38
+    Expr      go to state 41
     MathExpr  go to state 24
-    Primary   go to state 25
-    UnaryOp   go to state 26
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 27
+    UnaryOp   go to state 28
 
 
 State 8
@@ -358,31 +381,33 @@ State 11
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    Expr      go to state 39
+    Expr      go to state 42
     MathExpr  go to state 24
-    Primary   go to state 25
-    UnaryOp   go to state 26
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 27
+    UnaryOp   go to state 28
 
 
 State 12
 
    29 Stmt: WRITELN . SEMICOLON
 
-    SEMICOLON  shift, and go to state 40
+    SEMICOLON  shift, and go to state 43
 
 
 State 13
 
-   45 Primary: CHARACTER .
+   51 Primary: CHARACTER .
 
-    $default  reduce using rule 45 (Primary)
+    $default  reduce using rule 51 (Primary)
 
 
 State 14
 
     0 $accept: Program . $end
 
-    $end  shift, and go to state 41
+    $end  shift, and go to state 44
 
 
 State 15
@@ -413,7 +438,7 @@ State 16
 
     $default  reduce using rule 3 (DeclList)
 
-    DeclList     go to state 42
+    DeclList     go to state 45
     Decl         go to state 16
     VarDecl      go to state 17
     FunDeclList  go to state 18
@@ -423,8 +448,10 @@ State 16
     Stmt         go to state 22
     Expr         go to state 23
     MathExpr     go to state 24
-    Primary      go to state 25
-    UnaryOp      go to state 26
+    AddSub       go to state 25
+    MultDiv      go to state 26
+    Primary      go to state 27
+    UnaryOp      go to state 28
 
 
 State 17
@@ -456,8 +483,8 @@ State 19
     RCURLY    [reduce using rule 10 (FunDeclList)]
     $default  reduce using rule 7 (Decl)
 
-    FunDeclList  go to state 43
-    FunDecl      go to state 44
+    FunDeclList  go to state 46
+    FunDecl      go to state 47
 
 
 State 20
@@ -465,7 +492,7 @@ State 20
     8 VarDecl: Type . ID SEMICOLON
     9        | Type . ID LBRACKET NUMBER RBRACKET SEMICOLON
 
-    ID  shift, and go to state 45
+    ID  shift, and go to state 48
 
 
 State 21
@@ -501,19 +528,21 @@ State 22
     CHARACTER  [reduce using rule 23 (StmtList)]
     $default   reduce using rule 23 (StmtList)
 
-    StmtList  go to state 46
+    StmtList  go to state 49
     Stmt      go to state 22
     Expr      go to state 23
     MathExpr  go to state 24
-    Primary   go to state 25
-    UnaryOp   go to state 26
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 27
+    UnaryOp   go to state 28
 
 
 State 23
 
    26 Stmt: Expr . SEMICOLON
 
-    SEMICOLON  shift, and go to state 47
+    SEMICOLON  shift, and go to state 50
 
 
 State 24
@@ -525,12 +554,38 @@ State 24
 
 State 25
 
-   30 Expr: Primary .
+   37 MathExpr: AddSub .
+   41 AddSub: AddSub . MINUS MultDiv
+   42       | AddSub . PLUS MultDiv
 
-    $default  reduce using rule 30 (Expr)
+    PLUS   shift, and go to state 51
+    MINUS  shift, and go to state 52
+
+    $default  reduce using rule 37 (MathExpr)
 
 
 State 26
+
+   40 AddSub: MultDiv .
+
+    $default  reduce using rule 40 (AddSub)
+
+
+State 27
+
+   30 Expr: Primary .
+   43 MultDiv: Primary .
+
+    SEMICOLON  reduce using rule 30 (Expr)
+    SEMICOLON  [reduce using rule 43 (MultDiv)]
+    PLUS       reduce using rule 43 (MultDiv)
+    MINUS      reduce using rule 43 (MultDiv)
+    RPAREN     reduce using rule 30 (Expr)
+    RPAREN     [reduce using rule 43 (MultDiv)]
+    $default   reduce using rule 30 (Expr)
+
+
+State 28
 
    31 Expr: UnaryOp . Expr
 
@@ -540,13 +595,15 @@ State 26
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    Expr      go to state 48
+    Expr      go to state 53
     MathExpr  go to state 24
-    Primary   go to state 25
-    UnaryOp   go to state 26
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 27
+    UnaryOp   go to state 28
 
 
-State 27
+State 29
 
    32 Expr: ID EQ . Expr
 
@@ -556,139 +613,162 @@ State 27
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    Expr      go to state 49
+    Expr      go to state 54
     MathExpr  go to state 24
-    Primary   go to state 25
-    UnaryOp   go to state 26
-
-
-State 28
-
-   48 BinOp: PLUS .
-
-    $default  reduce using rule 48 (BinOp)
-
-
-State 29
-
-   49 BinOp: MINUS .
-
-    $default  reduce using rule 49 (BinOp)
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 27
+    UnaryOp   go to state 28
 
 
 State 30
 
-   50 BinOp: TIMES .
+   54 BinOp: PLUS .
 
-    $default  reduce using rule 50 (BinOp)
+    $default  reduce using rule 54 (BinOp)
 
 
 State 31
 
-   51 BinOp: DIVIDE .
+   55 BinOp: MINUS .
 
-    $default  reduce using rule 51 (BinOp)
+    $default  reduce using rule 55 (BinOp)
 
 
 State 32
 
-   34 Expr: ID LBRACKET . NUMBER RBRACKET EQ Primary
+   56 BinOp: TIMES .
 
-    NUMBER  shift, and go to state 50
+    $default  reduce using rule 56 (BinOp)
 
 
 State 33
 
-   33 Expr: ID LPAREN . ParamList RPAREN
+   57 BinOp: DIVIDE .
 
-    ID         shift, and go to state 51
-    NUMBER     shift, and go to state 52
-    LPAREN     shift, and go to state 7
-    CHARACTER  shift, and go to state 13
-
-    $default  reduce using rule 40 (ParamList)
-
-    ParamList  go to state 53
-    Primary    go to state 54
+    $default  reduce using rule 57 (BinOp)
 
 
 State 34
 
-   36 MathExpr: ID BinOp . MathExpr
+   34 Expr: ID LBRACKET . NUMBER RBRACKET EQ Primary
 
-    ID      shift, and go to state 55
-    NUMBER  shift, and go to state 56
-
-    MathExpr  go to state 57
+    NUMBER  shift, and go to state 55
 
 
 State 35
 
-   37 MathExpr: NUMBER BinOp . MathExpr
+   33 Expr: ID LPAREN . ParamList RPAREN
 
-    ID      shift, and go to state 55
-    NUMBER  shift, and go to state 56
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 57
+    LPAREN     shift, and go to state 7
+    CHARACTER  shift, and go to state 13
 
-    MathExpr  go to state 58
+    $default  reduce using rule 46 (ParamList)
+
+    ParamList  go to state 58
+    Primary    go to state 59
 
 
 State 36
 
-   28 Stmt: WRITE Expr . SEMICOLON
+   36 MathExpr: ID BinOp . MathExpr
 
-    SEMICOLON  shift, and go to state 59
+    ID         shift, and go to state 60
+    NUMBER     shift, and go to state 3
+    LPAREN     shift, and go to state 7
+    CHARACTER  shift, and go to state 13
+
+    MathExpr  go to state 61
+    AddSub    go to state 25
+    MultDiv   go to state 26
+    Primary   go to state 62
 
 
 State 37
 
-   13 FunDecl: FUNC Type . ID LPAREN $@1 ParamDecList RPAREN Block
+   44 MultDiv: NUMBER TIMES . MultDiv
 
-    ID  shift, and go to state 60
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 63
+    LPAREN     shift, and go to state 7
+    CHARACTER  shift, and go to state 13
+
+    MultDiv  go to state 64
+    Primary  go to state 62
 
 
 State 38
 
-   46 Primary: LPAREN Expr . RPAREN
+   45 MultDiv: NUMBER DIVIDE . MultDiv
 
-    RPAREN  shift, and go to state 61
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 63
+    LPAREN     shift, and go to state 7
+    CHARACTER  shift, and go to state 13
+
+    MultDiv  go to state 65
+    Primary  go to state 62
 
 
 State 39
 
-   27 Stmt: RETURN Expr . SEMICOLON
+   28 Stmt: WRITE Expr . SEMICOLON
 
-    SEMICOLON  shift, and go to state 62
+    SEMICOLON  shift, and go to state 66
 
 
 State 40
+
+   13 FunDecl: FUNC Type . ID LPAREN $@1 ParamDecList RPAREN Block
+
+    ID  shift, and go to state 67
+
+
+State 41
+
+   52 Primary: LPAREN Expr . RPAREN
+
+    RPAREN  shift, and go to state 68
+
+
+State 42
+
+   27 Stmt: RETURN Expr . SEMICOLON
+
+    SEMICOLON  shift, and go to state 69
+
+
+State 43
 
    29 Stmt: WRITELN SEMICOLON .
 
     $default  reduce using rule 29 (Stmt)
 
 
-State 41
+State 44
 
     0 $accept: Program $end .
 
     $default  accept
 
 
-State 42
+State 45
 
     2 DeclList: Decl DeclList .
 
     $default  reduce using rule 2 (DeclList)
 
 
-State 43
+State 46
 
    11 FunDeclList: FunDecl FunDeclList .
 
     $default  reduce using rule 11 (FunDeclList)
 
 
-State 44
+State 47
 
    10 FunDeclList: FunDecl .
    11            | FunDecl . FunDeclList
@@ -697,235 +777,293 @@ State 44
 
     $default  reduce using rule 10 (FunDeclList)
 
-    FunDeclList  go to state 43
-    FunDecl      go to state 44
+    FunDeclList  go to state 46
+    FunDecl      go to state 47
 
 
-State 45
+State 48
 
     8 VarDecl: Type ID . SEMICOLON
     9        | Type ID . LBRACKET NUMBER RBRACKET SEMICOLON
 
-    SEMICOLON  shift, and go to state 63
-    LBRACKET   shift, and go to state 64
+    SEMICOLON  shift, and go to state 70
+    LBRACKET   shift, and go to state 71
 
 
-State 46
+State 49
 
    24 StmtList: Stmt StmtList .
 
     $default  reduce using rule 24 (StmtList)
 
 
-State 47
+State 50
 
    26 Stmt: Expr SEMICOLON .
 
     $default  reduce using rule 26 (Stmt)
 
 
-State 48
+State 51
+
+   42 AddSub: AddSub PLUS . MultDiv
+
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 63
+    LPAREN     shift, and go to state 7
+    CHARACTER  shift, and go to state 13
+
+    MultDiv  go to state 72
+    Primary  go to state 62
+
+
+State 52
+
+   41 AddSub: AddSub MINUS . MultDiv
+
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 63
+    LPAREN     shift, and go to state 7
+    CHARACTER  shift, and go to state 13
+
+    MultDiv  go to state 73
+    Primary  go to state 62
+
+
+State 53
 
    31 Expr: UnaryOp Expr .
 
     $default  reduce using rule 31 (Expr)
 
 
-State 49
+State 54
 
    32 Expr: ID EQ Expr .
 
     $default  reduce using rule 32 (Expr)
 
 
-State 50
+State 55
 
    34 Expr: ID LBRACKET NUMBER . RBRACKET EQ Primary
 
-    RBRACKET  shift, and go to state 65
-
-
-State 51
-
-   43 Primary: ID .
-
-    $default  reduce using rule 43 (Primary)
-
-
-State 52
-
-   44 Primary: NUMBER .
-
-    $default  reduce using rule 44 (Primary)
-
-
-State 53
-
-   33 Expr: ID LPAREN ParamList . RPAREN
-
-    RPAREN  shift, and go to state 66
-
-
-State 54
-
-   42 ParamList: Primary . $@2 ParamList
-
-    $default  reduce using rule 41 ($@2)
-
-    $@2  go to state 67
-
-
-State 55
-
-   36 MathExpr: ID . BinOp MathExpr
-   38         | ID .
-
-    PLUS    shift, and go to state 28
-    MINUS   shift, and go to state 29
-    TIMES   shift, and go to state 30
-    DIVIDE  shift, and go to state 31
-
-    $default  reduce using rule 38 (MathExpr)
-
-    BinOp  go to state 34
+    RBRACKET  shift, and go to state 74
 
 
 State 56
 
-   37 MathExpr: NUMBER . BinOp MathExpr
-   39         | NUMBER .
+   49 Primary: ID .
 
-    PLUS    shift, and go to state 28
-    MINUS   shift, and go to state 29
-    TIMES   shift, and go to state 30
-    DIVIDE  shift, and go to state 31
-
-    $default  reduce using rule 39 (MathExpr)
-
-    BinOp  go to state 35
+    $default  reduce using rule 49 (Primary)
 
 
 State 57
+
+   50 Primary: NUMBER .
+
+    $default  reduce using rule 50 (Primary)
+
+
+State 58
+
+   33 Expr: ID LPAREN ParamList . RPAREN
+
+    RPAREN  shift, and go to state 75
+
+
+State 59
+
+   48 ParamList: Primary . $@2 ParamList
+
+    $default  reduce using rule 47 ($@2)
+
+    $@2  go to state 76
+
+
+State 60
+
+   36 MathExpr: ID . BinOp MathExpr
+   38         | ID .
+   49 Primary: ID .
+
+    PLUS    shift, and go to state 30
+    MINUS   shift, and go to state 31
+    TIMES   shift, and go to state 32
+    DIVIDE  shift, and go to state 33
+
+    SEMICOLON  reduce using rule 38 (MathExpr)
+    SEMICOLON  [reduce using rule 49 (Primary)]
+    PLUS       [reduce using rule 49 (Primary)]
+    MINUS      [reduce using rule 49 (Primary)]
+    RPAREN     reduce using rule 38 (MathExpr)
+    RPAREN     [reduce using rule 49 (Primary)]
+    $default   reduce using rule 38 (MathExpr)
+
+    BinOp  go to state 36
+
+
+State 61
 
    36 MathExpr: ID BinOp MathExpr .
 
     $default  reduce using rule 36 (MathExpr)
 
 
-State 58
+State 62
 
-   37 MathExpr: NUMBER BinOp MathExpr .
+   43 MultDiv: Primary .
 
-    $default  reduce using rule 37 (MathExpr)
+    $default  reduce using rule 43 (MultDiv)
 
 
-State 59
+State 63
+
+   44 MultDiv: NUMBER . TIMES MultDiv
+   45        | NUMBER . DIVIDE MultDiv
+   50 Primary: NUMBER .
+
+    TIMES   shift, and go to state 37
+    DIVIDE  shift, and go to state 38
+
+    $default  reduce using rule 50 (Primary)
+
+
+State 64
+
+   44 MultDiv: NUMBER TIMES MultDiv .
+
+    $default  reduce using rule 44 (MultDiv)
+
+
+State 65
+
+   45 MultDiv: NUMBER DIVIDE MultDiv .
+
+    $default  reduce using rule 45 (MultDiv)
+
+
+State 66
 
    28 Stmt: WRITE Expr SEMICOLON .
 
     $default  reduce using rule 28 (Stmt)
 
 
-State 60
+State 67
 
    13 FunDecl: FUNC Type ID . LPAREN $@1 ParamDecList RPAREN Block
 
-    LPAREN  shift, and go to state 68
+    LPAREN  shift, and go to state 77
 
 
-State 61
+State 68
 
-   46 Primary: LPAREN Expr RPAREN .
+   52 Primary: LPAREN Expr RPAREN .
 
-    $default  reduce using rule 46 (Primary)
+    $default  reduce using rule 52 (Primary)
 
 
-State 62
+State 69
 
    27 Stmt: RETURN Expr SEMICOLON .
 
     $default  reduce using rule 27 (Stmt)
 
 
-State 63
+State 70
 
     8 VarDecl: Type ID SEMICOLON .
 
     $default  reduce using rule 8 (VarDecl)
 
 
-State 64
+State 71
 
     9 VarDecl: Type ID LBRACKET . NUMBER RBRACKET SEMICOLON
 
-    NUMBER  shift, and go to state 69
+    NUMBER  shift, and go to state 78
 
 
-State 65
+State 72
+
+   42 AddSub: AddSub PLUS MultDiv .
+
+    $default  reduce using rule 42 (AddSub)
+
+
+State 73
+
+   41 AddSub: AddSub MINUS MultDiv .
+
+    $default  reduce using rule 41 (AddSub)
+
+
+State 74
 
    34 Expr: ID LBRACKET NUMBER RBRACKET . EQ Primary
 
-    EQ  shift, and go to state 70
+    EQ  shift, and go to state 79
 
 
-State 66
+State 75
 
    33 Expr: ID LPAREN ParamList RPAREN .
 
     $default  reduce using rule 33 (Expr)
 
 
-State 67
+State 76
 
-   42 ParamList: Primary $@2 . ParamList
+   48 ParamList: Primary $@2 . ParamList
 
-    ID         shift, and go to state 51
-    NUMBER     shift, and go to state 52
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 57
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    $default  reduce using rule 40 (ParamList)
+    $default  reduce using rule 46 (ParamList)
 
-    ParamList  go to state 71
-    Primary    go to state 54
+    ParamList  go to state 80
+    Primary    go to state 59
 
 
-State 68
+State 77
 
    13 FunDecl: FUNC Type ID LPAREN . $@1 ParamDecList RPAREN Block
 
     $default  reduce using rule 12 ($@1)
 
-    $@1  go to state 72
+    $@1  go to state 81
 
 
-State 69
+State 78
 
     9 VarDecl: Type ID LBRACKET NUMBER . RBRACKET SEMICOLON
 
-    RBRACKET  shift, and go to state 73
+    RBRACKET  shift, and go to state 82
 
 
-State 70
+State 79
 
    34 Expr: ID LBRACKET NUMBER RBRACKET EQ . Primary
 
-    ID         shift, and go to state 51
-    NUMBER     shift, and go to state 52
+    ID         shift, and go to state 56
+    NUMBER     shift, and go to state 57
     LPAREN     shift, and go to state 7
     CHARACTER  shift, and go to state 13
 
-    Primary  go to state 74
+    Primary  go to state 83
 
 
-State 71
+State 80
 
-   42 ParamList: Primary $@2 ParamList .
+   48 ParamList: Primary $@2 ParamList .
 
-    $default  reduce using rule 42 (ParamList)
+    $default  reduce using rule 48 (ParamList)
 
 
-State 72
+State 81
 
    13 FunDecl: FUNC Type ID LPAREN $@1 . ParamDecList RPAREN Block
 
@@ -935,41 +1073,41 @@ State 72
 
     $default  reduce using rule 14 (ParamDecList)
 
-    ParamDecList      go to state 75
-    ParamDecListTail  go to state 76
-    ParamDecl         go to state 77
-    Type              go to state 78
+    ParamDecList      go to state 84
+    ParamDecListTail  go to state 85
+    ParamDecl         go to state 86
+    Type              go to state 87
 
 
-State 73
+State 82
 
     9 VarDecl: Type ID LBRACKET NUMBER RBRACKET . SEMICOLON
 
-    SEMICOLON  shift, and go to state 79
+    SEMICOLON  shift, and go to state 88
 
 
-State 74
+State 83
 
    34 Expr: ID LBRACKET NUMBER RBRACKET EQ Primary .
 
     $default  reduce using rule 34 (Expr)
 
 
-State 75
+State 84
 
    13 FunDecl: FUNC Type ID LPAREN $@1 ParamDecList . RPAREN Block
 
-    RPAREN  shift, and go to state 80
+    RPAREN  shift, and go to state 89
 
 
-State 76
+State 85
 
    15 ParamDecList: ParamDecListTail .
 
     $default  reduce using rule 15 (ParamDecList)
 
 
-State 77
+State 86
 
    16 ParamDecListTail: ParamDecl .
    17                 | ParamDecl . ParamDecListTail
@@ -980,49 +1118,49 @@ State 77
 
     $default  reduce using rule 16 (ParamDecListTail)
 
-    ParamDecListTail  go to state 81
-    ParamDecl         go to state 77
-    Type              go to state 78
+    ParamDecListTail  go to state 90
+    ParamDecl         go to state 86
+    Type              go to state 87
 
 
-State 78
+State 87
 
    18 ParamDecl: Type . ID
 
-    ID  shift, and go to state 82
+    ID  shift, and go to state 91
 
 
-State 79
+State 88
 
     9 VarDecl: Type ID LBRACKET NUMBER RBRACKET SEMICOLON .
 
     $default  reduce using rule 9 (VarDecl)
 
 
-State 80
+State 89
 
    13 FunDecl: FUNC Type ID LPAREN $@1 ParamDecList RPAREN . Block
 
-    LCURLY  shift, and go to state 83
+    LCURLY  shift, and go to state 92
 
-    Block  go to state 84
+    Block  go to state 93
 
 
-State 81
+State 90
 
    17 ParamDecListTail: ParamDecl ParamDecListTail .
 
     $default  reduce using rule 17 (ParamDecListTail)
 
 
-State 82
+State 91
 
    18 ParamDecl: Type ID .
 
     $default  reduce using rule 18 (ParamDecl)
 
 
-State 83
+State 92
 
    19 Block: LCURLY . DeclList RCURLY
 
@@ -1040,7 +1178,7 @@ State 83
     WRITELN    shift, and go to state 12
     CHARACTER  shift, and go to state 13
 
-    DeclList     go to state 85
+    DeclList     go to state 94
     Decl         go to state 16
     VarDecl      go to state 17
     FunDeclList  go to state 18
@@ -1050,25 +1188,27 @@ State 83
     Stmt         go to state 22
     Expr         go to state 23
     MathExpr     go to state 24
-    Primary      go to state 25
-    UnaryOp      go to state 26
+    AddSub       go to state 25
+    MultDiv      go to state 26
+    Primary      go to state 27
+    UnaryOp      go to state 28
 
 
-State 84
+State 93
 
    13 FunDecl: FUNC Type ID LPAREN $@1 ParamDecList RPAREN Block .
 
     $default  reduce using rule 13 (FunDecl)
 
 
-State 85
+State 94
 
    19 Block: LCURLY DeclList . RCURLY
 
-    RCURLY  shift, and go to state 86
+    RCURLY  shift, and go to state 95
 
 
-State 86
+State 95
 
    19 Block: LCURLY DeclList RCURLY .
 

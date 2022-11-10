@@ -27,6 +27,7 @@ struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
     // if (!ASTassign->right) {
     //     printf("right is null: %s\n", ASTassign->right);
     // }
+
     
 
 /*

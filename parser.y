@@ -25,7 +25,7 @@ FILE * IRcode;
 FILE * GarbageMIPS;
 
 //Some global variables
-const char* computeEquation(int val1, int val2, char operator);
+int computeEquation(int val1, int val2, char operator);
 void yyerror(const char* s);
 char currentScope[50] = "GLOBAL"; // global or the name of the function
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
@@ -74,17 +74,17 @@ int count = 0;
 
 %token <string> CHARACTER
 
+%left PLUS
+%left MINUS
 %left TIMES
 %left DIVIDE
-/* %left '-'
-%left '+' */
 
 //Idk what this does
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 //All the program grammar that will come up
-%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr MathExpr ParamList Primary UnaryOp BinOp 
+%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr MathExpr AddSub MultDiv ParamList Primary UnaryOp BinOp 
 
 %start Program
 
@@ -568,43 +568,7 @@ MathExpr:
 
 	}
 
-	| NUMBER BinOp MathExpr {
-		
-		char newVal[5];
-
-		// Evaluate expression
-		char opArray[3];
-		sprintf(opArray, "%s", $2);
-		char operator = opArray[0];
-
-		strcpy(newVal, computeEquation($1, atoi($3->RHS), operator));
-		printf("newVal = %s\n", newVal);
-
-		$$ = AST_assignment("int", "", newVal);
-	
-
-		// switch (operator) {
-		// 	case '+':
-		// 		sprintf(newVal, "%d", $1 + atoi($3->RHS));
-		// 		printf("Addtion Expr found!\n");
-		// 		break;
-		// 	case '-':
-		// 		sprintf(newVal, "%d", $1 - atoi($3->RHS));
-		// 		printf("Subtraction Expr found!\n");
-		// 		break;
-		// 	case '*':
-		// 		sprintf(newVal, "%d", $1 * atoi($3->RHS));
-		// 		printf("Multiplication Expr found!\n");
-		// 		break;
-		// 	case '/':
-		// 		sprintf(newVal, "%d", $1 / atoi($3->RHS));
-		// 		printf("Division Expr found!\n");
-		// 		break;
-		// }
-
-
-		// printf("$3 = %s\n", $3->RHS);
-	}
+	| AddSub
 
 	| ID {
 
@@ -633,6 +597,86 @@ MathExpr:
 	}
 
 ;
+
+AddSub: 
+	MultDiv	
+	
+	| AddSub MINUS MultDiv {
+		
+		char newVal[5];
+
+		// Evaluate expression
+		char opArray[3];
+		sprintf(opArray, "%s", $2);
+
+		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+		// printf("newVal = %s\n", newVal);
+
+		$$ = AST_assignment("int", "", newVal);
+
+	}
+
+	| AddSub PLUS MultDiv {
+		
+		char newVal[5];
+
+		// Evaluate expression
+		char opArray[3];
+		sprintf(opArray, "%s", $2);
+
+		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+		// printf("newVal = %s\n", newVal);
+
+		$$ = AST_assignment("int", "", newVal);
+
+	}
+
+;
+
+MultDiv: 
+	Primary {
+		char numVal[10];
+		if (strcmp($1->nodeType,"id") == 0) {
+			printf("ID Found!\n");
+			sprintf(numVal, "%d", getValue($1->RHS, currentScope));
+			$$ = AST_assignment("int", "", numVal);
+		} else {
+			//primary is a number, do nothing
+			$$ = $1;
+		}
+	}	
+
+	| NUMBER TIMES MultDiv {
+		
+		char newVal[5];
+
+		// Evaluate expression
+		char opArray[3];
+		sprintf(opArray, "%s", $2);
+
+		sprintf(newVal, "%d", computeEquation($1, atoi($3->RHS), opArray[0]));
+		// printf("newVal = %s\n", newVal);
+
+		$$ = AST_assignment("int", "", newVal);
+
+	}
+
+	| NUMBER DIVIDE MultDiv {
+		
+		char newVal[5];
+
+		// Evaluate expression
+		char opArray[3];
+		sprintf(opArray, "%s", $2);
+
+		sprintf(newVal, "%d", computeEquation($1, atoi($3->RHS), opArray[0]));
+		// printf("newVal = %s\n", newVal);
+
+		$$ = AST_assignment("int", "", newVal);
+
+	}
+;
+
 ParamList:	{}
 	| Primary {printf("\nRECOGNIZED RULE: Parameter\n");} ParamList {}
 ;
@@ -640,15 +684,18 @@ ParamList:	{}
 
 //==========================================
 
-Primary: ID 
-		| NUMBER {
-			printf("num detected\n");
-			char numVal[10];
-			sprintf(numVal, "%d", $1);
-			$$ = AST_assignment("int", "", numVal);
-		}
-		| CHARACTER 
-		| LPAREN Expr RPAREN 
+Primary: 
+	ID {
+		$$ = AST_assignment("id", "" , $1);
+	}
+	| NUMBER {
+		printf("num detected\n");
+		char numVal[10];
+		sprintf(numVal, "%d", $1);
+		$$ = AST_assignment("int", "", numVal);
+	}
+	| CHARACTER 
+	| LPAREN Expr RPAREN 
 
 UnaryOp: MINUS {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", $1);}
 
@@ -689,34 +736,36 @@ int main(int argc, char**argv)
 	/* fprintf (GarbageMIPS, "syscall\n"); */
 }
 
-const char* computeEquation(int val1, int val2, char operator) {
+int computeEquation(int val1, int val2, char operator) {
 
-	char newVal[3];
+	/* char newVal[3]; */
+	int newVal;
+	/* printf("Equation detected: %d %c %d", val1, operator, val2); */
 
 	switch (operator) {
 		case '+':
-			/* newVal = val1 + val2; */
-			sprintf(newVal, "%d", val1 + val2);
+			newVal = val1 + val2;
+			/* sprintf(newVal, "%d", val1 + val2); */
 			printf("Addtion Expr found!\n");
 			break;
 		case '-':
-			/* newVal = val1 - val2; */
-			sprintf(newVal, "%d", val1 - val2);
+			newVal = val1 - val2;
+			/* sprintf(newVal, "%d", val1 - val2); */
 			printf("Subtraction Expr found!\n");
 			break;
 		case '*':
-			/* newVal = val1 * val2; */
-			sprintf(newVal, "%d", val1 * val2);
+			newVal = val1 * val2;
+			/* sprintf(newVal, "%d", val1 * val2); */
 			printf("Multiplication Expr found!\n");
 			break;
 		case '/':
-			/* newVal = val1 / val2; */
-			sprintf(newVal, "%d", val1 / val2);
+			newVal = val1 / val2;
+			/* sprintf(newVal, "%d", val1 / val2); */
 			printf("Division Expr found!\n");
 			break;
 	}
 
-	printf("Newval = %s\n", newVal);
+	printf("Newval = %d\n", newVal);
 	return newVal;
 
 }

@@ -49,8 +49,9 @@ void emitArrayDecl (char* id, int size, int idNum) {
 void emitArrayAssignment(char *id, char id2[50]){
     IRcode = fopen("IRcode.ir","a");
 
-    fprintf(IRcode,"%s[%d] = %s",id,id2);
-    fprintf(IRcode, "T%d = %s");
+    // TODO ARRAY IR CODE
+    // fprintf(IRcode,"%s[%d] = %s",id,id2);
+    // fprintf(IRcode, "T%d = %s");
 
     fclose(IRcode);
 

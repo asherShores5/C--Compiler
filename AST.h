@@ -87,23 +87,6 @@ void printDots(int num)
         printf("      ");
 }
 
-// struct AST* getEndNode(struct AST* node) {
-//     struct AST* curr = node;
-
-//     while (1) {
-//         printf("curr.right = %s\n", curr->right);
-//         if (!curr->right) {
-//             printf("curr.right = %s\n", curr->right);
-//         } else {
-//             printf("not end of node!\n");
-//             curr = curr->right;
-//         }
-//         // printf("strcmp: %d\n", strcmp("null", curr->right));
-//     }
-//     printf("final node = %s\n", curr->nodeType);
-//     return curr;
-// }
-
 void printAST(struct AST* tree, int level){
     if (tree == NULL) return;
     printDots(level);

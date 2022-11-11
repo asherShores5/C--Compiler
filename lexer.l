@@ -18,7 +18,8 @@ letter      [a-zA-Z]
 digit       [0-9]
 ID          {letter}({letter}|{digit})*
 delim       [ \t\n]
-NUMBER      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
+INTEGER 	{digit}+
+DECIMAL      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
 CHARACTER   ["'"]({letter}|{digit})["'"]
 /* ws          {delim}+
 boolean     [true] */
@@ -86,11 +87,17 @@ boolean     [true] */
 			  yylval.string = strdup(yytext); 
 			  return ID;
 			}
-			
-{NUMBER}		{words++; chars += strlen(yytext);
-			  printf("%s : NUMBER\n",yytext);
+
+{INTEGER}   {words++; chars += strlen(yytext);
+			  printf("%s : INTEGER\n",yytext);
 			  yylval.number = atoi(strdup(yytext)); 
-			  return NUMBER;
+			  return INTEGER;
+			}
+			
+{DECIMAL}		{words++; chars += strlen(yytext);
+			  printf("%s : DECIMAL\n",yytext);
+			  yylval.number = atoi(strdup(yytext)); 
+			  return DECIMAL;
 			}
 
 {CHARACTER}		{words++; chars += strlen(yytext);

@@ -52,25 +52,26 @@ extern int yydebug;
     ID = 258,
     SEMICOLON = 259,
     EQ = 260,
-    NUMBER = 261,
-    WRITE = 262,
-    FUNC = 263,
-    PLUS = 264,
-    MINUS = 265,
-    TIMES = 266,
-    DIVIDE = 267,
-    LBRACKET = 268,
-    RBRACKET = 269,
-    LPAREN = 270,
-    RPAREN = 271,
-    LCURLY = 272,
-    RCURLY = 273,
-    INT = 274,
-    CHAR = 275,
-    FLOAT = 276,
-    RETURN = 277,
-    WRITELN = 278,
-    CHARACTER = 279
+    INTEGER = 261,
+    DECIMAL = 262,
+    WRITE = 263,
+    FUNC = 264,
+    PLUS = 265,
+    MINUS = 266,
+    TIMES = 267,
+    DIVIDE = 268,
+    LBRACKET = 269,
+    RBRACKET = 270,
+    LPAREN = 271,
+    RPAREN = 272,
+    LCURLY = 273,
+    RCURLY = 274,
+    INT = 275,
+    CHAR = 276,
+    FLOAT = 277,
+    RETURN = 278,
+    WRITELN = 279,
+    CHARACTER = 280
   };
 #endif
 
@@ -78,7 +79,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 39 "parser.y"
+#line 38 "parser.y"
 
 	//Tokens declared in C so we can declare them in C--... I think
 	int number;
@@ -86,7 +87,7 @@ union YYSTYPE
 	char* string;
 	struct AST* ast;
 
-#line 90 "parser.tab.h"
+#line 91 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

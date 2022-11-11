@@ -2,8 +2,7 @@
 // Set of functions to emit MIPS code
 FILE * MIPScode;
 FILE * dataMIPS;
-FILE * fp1;
-FILE * fp2;
+FILE * funcs;
 
 void  initAssemblyFile(){
     // Creates a MIPS file with a generic header that needs to be in every file
@@ -17,6 +16,8 @@ void  initAssemblyFile(){
 
     // data
     fprintf(dataMIPS, ".data\n");
+    fprintf(dataMIPS, "newLine: .asciiz \"\\n\"\n");
+
 
     fclose(MIPScode);
     fclose(dataMIPS);
@@ -42,36 +43,45 @@ void emitMIPSConstantIntAssignment (int id1, char id2[50]){
      // be emitted in MIPS
 
      // nextRegister = allocateRegister(id1);  // This is conceptual to inform what needs to be done later
-    printf("Emmiting INT mips ------>\n");
+    // printf("Emmiting INT mips ------>\n");
     fprintf(MIPScode, "li $t%d,%s\n", id1, id2);
 
     fclose(MIPScode);
 }
 
-void emitMIPSWriteInt(int id){
+void emitMIPSWriteInt(int n){
     MIPScode = fopen("MIPScode.asm", "a");
     // This is what needs to be printed, but must manage registers
     // $a0 is the register through which everything is printed in MIPS
     
     //fprintf(MIPScode, "li $a0,%s\n", id);
     fprintf(MIPScode, "# Printing -----------\n");
-    fprintf(MIPScode, "move $a0, $t%d\n", id);
     fprintf(MIPScode, "li $v0, 1\n");
+    fprintf(MIPScode, "li $a0, %d\n", n);
     fprintf(MIPScode, "syscall\n");
 
     fclose(MIPScode);
 }
 
-void emitMIPSWriteId(char * id){
+void emitMIPSWriteId(char id[50], char type[5]){
     MIPScode = fopen("MIPScode.asm", "a");
     // This is what needs to be printed, but must manage registers
     // $a0 is the register through which everything is printed in MIPS
     
     //fprintf(MIPScode, "li $a0,%s\n", id);
     fprintf(MIPScode, "# Printing -----------\n");
-    fprintf(MIPScode, "move $a0, $t%s\n", id);
-    fprintf(MIPScode, "li $v0, 4\n");
-    fprintf(MIPScode, "syscall\n");
+
+    //if id is an int
+    if (strcmp(type, "int") == 0) {
+        fprintf(MIPScode, "li $v0, 1\n");
+        fprintf(MIPScode, "lw $a0, %s\n", id);
+    } 
+    // if id is a char
+    else { 
+        fprintf(MIPScode, "li $v0, 4\n");
+        fprintf(MIPScode, "la $a0, %s\n", id);
+    }
+    fprintf(MIPScode, "syscall\n");    
 
     fclose(MIPScode);
 }
@@ -95,7 +105,6 @@ void emitMIPSCharDecl (char id[50], char c) {
 
 void emitEndOfAssemblyCode(){
     MIPScode = fopen("MIPScode.asm", "a ");
-    dataMIPS = fopen("dataMIPS.asm", "a ");
 
     fprintf(MIPScode, "# -----------------\n");
     fprintf(MIPScode, "#  Done, terminate program.\n\n");
@@ -106,15 +115,26 @@ void emitEndOfAssemblyCode(){
     fprintf(MIPScode, ".end main\n");
 
     fclose(MIPScode);    
-    fclose(dataMIPS);    
+}
+
+void emitIntVar(char id[50], int val) {
+
+    dataMIPS = fopen("dataMIPS.asm", "a ");
+
+    fprintf(dataMIPS, "%s:   .word  %d\n", id, val);
+
+    fclose(dataMIPS); 
+
 }
 
 void addMainToData() {
-    fp1 = fopen("MIPScode.asm", "a+");
-    fp2 = fopen("dataMIPS.asm", "a+");
+
+    MIPScode = fopen("MIPScode.asm", "a+");
+    dataMIPS = fopen("dataMIPS.asm", "a+");
+    funcs = fopen("funcs.asm", "a+");
  
     // If file is not found then return.
-    if (!fp1 && !fp2) {
+    if (!MIPScode && !dataMIPS && !funcs) {
         printf("Unable to open/"
                "detect file(s)\n");
         return;
@@ -125,22 +145,28 @@ void addMainToData() {
     // explicitly writing "\n"
     // to the destination file
     // so to enhance readability.
-    fprintf(fp2, "\n");
+    fprintf(dataMIPS, "\n");
  
     // writing the contents of
     // source file to destination file.
-    while (!feof(fp1)) {
-        fgets(buf, sizeof(buf), fp1);
-        fprintf(fp2, "%s", buf);
+    while (!feof(MIPScode)) {
+        fgets(buf, sizeof(buf), MIPScode);
+        fprintf(dataMIPS, "%s", buf);
+    }
+
+    fprintf(dataMIPS, "\n");
+
+    while (!feof(funcs)) {
+        fgets(buf, sizeof(buf), funcs);
+        fprintf(dataMIPS, "%s", buf);
     }
  
-    rewind(fp2);
+    // rewind(dataMIPS);
  
     // printing contents of
     // destination file to stdout.
-    while (!feof(fp2)) {
-        fgets(buf, sizeof(buf), fp2);
-        printf("%s", buf);
-    }
-}
-    
+    // while (!feof(dataMIPS)) {
+    //     fgets(buf, sizeof(buf), dataMIPS);
+    //     printf("%s", buf); //Prints result to console if needed
+    // }
+}   

@@ -1,7 +1,11 @@
-//Asher Shores
+//Asher Shores, Riley Monwai, Even Klever
 // CST-405: Compilers
 // Professor Isac Artzi
 
+/* %code requires
+  {
+    #define YYSTYPE double
+  } */
 %{
 //Standard libs
 #include <stdio.h>
@@ -9,19 +13,16 @@
 #include <string.h>
 
 //Other Files 
-// Need tp add IR + MIPS Code??
 #include "symbolTable.h"
 #include "AST.h"
 #include "IRcode.h"
 #include "MIPScode.h"
+#include "funcMIPS.h"
 
 //Bison stuff I assume... IDK what it does
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
-
-FILE * IRcode;
-FILE * GarbageMIPS;
 
 //Some global variables
 int computeEquation(int val1, int val2, char operator);
@@ -38,6 +39,7 @@ int count = 0;
 %union {
 	//Tokens declared in C so we can declare them in C--... I think
 	int number;
+	float floatValue;
 	char character;
 	char* string;
 	struct AST* ast;
@@ -49,7 +51,7 @@ int count = 0;
 %token <string> SEMICOLON
 %token <string> EQ
 %token <number> INTEGER
-%token <number> DECIMAL
+%token <floatValue> DECIMAL
 %token <string> WRITE
 %token <string> FUNC
 
@@ -64,16 +66,20 @@ int count = 0;
 %token <string> RPAREN
 %token <string> LCURLY
 %token <string> RCURLY
+%token <string> APOST
 
+//TYPES
 %token <string> INT
 %token <string> CHAR
 %token <string> FLOAT
 
+//Keywords??
 %token <string> RETURN
 %token <string> WRITELN
 
 %token <string> CHARACTER
 
+//Math
 %left PLUS
 %left MINUS
 %left TIMES
@@ -84,29 +90,13 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } INTEGER;
 
 //All the program grammar that will come up
-%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
+%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList ArrayExpr Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
 
 %start Program
 
 %%
 
-// Program ------> VarDeclList FunDeclList 
 Program: 
-	/* VarDeclList FunDeclList {
-
-		printf("Program started:\n");
-
-		// ------ AST ------ //
-		// struct AST* rightMost = getEndNode($1);
-		// rightMost->right = $2; 
-
-		// printf("LAST DECLARED VAR = %s | RHS = %s\n", lastVar->nodeType, lastVar->RHS);
-		lastVar->right = $2;
-		$$ = $1;
-		printf("$$ right: %s", $1->right);
-		
-		printAST($$, 3);
-	} */
 
 	DeclList {
 		
@@ -124,12 +114,6 @@ DeclList:
 		$$ = $1;
 		// printf("LINK DECLLIST\n");
 		// printNode($$->right);
-	
-	// } | StmtList DeclList  { 
-
-	// 	// printf("Test debug STMTDECLLIST\n");
-	// 	$1->right = $2;
-	// 	$$ = $1;
 
 	} 
 
@@ -396,7 +380,10 @@ Stmt:
 
 		// printf("EXpr: %s\n", $2);
 		$$ = AST_Write("WRITE", "", $2->nodeType);
-		
+
+		// ------ IRCODE GENERATION ------ //
+		emitIRWriteId($2->LHS, getVariableType($2->LHS, currentScope));
+		// ------ ¯\_(ツ)_/¯ ------ //
 
 		// ------ CODE GENERATION ------ //
 		// printf("Test: %s\n", $2->RHS);
@@ -417,11 +404,76 @@ Stmt:
 
 //==========================================
 
+ArrayExpr:
+
+	ID LBRACKET INTEGER RBRACKET EQ Primary {
+
+		printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);
+
+		//Asher's Semantic Checks
+		symTabAccess();
+		int inSymTab = found($1, currentScope);
+
+		if (inSymTab != 0) {
+			printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
+			semanticCheckPassed = 0;
+		} else {
+			printf("\nSEMANTIC CHECK PASSED\n");
+			
+			//emitArrayAssignment();
+		}
+		// ------ SYMBOL TABLE ------ //
+
+		// Setting array value in the symbol table
+		char arrayStmt[10]; char newVal[10];
+		sprintf(arrayStmt, "%s%s%d%s", $1, $2, $3, $4);
+		// printf("setVal %s\n", $6);
+		// sprintf(newVal, "%d", $6);
+		setItemValue(arrayStmt, $6->RHS, currentScope);
+
+
+		// ----- AST ----- //
+		$$ = AST_assignment("=", arrayStmt, newVal);		
+
+	}
+
+	| ID EQ ID LBRACKET INTEGER RBRACKET {
+
+		symTabAccess();
+		int inSymTab = found($1, currentScope);
+
+		// Getting array value in the symbol table
+		if (inSymTab) {
+
+			char arrayStmt[10]; char newVal[10];
+			sprintf(arrayStmt, "%s%s%d%s", $3, $4, $5, $6);
+
+			int arrayVal = getValue(arrayStmt, currentScope);
+			sprintf(newVal, "%d", arrayVal);
+
+
+			// ---- SYMBOL TABLE ---- //
+			setItemValue($1, newVal, currentScope);
+
+
+			// ------ AST ------ //
+			$$ = AST_assignment("=", $1, newVal);
+		}
+
+
+	}
+
+;
+
 
 Expr: 
-	Primary 
+	Primary {
+		printf("primary in expr found! %s\n", $1);
+	}
 
 	| MathExpr
+
+	| ArrayExpr
 
 	| UnaryOp Expr { 
 
@@ -463,6 +515,7 @@ Expr:
 
 		// ------- SYMBOL TABLE ------- //
 		if (semanticCheckPassed) {
+			printNode($3);
 			setItemValue($1, $3->RHS, currentScope);
 		}
 		
@@ -476,11 +529,24 @@ Expr:
 
 		if (semanticCheckPassed) {
 
-			// ---- IR CODE ---- //
-			// TODO PUT IR CODE HERE
+			char *test = getVariableType($1, currentScope);
 
-			// ---- MIPS CODE ---- //
-			emitIntVar($1, atoi($3->RHS));
+ 			//¯\_(ツ)_/¯ ¯\_(ツ)_/¯ ¯\_(ツ)_/¯
+
+			// CHAR CODE 
+			if (strcmp(test, "char") == 0) {
+				emitMIPSCharDecl($1, $3->RHS);
+				emitIRCharDecl($1, $3->RHS);
+
+			}
+
+			// INT CODE 
+			else if (strcmp(test, "int") == 0) {
+				// ---- IR CODE ---- //
+				emitIntVarIR($1, atoi($3->RHS));
+				// ---- MIPS CODE ---- //
+				emitIntVar($1, atoi($3->RHS));
+			}
 
 		}
 
@@ -488,38 +554,7 @@ Expr:
 	}
 
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
-	
-	
-	| ID LBRACKET INTEGER RBRACKET EQ Primary {
 
-		printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", $1);
-
-		//Asher's Semantic Checks
-		symTabAccess();
-		int inSymTab = found($1, currentScope);
-
-		if (inSymTab != 0) {
-			printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
-			semanticCheckPassed = 0;
-		} else {
-			printf("\nSEMANTIC CHECK PASSED\n");
-			
-			//emitArrayAssignment();
-		}
-		// ------ SYMBOL TABLE ------ //
-
-		// Setting array value in the symbol table
-		char arrayStmt[10]; char newVal[10];
-		sprintf(arrayStmt, "%s%s%d%s", $1, $2, $3, $4);
-		// printf("setVal %s\n", $6);
-		// sprintf(newVal, "%d", $6);
-		setItemValue(arrayStmt, $6->RHS, currentScope);
-
-
-		// ----- AST ----- //
-		$$ = AST_assignment("=", arrayStmt, newVal);		
-
-	}
 
 ;
 
@@ -681,20 +716,27 @@ Primary:
 	ID {
 		$$ = AST_assignment("id", "" , $1);
 	}
-	/* | DECIMAL {
-		printf("float detected\n");
+
+	| DECIMAL {
+		printf("float detected: %f\n", $1);
 		char numVal[10];
-		sprintf(numVal, "%d", $1);
+		sprintf(numVal, "%f", $1);
 		$$ = AST_assignment("float", "", numVal);
-	} */
+	}
+	
 	| INTEGER {
 		// printf("int detected\n");
 		char numVal[10];
 		sprintf(numVal, "%d", $1);
 		$$ = AST_assignment("int", "", numVal);
 	}
-	| CHARACTER 
-	| LPAREN Expr RPAREN 
+
+	|  CHARACTER  {
+
+		$$ = AST_assignment("char", "", $1);
+
+	}
+	/* | LPAREN Expr RPAREN  */
 
 UnaryOp: MINUS {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", $1);}
 
@@ -730,10 +772,12 @@ int main(int argc, char**argv)
 	yyparse();
 
 	emitEndOfAssemblyCode();
+	emitEndOfAssemblyCodeIR();
 
 	// Merge data and main sections in MIPS
 	addMainToData();
-
+	addMainToDataIR();
+	showSymTable();
 	printf("\n\n##### COMPILER ENDED #####\n\n");
 
 

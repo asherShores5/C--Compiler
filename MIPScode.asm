@@ -1,10 +1,6 @@
 .text
 main:
 # -----------------------
-# Printing -----------
-li $v0, 1
-lw $a0, help
-syscall
 # -----------------
 #  Done, terminate program.
 

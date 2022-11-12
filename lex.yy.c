@@ -879,7 +879,7 @@ YY_RULE_SETUP
 #line 97 "lexer.l"
 {words++; chars += strlen(yytext);
 			  printf("%s : DECIMAL\n",yytext);
-			  yylval.number = atoi(strdup(yytext)); 
+			  yylval.floatValue = atof(yytext); 
 			  return DECIMAL;
 			}
 	YY_BREAK
@@ -888,7 +888,7 @@ YY_RULE_SETUP
 #line 103 "lexer.l"
 {words++; chars += strlen(yytext);
 			  printf("%s : CHARACTER\n",yytext);
-			  yylval.character = atoi(strdup(yytext)); 
+			  yylval.character = strdup(yytext); 
 			  return CHARACTER;
 			}
 	YY_BREAK

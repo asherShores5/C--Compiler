@@ -1,3 +1,5 @@
+DATA:
+myChar  BYTE   'Ä'
 MAIN:
 # -----------------------
 # -----------------
@@ -6,3 +8,5 @@ MAIN:
 LOAD V0,10   # call code for terminate
 SYSTEM CALL      # system call (terminate)
 END MAIN
+END MAIN
+

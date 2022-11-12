@@ -66,12 +66,13 @@ extern int yydebug;
     RPAREN = 272,
     LCURLY = 273,
     RCURLY = 274,
-    INT = 275,
-    CHAR = 276,
-    FLOAT = 277,
-    RETURN = 278,
-    WRITELN = 279,
-    CHARACTER = 280
+    APOST = 275,
+    INT = 276,
+    CHAR = 277,
+    FLOAT = 278,
+    RETURN = 279,
+    WRITELN = 280,
+    CHARACTER = 281
   };
 #endif
 
@@ -79,15 +80,16 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 38 "parser.y"
+#line 39 "parser.y"
 
 	//Tokens declared in C so we can declare them in C--... I think
 	int number;
+	float floatValue;
 	char character;
 	char* string;
 	struct AST* ast;
 
-#line 91 "parser.tab.h"
+#line 93 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -96,13 +96,13 @@ boolean     [true] */
 			
 {DECIMAL}		{words++; chars += strlen(yytext);
 			  printf("%s : DECIMAL\n",yytext);
-			  yylval.number = atoi(strdup(yytext)); 
+			  yylval.floatValue = atof(yytext); 
 			  return DECIMAL;
 			}
 
 {CHARACTER}		{words++; chars += strlen(yytext);
 			  printf("%s : CHARACTER\n",yytext);
-			  yylval.character = atoi(strdup(yytext)); 
+			  yylval.character = strdup(yytext); 
 			  return CHARACTER;
 			}
 			

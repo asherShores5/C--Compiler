@@ -1,10 +1,28 @@
-int x; 
+int x;
+char myChar;
+myChar = 'a';
+float test;
+test = 2.5;
+
+/*
+func int myFunc() {
+	int localInt;
+	localInt = 12;
+	write localInt;
+	return 0;
+}
+
+
 
 func int main(int z) {
+	myFunc();
 	int help;
 	x = 5;
+	write myChar;
 	help = (1 + 8) / 3;
+	test = myArray[0];
 	write help;
 	return 0;
 }
 
+*/

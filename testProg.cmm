@@ -1,8 +1,9 @@
 int x;
 char myChar;
 myChar = 'a';
-float test;
-test = 2.5;
+
+int foo[5];
+foo[0] = 2;
 
 /*
 func int myFunc() {

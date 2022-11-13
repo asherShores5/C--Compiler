@@ -66,13 +66,12 @@ extern int yydebug;
     RPAREN = 272,
     LCURLY = 273,
     RCURLY = 274,
-    APOST = 275,
-    INT = 276,
-    CHAR = 277,
-    FLOAT = 278,
-    RETURN = 279,
-    WRITELN = 280,
-    CHARACTER = 281
+    INT = 275,
+    CHAR = 276,
+    FLOAT = 277,
+    RETURN = 278,
+    WRITELN = 279,
+    CHARACTER = 280
   };
 #endif
 
@@ -89,7 +88,7 @@ union YYSTYPE
 	char* string;
 	struct AST* ast;
 
-#line 93 "parser.tab.h"
+#line 92 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

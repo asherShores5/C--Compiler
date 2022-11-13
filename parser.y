@@ -66,7 +66,7 @@ int count = 0;
 %token <string> RPAREN
 %token <string> LCURLY
 %token <string> RCURLY
-%token <string> APOST
+/* %token <string> APOST */
 
 //TYPES
 %token <string> INT
@@ -166,18 +166,29 @@ VarDecl:
 		
 
 		// ------ SEMANTIC CHECKS ------ //
-		if (inSymTab == 0) 
+		if (inSymTab == 0)  {
 			addItem($2, "Var", $1->nodeType, currentScope);
-		else
+			showSymTable();
+		}
+		else {
 			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
-
-		showSymTable();
+			semanticCheckPassed = 0;
+		}
 
 
 		// ------  AST  ------ //
-		$$ = AST_Type("TYPE", $1->nodeType, $2);
-		// lastVar = $$;
+		if (semanticCheckPassed) {
 
+			$$ = AST_Type("TYPE", $1->nodeType, $2);
+
+
+			// ---- CODE GENERATION ---- //
+			// code generation occurs when variable 
+			// recieves a value to save space
+			
+		}
+
+		semanticCheckPassed = 1;
 	}
 	
 
@@ -197,7 +208,7 @@ VarDecl:
 				sprintf(arrIndex, "%s[%d]", $2, i);
 				addItem(arrIndex, "ARRAY", $1->nodeType, currentScope);				
 			}
-			// addItem($2, "ARRAY", $1, $4, currentScope);
+
 			showSymTable();
 		} else {
 			printf("SEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
@@ -209,12 +220,18 @@ VarDecl:
 		sprintf(intVal, "%d", $4);
 		$$ = AST_assignment("ARR", intVal, $2);
 
-		lastVar = $$;
+
+		// ----- CODE GENERATION ----- //
+		
+		// ---- IR CODE ---- //
+		// emitArrayDecl($2, $4);
 
 
-// 		// ----- CODE GENERATION ----- //
-// 		// emitArrayDecl($2, $4, getItemID($2, currentScope));
-		} 
+		// ---- MIPS CODE ---- //
+		emitMIPSArrayDecl($2, $4);
+
+		semanticCheckPassed = 1;
+	} 
 	// | ArrDecl
 ;
 
@@ -237,6 +254,7 @@ FunDeclList:
 //FunDecl ------> Type id ( ParamDecList ) Block
 FunDecl:
 	FUNC Type ID LPAREN {
+
 		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
 		printf("ID = %s\n", $3);
 		strcpy(currentScope, $3);
@@ -254,21 +272,35 @@ FunDecl:
 			
 			addItem($3, "FUNC", $2->nodeType, currentScope);
 			showSymTable();
-		} else {
+
+		} 
+		else {
 			printf("SEMANTIC ERROR: Function %s is already in the symbol table\n", $2->nodeType);
+			semanticCheckPassed = 0;
 		}
 	} 
 
 	ParamDecList RPAREN Block {
 
 		// ----- AST ----- //
-		$$ = AST_assignment("FUNC", $2->nodeType, $3);		
+		if (semanticCheckPassed) {
+			$$ = AST_assignment("FUNC", $2->nodeType, $3);		
+
+			printNode($$);
+
+			// ---- CODE GENERATION ---- //
+
+			// ---- IR CODE ---- //
+
+
+			// ---- MIPS CODE ---- //
+			emitMIPSFunc($3);
+		}
+
+
+
+		semanticCheckPassed = 1;
 		
-
-		// printf("TEST %s\n", $8);
-		$$ -> right = $8;
-
-		printNode($$);
 	}
 ;
 
@@ -301,19 +333,25 @@ ParamDecListTail:
 //                Type id[]
 ParamDecl: 
 	Type ID {
+
 		printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", $2);
+
 		//Asher's Semantic Checks
-		//Symbol Table
+		// ---- Symbol Table ---- //
 		symTabAccess();
+
 		//Var Decl Check
 		int inSymTab = found($2, currentScope);
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
+
 		if (inSymTab == 0) {
 			addItem($2, "Var", $1->nodeType, currentScope);
-		} else {
+			showSymTable();
+		} 
+		else {
 			printf("\nSEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
 		} 
-		showSymTable();
+
 	}
 
 	/* | Type ID LBRACKET RBRACKET {
@@ -365,15 +403,17 @@ StmtList:
 Stmt: 
 	SEMICOLON {
 		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);	
-	}
+	} 
+
 
 	| Expr SEMICOLON {}
 
+
 	| RETURN Expr SEMICOLON {		
 		$$ = AST_assignment("RETURN", "", $2->RHS);
-		// printNode($$);
-		
+		// printNode($$);		
 	}
+
 
 	| WRITE Expr SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
@@ -394,6 +434,7 @@ Stmt:
 		}
 		
 	}
+
 
 	| WRITELN SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Line %s\n", $1);
@@ -435,7 +476,18 @@ ArrayExpr:
 		// ----- AST ----- //
 		$$ = AST_assignment("=", arrayStmt, newVal);		
 
+
+		// ---- CODE GENERATION ---- //
+
+			// ---- IR CODE ---- //
+
+
+			// ---- MIPS CODE ---- //
+		//TODO we only have functionality to add to ints at the moment 
+		emitMIPSIntArrayAssign($1, $3, atoi($6->RHS));
+
 	}
+
 
 	| ID EQ ID LBRACKET INTEGER RBRACKET {
 
@@ -458,8 +510,16 @@ ArrayExpr:
 
 			// ------ AST ------ //
 			$$ = AST_assignment("=", $1, newVal);
-		}
 
+
+			// ---- CODE GENERATION ---- //
+
+			// ---- IR CODE ---- //
+			//TODO
+
+			// ---- MIPS CODE ---- //
+			
+		}
 
 	}
 
@@ -467,9 +527,7 @@ ArrayExpr:
 
 
 Expr: 
-	Primary {
-		printf("primary in expr found! %s\n", $1);
-	}
+	Primary 
 
 	| MathExpr
 
@@ -487,7 +545,8 @@ Expr:
 		}
 		showSymTable();
 
-		$$ = $2;
+		//TODO fix negative numbers :)
+		// $$ = $2;
 
 	}
 
@@ -533,17 +592,25 @@ Expr:
 
  			//¯\_(ツ)_/¯ ¯\_(ツ)_/¯ ¯\_(ツ)_/¯
 
-			// CHAR CODE 
+			// ---- CODE GENERATION ---- //
+
+				// ---- CHAR CODE ---- // 
 			if (strcmp(test, "char") == 0) {
-				emitMIPSCharDecl($1, $3->RHS);
+
+				// ---- IR CODE ---- // 
 				emitIRCharDecl($1, $3->RHS);
+				
+				// ---- MIPS CODE ---- // 
+				emitMIPSCharDecl($1, $3->RHS);
 
 			}
 
-			// INT CODE 
+				// ---- INT CODE ---- // 
 			else if (strcmp(test, "int") == 0) {
+
 				// ---- IR CODE ---- //
 				emitIntVarIR($1, atoi($3->RHS));
+
 				// ---- MIPS CODE ---- //
 				emitIntVar($1, atoi($3->RHS));
 			}
@@ -557,53 +624,6 @@ Expr:
 
 
 ;
-
-/* MathExpr:
-	ID BinOp MathExpr {
-		
-		int idValue = getValue($1, currentScope);
-		printf("idValue = %d\n", idValue);
-		// printf("$2 = %c\n", '+');
-		// addNumToArray(idValue, $2);
-
-
-		// -------- SEMANTIC CHECK -------- //
-		// printf("ID is an int! rv = %s", getNodeType($1, currentScope));
-		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
-			semanticCheckPassed = 0;
-		}
-
-	}
-
-	| AddSub
-
-	| ID {
-
-		char* noOp;
-		//Get value of ID from symbol table
-		int idValue = getValue($1, currentScope);
-		// addNumToArray(idValue, noOp);
-
-		// -------- SEMANTIC CHECK -------- //
-		//printf("ID is an int! rv = %s", getNodeType($1, currentScope));
-
-		if (strcmp(getVariableType($1, currentScope), "int") != 0) {
-			semanticCheckPassed = 0;
-		}
-
-	}
-
-	| INTEGER {
-		// printf("Number in mathExpr detected\n");
-		char val[5];
-		sprintf(val, "%d", $1);
-		$$ = AST_assignment("int", "", val);
-		// char* noOp;
-		// // printf("Number recog\n");
-		// addNumToArray($1, noOp);
-	}
-
-; */
 
 MathExpr: 
 	Trm	

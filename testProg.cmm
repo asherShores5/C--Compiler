@@ -2,18 +2,18 @@ int x;
 char myChar;
 myChar = 'a';
 float test;
+if (1 == 1) {
+	x = 5;
+}
 test = 2.5;
 
-/*
+
 func int myFunc() {
-	int localInt;
-	localInt = 12;
-	write localInt;
 	return 0;
 }
 
 
-
+/*
 func int main(int z) {
 	myFunc();
 	int help;

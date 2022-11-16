@@ -82,6 +82,18 @@ boolean     [true] */
 			return FUNC;
 		}
 
+"if" 		{words++; chars += strlen(yytext);
+			printf("%s : IF\n", yytext);
+			yylval.string = strdup(yytext); 
+			return ELSE;
+		}
+
+"else" 		{words++; chars += strlen(yytext);
+			printf("%s : ELSE\n", yytext);
+			yylval.string = strdup(yytext); 
+			return ELSE;
+		}
+
 {ID}	{words++; chars += strlen(yytext);
 			  printf("%s : IDENTIFIER\n",yytext);
 			  yylval.string = strdup(yytext); 
@@ -116,6 +128,37 @@ boolean     [true] */
 		  printf("%s : EQ\n", yytext);
 		  yylval.string = strdup(yytext); 
 		  return EQ;
+		}
+
+"=="		{chars++;
+		  printf("%s : LOGICOP\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LOGICOP;
+		}
+"!="		{chars++;
+		  printf("%s : LOGICOP\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LOGICOP;
+		}
+">"		{chars++;
+		  printf("%s : LOGICOP\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LOGICOP;
+		}
+"<"		{chars++;
+		  printf("%s : LOGICOP\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LOGICOP;
+		}
+"<="		{chars++;
+		  printf("%s : LOGICOP\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LOGICOP;
+		}
+">="		{chars++;
+		  printf("%s : LOGICOP\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LOGICOP;
 		}
 
 

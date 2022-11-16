@@ -29,6 +29,7 @@ int computeEquation(int val1, int val2, char operator);
 void yyerror(const char* s);
 char currentScope[50] = "GLOBAL"; // global or the name of the function
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
+int gotToElse = 0;
 char typeTemp[50];
 struct AST * lastVar; 
 
@@ -54,11 +55,14 @@ int count = 0;
 %token <floatValue> DECIMAL
 %token <string> WRITE
 %token <string> FUNC
+%token <string> IF
+%token <string> ELSE
 
 %token <string> PLUS
 %token <string> MINUS
 %token <string> TIMES
 %token <string> DIVIDE
+%token <string> LOGICOP
 
 %token <string> LBRACKET
 %token <string> RBRACKET
@@ -90,7 +94,7 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } INTEGER;
 
 //All the program grammar that will come up
-%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList ArrayExpr Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
+%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList IfStmt Condition Else ArrayExpr Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
 
 %start Program
 
@@ -145,7 +149,8 @@ VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
 Decl: 		
 	VarDecl 
 	| StmtList
-	| FunDecl
+
+	/* | FunDecl */
 	
 ;
 
@@ -342,7 +347,7 @@ Block:
 	}
 ;
 
-//=================f=========================
+//==========================================
 
 Type: INT {}
 	| FLOAT {}
@@ -366,6 +371,8 @@ Stmt:
 	SEMICOLON {
 		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);	
 	}
+
+	| IfStmt
 
 	| Expr SEMICOLON {}
 
@@ -399,8 +406,66 @@ Stmt:
 		printf("\nRECOGNIZED RULE: Write Line %s\n", $1);
 	}
 
+
 ;
 
+IfStmt:	IF LPAREN Condition RPAREN Block Else {
+
+		if (!strcmp($3, "TRUE")) {
+
+			printf("IfStmt Recognized ----->\n");			
+			
+		}
+
+		else {
+			printf("GoTo Else statment----->\n");
+		}
+
+		
+
+	}
+
+;
+
+Condition: 
+	Primary LOGICOP Primary {
+
+		// ----- SEMANTIC CHECKS ----- //
+
+		// TODO 1.If primaries are ID's, check 
+		// if they have been declared
+		// 2. Make sure primaries are of same type
+
+		if (!strcmp($2, "==")) {
+			printf("EQ found\n");
+
+			// check if value are equal
+			if (!strcmp($1->RHS, $3->RHS)) {
+				printf("Values are equal!\n");
+			}
+
+			$$ = "TRUE";
+			
+		}
+	}
+
+;
+
+
+Else: 
+	// EPSILON
+
+	| ELSE Block {
+		// DO STUFF
+	}
+
+;
+
+// ID logicOp ID
+// ID LogicOp Number
+// LogicalExpr
+
+// LogicalExpr: Expr LogicOp Expr
 
 //==========================================
 

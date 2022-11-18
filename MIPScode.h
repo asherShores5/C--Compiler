@@ -1,10 +1,11 @@
+#include <stdio.h>
 
 // Set of functions to emit MIPS code
 FILE * mainMIPS;
 FILE * dataMIPS;
 FILE * funcs;
 
-char currentScope[50];
+int inFunc = 0;
 
 void  initAssemblyFile(){
     // Creates a MIPS file with a generic header that needs to be in every file
@@ -40,24 +41,25 @@ void emitMIPSAssignment(char * id1, char * id2){
 }
 
 void emitMIPSConstantIntAssignment (int id1, char id2[50]){
-    funcs = fopen("funcs.asm", "a");
 
     mainMIPS = fopen("MIPScode.asm", "a");
-     // This is the temporary approach, until register management is implemented
-     // The parameters of this function should inform about registers
-     // For now, this is "improvised" to illustrate the idea of what needs to 
-     // be emitted in MIPS
-
-     // nextRegister = allocateRegister(id1);  // This is conceptual to inform what needs to be done later
-    // printf("Emmiting INT mips ------>\n");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+    
+  
     fprintf(mainMIPS, "li $t%d,%s\n", id1, id2);
 
     fclose(mainMIPS);
 }
 
 void emitMIPSWriteInt(int n){
-    funcs = fopen("funcs.asm", "a");
+
     mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
     // This is what needs to be printed, but must manage registers
     // $a0 is the register through which everything is printed in MIPS
     
@@ -72,8 +74,12 @@ void emitMIPSWriteInt(int n){
 
 
 void emitMIPSWriteId(char id[50], char type[5]){
-    funcs = fopen("funcs.asm", "a");
+
     mainMIPS = fopen("MIPScode.asm", "a");
+
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
     // This is what needs to be printed, but must manage registers
     // $a0 is the register through which everything is printed in MIPS
     
@@ -82,12 +88,14 @@ void emitMIPSWriteId(char id[50], char type[5]){
 
     //if id is an int
     if (strcmp(type, "int") == 0) {
+        // printf("printing an integer----->\n");
         fprintf(mainMIPS, "li $v0, 1\n");
         fprintf(mainMIPS, "lw $a0, %s\n", id);
     } 
 
     //if is a character
     else if (strcmp(type, "char") == 0) {
+        // printf("printing a char\n");
         fprintf(mainMIPS, "li $v0, 11\n");
         fprintf(mainMIPS, "lb $a0, %s\n", id);
     }
@@ -97,6 +105,7 @@ void emitMIPSWriteId(char id[50], char type[5]){
         fprintf(mainMIPS, "li $v0, 4\n");
         fprintf(mainMIPS, "la $a0, %s\n", id);
     }
+
     fprintf(mainMIPS, "syscall\n");    
 
     fclose(mainMIPS);
@@ -105,10 +114,10 @@ void emitMIPSWriteId(char id[50], char type[5]){
 
 // ----- ARRAYS FOR MIPS ----->
 void emitMIPSArrayDecl (char id[50], int size) {
-    funcs = fopen("funcs.asm", "a");
+
     dataMIPS = fopen("dataMIPS.asm", "a");
 
-    fprintf(dataMIPS, "%s  .space   %d\n", id, size*4);
+    fprintf(dataMIPS, "%s:  .space   %d\n", id, size*4);
 
     fclose(dataMIPS);
 }
@@ -117,16 +126,20 @@ void emitMIPSIntArrayAssign (char id[50], int index, int val) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
 
+    if (inFunc) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
     fprintf(mainMIPS, "addi $s0, $zero, %d\n", val); //add value to register
     fprintf(mainMIPS, "addi $t0, $t0, %d\n", index*4);
-    fprintf(mainMIPS, "sw   $s0, %s(t0)\n", id);
+    fprintf(mainMIPS, "sw   $s0, %s($t0)\n", id);
 
-    fclose(dataMIPS);
+    fclose(mainMIPS);
 }
 
 
 void emitMIPSCharDecl (char id[50], char c[5]) {
-    funcs = fopen("funcs.asm", "a");
+
     dataMIPS = fopen("dataMIPS.asm", "a");
 
     fprintf(dataMIPS, "%s  .byte   %s\n", id, c);
@@ -134,11 +147,27 @@ void emitMIPSCharDecl (char id[50], char c[5]) {
     fclose(dataMIPS);
 }
 
+void setCharVar(char id[50], char c[5]) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "la $a0, %s #get address\n", id);
+    fprintf(mainMIPS, "li $a1, %s #new value\n", c);
+    fprintf(mainMIPS, "sw $a1 0($a0) #save new value\n");
+
+    fclose(mainMIPS);
+
+}
 
 void emitIntVar(char id[50], int val) {
-    funcs = fopen("funcs.asm", "a");
+    // if (inFunc == 1) {
+    //     mainMIPS = fopen("funcs.asm", "a");
+    // }
 
-    dataMIPS = fopen("dataMIPS.asm", "a ");
+    dataMIPS = fopen("dataMIPS.asm", "a");
 
     fprintf(dataMIPS, "%s:   .word  %d\n", id, val);
 
@@ -146,22 +175,60 @@ void emitIntVar(char id[50], int val) {
 
 }
 
+void setIntVar(char id[50], int val) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "la $a0, %s #get address\n", id);
+    fprintf(mainMIPS, "li $a1, %d #new value\n", val);
+    fprintf(mainMIPS, "sw $a1 0($a0) #save new value\n");
+
+    fclose(mainMIPS);
+
+}
+
+
 
 void emitMIPSFunc (char func[50]) {
+
     mainMIPS = fopen("MIPScode.asm", "a");
     funcs = fopen("funcs.asm", "a");
-    strcpy(currentScope, func);
+    
+    inFunc = 1;
 
-    fprintf(mainMIPS, "jal  %s", func);
+    fprintf(mainMIPS, "jal  %s\n", func);
 
     fprintf(funcs, "%s:\n", func);
 
     fclose(funcs);
+    fclose(mainMIPS);
+
+}
+
+void emitMIPSReturnInt (int rv) {
+
+    funcs = fopen("funcs.asm", "a");
+
+    fprintf(funcs, "")
+    fprintf(funcs, "jr  $ra");
+
+}
+
+
+void endOfFunction () {
+
+    funcs = fopen("funcs.asm", "a");
+    fprintf("\n");
+    inFunc = 0;
 
 }
 
 void emitEndOfAssemblyCode(){
-    mainMIPS = fopen("MIPScode.asm", "a ");
+    mainMIPS = fopen("MIPScode.asm", "a");
 
     fprintf(mainMIPS, "# -----------------\n");
     fprintf(mainMIPS, "#  Done, terminate program.\n\n");
@@ -174,52 +241,27 @@ void emitEndOfAssemblyCode(){
     fclose(mainMIPS);    
 }
 
-void addMainToData() {
+void appendFiles() {
 
-    mainMIPS = fopen("MIPScode.asm", "a+");
-    dataMIPS = fopen("dataMIPS.asm", "a+");
-    funcs = fopen("funcs.asm", "a+");
- 
-    // If file is not found then return.
-    if (!mainMIPS && !dataMIPS && !funcs) {
-        printf("Unable to open/"
-               "detect file(s)\n");
-        return;
-    }
- 
-    char buf[100];
- 
-    // explicitly writing "\n"
-    // to the destination file
-    // so to enhance readability.
+    char ch;
+
+    mainMIPS = fopen("MIPScode.asm", "r");
+    funcs = fopen("funcs.asm", "r");
+    dataMIPS = fopen("dataMIPS.asm", "a");
+
     fprintf(dataMIPS, "\n");
+
+    while((ch = getc(mainMIPS)) != EOF)
+        putc(ch, dataMIPS);
+
+    fprintf(dataMIPS, "\n");
+
+    while((ch = getc(funcs)) != EOF)
+        putc(ch, dataMIPS);
  
-    // writing the contents of
-    // source file to destination file.
-    while (!feof(mainMIPS)) {
-        fgets(buf, sizeof(buf), mainMIPS);
-        fprintf(dataMIPS, "%s", buf);
-    }
-    
+    printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n\n");
     fclose(mainMIPS);
-    
-    //fclose(my_life);
-    
-    fprintf(dataMIPS, "\n");
-
-    while (!feof(funcs)) {
-        fgets(buf, sizeof(buf), funcs);
-        fprintf(dataMIPS, "%s", buf);
-    }
-
     fclose(funcs);
- 
-    // rewind(dataMIPS);
- 
-    // printing contents of
-    // destination file to stdout.
-    // while (!feof(dataMIPS)) {
-    //     fgets(buf, sizeof(buf), dataMIPS);
-    //     printf("%s", buf); //Prints result to console if needed
-    // }
-}   
+    fclose(dataMIPS);
+
+}

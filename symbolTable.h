@@ -114,9 +114,9 @@ int setItemUsed(char itemName[50],  char scope[50]) {
 }
 
 // Returns the value of a given ID
-int getValue(char itemName[50], char scope[50]) {
+const char* getValue(char itemName[50], char scope[50]) {
 
-	int returnValue;
+	const char *returnValue;
 
 	for(int i=0; i<100; i++) {
 		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
@@ -124,13 +124,13 @@ int getValue(char itemName[50], char scope[50]) {
 		int str2 = strcmp(symTabItems[i].scope,scope);
 
 		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
-			returnValue = atoi(symTabItems[i].itemValue);
+			returnValue = (symTabItems[i].itemValue);
 			// printf("Item Value:%d\n", returnValue);
 			return returnValue;
 		}
 	}
 
-	return 0; //item not found;
+	return NULL; //item not found;
 }
 
 // Returns the ID of a given itemName

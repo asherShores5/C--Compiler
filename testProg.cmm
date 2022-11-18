@@ -1,19 +1,17 @@
 int x;
-char myChar;
-myChar = 'a';
-float test;
-if (1 == 1) {
-	x = 5;
-}
-test = 2.5;
+x = 3;
 
 
 func int myFunc() {
+	x = 2;
+	int foo[3];
+	foo[1] = 10;
+	write 10;
 	return 0;
 }
 
-
 /*
+
 func int main(int z) {
 	myFunc();
 	int help;

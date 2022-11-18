@@ -85,7 +85,7 @@ boolean     [true] */
 "if" 		{words++; chars += strlen(yytext);
 			printf("%s : IF\n", yytext);
 			yylval.string = strdup(yytext); 
-			return ELSE;
+			return IF;
 		}
 
 "else" 		{words++; chars += strlen(yytext);

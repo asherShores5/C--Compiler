@@ -213,7 +213,7 @@ void emitMIPSReturnInt (int rv) {
 
     funcs = fopen("funcs.asm", "a");
 
-    fprintf(funcs, "")
+    fprintf(funcs, "");
     fprintf(funcs, "jr  $ra");
 
 }
@@ -222,7 +222,7 @@ void emitMIPSReturnInt (int rv) {
 void endOfFunction () {
 
     funcs = fopen("funcs.asm", "a");
-    fprintf("\n");
+    fprintf(funcs, "\n");
     inFunc = 0;
 
 }

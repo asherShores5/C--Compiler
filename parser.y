@@ -25,6 +25,7 @@ extern FILE* yyin;
 
 //Some global variables
 int computeEquation(int val1, int val2, char operator);
+int evalCondition(struct AST* x, struct AST* y, char logOp[5]);
 void yyerror(const char* s);
 char currentScope[50] = "GLOBAL"; // global or the name of the function
 char currReturnType[10];
@@ -449,36 +450,30 @@ Stmt:
 	| WRITE Expr SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 
-		// printf("EXpr: %s\n", $2);
 		$$ = AST_Write("WRITE", "", $2->RHS);
 
-
-		// ------ CODE GENERATION ------ //
-		printf("Test: %s\n", $2->nodeType);
-
-
-			// ---- IR CODE ---- //
-		// emitIRWriteId($2->LHS, getVariableType($2->LHS, currentScope));
+		// ------     IR CODE     ------ //
+		 //emitIRWriteId($2->LHS, getVariableType($2->LHS, currentScope));
 		// ------ ¯\_(ツ)_/¯ ------ //
 
-		
 			// ---- MIPS CODE ---- //
 		// Printing an ID ------>
+		printf("%s\n\n", $2->nodeType);
 		if (!strcmp($2->nodeType,"id")) {
 
-			emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
+			//emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
 
 		}
 
 		else if (!strcmp($2->nodeType, "int")) {
 
-			emitMIPSWriteInt(atoi($2->RHS));
+			//emitMIPSWriteInt(atoi($2->RHS));
 
 		}
 
 		else if (!strcmp($2->nodeType, "char")) {
 
-			emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
+			//emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
 
 		}
 		
@@ -539,6 +534,7 @@ Else:
 
 	| ELSE Block {
 		// DO STUFF
+		//big brain time
 	}
 
 ;
@@ -548,6 +544,7 @@ Else:
 // LogicalExpr
 
 // LogicalExpr: Expr LogicOp Expr
+;
 
 //==========================================
 
@@ -900,45 +897,6 @@ BinOp: PLUS {}
 
 %%
 
-int main(int argc, char**argv)
-{
-/* 
-	#ifdef YYDEBUG
-		yydebug = 1;
-	#endif */
-
-	printf("\n\n##### COMPILER STARTED #####\n\n");
-
-	// Initialize IR File
-	initIRcodeFile();
-	// Initialize MIPS.h
-	initAssemblyFile();
-	
-	if (argc > 1){
-	  if(!(yyin = fopen(argv[1], "r")))
-          {
-		perror(argv[1]);
-		return(1);
-	  }
-	}
-	yyparse();
-
-	emitEndOfAssemblyCode();
-	emitEndOfAssemblyCodeIR();
-
-	// Merge data and main sections in MIPS
-	/* addMainToData(); */
-	appendFiles();
-
-	addMainToDataIR();
-
-	showSymTable();
-	printf("\n\n##### COMPILER ENDED #####\n\n");
-
-
-	/* fprintf (GarbageMIPS, "syscall\n"); */
-}
-
 int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {
 	int val1; int val2;
 	if (x->nodeType == "id") {
@@ -1020,23 +978,41 @@ void yyerror(const char* s) {
 	exit(1);
 }
 
-/* Expr: ID EQ ID {
-    // perform semantic checks for declarations and types
-    if (semantic check passed){
-        fprintf (IRcode, " T1 = T2");
+int main(int argc, char**argv)
+{
+/* 
+	#ifdef YYDEBUG
+		yydebug = 1;
+	#endif */
 
-        // print assembly
+	printf("\n\n##### COMPILER STARTED #####\n\n");
 
-        fprintf(MIPScode, " mov, $r1, $2")
-    }
+	// Initialize IR File
+	initIRcodeFile();
+	// Initialize MIPS.h
+	initAssemblyFile();
+	
+	if (argc > 1){
+	  if(!(yyin = fopen(argv[1], "r")))
+          {
+		perror(argv[1]);
+		return(1);
+	  }
+	}
+	yyparse();
+
+	emitEndOfAssemblyCode();
+	emitEndOfAssemblyCodeIR();
+
+	// Merge data and main sections in MIPS
+	/* addMainToData(); */
+	appendFiles();
+
+	addMainToDataIR();
+
+	showSymTable();
+	printf("\n\n##### COMPILER ENDED #####\n\n");
+
+
+	/* fprintf (GarbageMIPS, "syscall\n"); */
 }
-
-...
-
-int main(){
-
-...
-IRcode = fopen("IRcode.ir", "w");
-...
-
-} */

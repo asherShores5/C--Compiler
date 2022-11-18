@@ -1,2 +1,3 @@
 DATA:
-myChar  BYTE   'Ä'
+x:   WORD  2
+x:   WORD  5

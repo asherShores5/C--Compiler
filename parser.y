@@ -451,29 +451,31 @@ Stmt:
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 
 		$$ = AST_Write("WRITE", "", $2->RHS);
+		printf("\n%s\n", $2->RHS);
 
 		// ------     IR CODE     ------ //
-		 //emitIRWriteId($2->LHS, getVariableType($2->LHS, currentScope));
+		emitIRWriteId($2->RHS, getVariableType($2->RHS, currentScope));
 		// ------ ¯\_(ツ)_/¯ ------ //
 
 			// ---- MIPS CODE ---- //
 		// Printing an ID ------>
-		printf("%s\n\n", $2->nodeType);
+		//printf("%s\n\n", $2->nodeType);
+		
 		if (!strcmp($2->nodeType,"id")) {
 
-			//emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
+			emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
 
 		}
 
 		else if (!strcmp($2->nodeType, "int")) {
 
-			//emitMIPSWriteInt(atoi($2->RHS));
+			emitMIPSWriteInt(atoi($2->RHS));
 
 		}
 
 		else if (!strcmp($2->nodeType, "char")) {
 
-			//emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
+			emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
 
 		}
 		

@@ -1,4 +1,6 @@
 int x;
+char myChar;
+myChar = 'a';
 
 func int myFunc() {
 	x = 2;
@@ -13,9 +15,6 @@ func int main(int z) {
 	int help;
 	x = 5;
 	write myChar;
-	if (x = 5) {
-		write help;
-	}
 	help = (1 + 8) / 3;
 	test = myArray[0];
 	write help;

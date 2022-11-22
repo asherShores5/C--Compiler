@@ -574,9 +574,9 @@ static const yytype_int16 yyrline[] =
        0,   106,   106,   115,   125,   130,   151,   154,   157,   169,
      208,   255,   257,   268,   268,   327,   329,   338,   340,   349,
      391,   399,   400,   401,   406,   408,   418,   427,   430,   450,
-     483,   490,   507,   532,   535,   553,   595,   633,   635,   637,
-     639,   656,   747,   753,   757,   764,   771,   782,   784,   799,
-     817,   833,   848,   865,   869,   876,   881,   882,   882,   890
+     485,   492,   509,   534,   537,   555,   597,   635,   637,   639,
+     641,   658,   749,   755,   759,   766,   773,   784,   786,   801,
+     819,   835,   850,   867,   871,   878,   883,   884,   884,   892
 };
 #endif
 
@@ -1561,46 +1561,48 @@ yyreduce:
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 
 		(yyval.ast) = AST_Write("WRITE", "", (yyvsp[-1].ast)->RHS);
+		printf("\n%s\n", (yyvsp[-1].ast)->RHS);
 
 		// ------     IR CODE     ------ //
-		 //emitIRWriteId($2->LHS, getVariableType($2->LHS, currentScope));
+		emitIRWriteId((yyvsp[-1].ast)->RHS, getVariableType((yyvsp[-1].ast)->RHS, currentScope));
 		// ------ ¯\_(ツ)_/¯ ------ //
 
 			// ---- MIPS CODE ---- //
 		// Printing an ID ------>
-		printf("%s\n\n", (yyvsp[-1].ast)->nodeType);
+		//printf("%s\n\n", $2->nodeType);
+		
 		if (!strcmp((yyvsp[-1].ast)->nodeType,"id")) {
 
-			//emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
+			emitMIPSWriteId((yyvsp[-1].ast)->RHS, getVariableType((yyvsp[-1].ast)->RHS, currentScope));
 
 		}
 
 		else if (!strcmp((yyvsp[-1].ast)->nodeType, "int")) {
 
-			//emitMIPSWriteInt(atoi($2->RHS));
+			emitMIPSWriteInt(atoi((yyvsp[-1].ast)->RHS));
 
 		}
 
 		else if (!strcmp((yyvsp[-1].ast)->nodeType, "char")) {
 
-			//emitMIPSWriteId($2->RHS, getVariableType($2->RHS, currentScope));
+			emitMIPSWriteId((yyvsp[-1].ast)->RHS, getVariableType((yyvsp[-1].ast)->RHS, currentScope));
 
 		}
 		
 	}
-#line 1592 "parser.tab.c"
+#line 1594 "parser.tab.c"
     break;
 
   case 30: /* Stmt: WRITELN SEMICOLON  */
-#line 483 "parser.y"
+#line 485 "parser.y"
                             {
 		printf("\nRECOGNIZED RULE: Write Line %s\n", (yyvsp[-1].string));
 	}
-#line 1600 "parser.tab.c"
+#line 1602 "parser.tab.c"
     break;
 
   case 31: /* IfStmt: IF LPAREN Condition RPAREN Block Else  */
-#line 490 "parser.y"
+#line 492 "parser.y"
                                               {
 
 		if ((yyvsp[-3].ast)) {
@@ -1614,11 +1616,11 @@ yyreduce:
 		}		
 
 	}
-#line 1618 "parser.tab.c"
+#line 1620 "parser.tab.c"
     break;
 
   case 32: /* Condition: Primary LOGICOP Primary  */
-#line 507 "parser.y"
+#line 509 "parser.y"
                                 {
 
 		// ----- SEMANTIC CHECKS ----- //
@@ -1640,20 +1642,20 @@ yyreduce:
 			(yyval.ast) = 0;
 		}
 	}
-#line 1644 "parser.tab.c"
+#line 1646 "parser.tab.c"
     break;
 
   case 34: /* Else: ELSE Block  */
-#line 535 "parser.y"
+#line 537 "parser.y"
                      {
 		// DO STUFF
 		//big brain time
 	}
-#line 1653 "parser.tab.c"
+#line 1655 "parser.tab.c"
     break;
 
   case 35: /* ArrayExpr: ID LBRACKET INTEGER RBRACKET EQ Primary  */
-#line 553 "parser.y"
+#line 555 "parser.y"
                                                 {
 
 		printf("\nRECOGNIZED RULE: ARRAY assignment %s\n", (yyvsp[-5].string));
@@ -1694,11 +1696,11 @@ yyreduce:
 		emitMIPSIntArrayAssign((yyvsp[-5].string), (yyvsp[-3].number), atoi((yyvsp[0].ast)->RHS));
 
 	}
-#line 1698 "parser.tab.c"
+#line 1700 "parser.tab.c"
     break;
 
   case 36: /* ArrayExpr: ID EQ ID LBRACKET INTEGER RBRACKET  */
-#line 595 "parser.y"
+#line 597 "parser.y"
                                              {
 
 		symTabAccess();
@@ -1732,11 +1734,11 @@ yyreduce:
 		}
 
 	}
-#line 1736 "parser.tab.c"
+#line 1738 "parser.tab.c"
     break;
 
   case 40: /* Expr: UnaryOp Expr  */
-#line 639 "parser.y"
+#line 641 "parser.y"
                        { 
 
 		//Asher's Semantic Checls
@@ -1753,11 +1755,11 @@ yyreduce:
 		// $$ = $2;
 
 	}
-#line 1757 "parser.tab.c"
+#line 1759 "parser.tab.c"
     break;
 
   case 41: /* Expr: ID EQ Expr  */
-#line 656 "parser.y"
+#line 658 "parser.y"
                      {
 
 		printf("\nRECOGNIZED RULE: Assignment Statement ----> %s\n", (yyvsp[-2].string));
@@ -1848,57 +1850,57 @@ yyreduce:
 
 		semanticCheckPassed = 1;
 	}
-#line 1852 "parser.tab.c"
+#line 1854 "parser.tab.c"
     break;
 
   case 42: /* Expr: ID LPAREN ParamList RPAREN  */
-#line 747 "parser.y"
+#line 749 "parser.y"
                                      {printf("\nRECOGNIZED RULE: Function Call %s\n", (yyvsp[-3].string));}
-#line 1858 "parser.tab.c"
+#line 1860 "parser.tab.c"
     break;
 
   case 43: /* Primary: ID  */
-#line 753 "parser.y"
+#line 755 "parser.y"
            {
 		(yyval.ast) = AST_assignment("id", "" , (yyvsp[0].string));
 	}
-#line 1866 "parser.tab.c"
+#line 1868 "parser.tab.c"
     break;
 
   case 44: /* Primary: DECIMAL  */
-#line 757 "parser.y"
+#line 759 "parser.y"
                   {
 		printf("float detected: %f\n", (yyvsp[0].floatValue));
 		char numVal[10];
 		sprintf(numVal, "%f", (yyvsp[0].floatValue));
 		(yyval.ast) = AST_assignment("float", "", numVal);
 	}
-#line 1877 "parser.tab.c"
+#line 1879 "parser.tab.c"
     break;
 
   case 45: /* Primary: INTEGER  */
-#line 764 "parser.y"
+#line 766 "parser.y"
                   {
 		// printf("int detected\n");
 		char numVal[10];
 		sprintf(numVal, "%d", (yyvsp[0].number));
 		(yyval.ast) = AST_assignment("int", "", numVal);
 	}
-#line 1888 "parser.tab.c"
+#line 1890 "parser.tab.c"
     break;
 
   case 46: /* Primary: CHARACTER  */
-#line 771 "parser.y"
+#line 773 "parser.y"
                       {
 
 		(yyval.ast) = AST_assignment("char", "", (yyvsp[0].string));
 
 	}
-#line 1898 "parser.tab.c"
+#line 1900 "parser.tab.c"
     break;
 
   case 48: /* MathExpr: MathExpr MINUS Trm  */
-#line 784 "parser.y"
+#line 786 "parser.y"
                              {
 		
 		char newVal[5];
@@ -1913,11 +1915,11 @@ yyreduce:
 		(yyval.ast) = AST_assignment("int", "", newVal);
 
 	}
-#line 1917 "parser.tab.c"
+#line 1919 "parser.tab.c"
     break;
 
   case 49: /* MathExpr: MathExpr PLUS Trm  */
-#line 799 "parser.y"
+#line 801 "parser.y"
                             {
 		
 		char newVal[5];
@@ -1932,11 +1934,11 @@ yyreduce:
 		(yyval.ast) = AST_assignment("int", "", newVal);
 
 	}
-#line 1936 "parser.tab.c"
+#line 1938 "parser.tab.c"
     break;
 
   case 50: /* Trm: Factor  */
-#line 817 "parser.y"
+#line 819 "parser.y"
                {
 		char numVal[10];
 		if (strcmp((yyvsp[0].ast)->nodeType,"id") == 0) {
@@ -1952,11 +1954,11 @@ yyreduce:
 			(yyval.ast) = (yyvsp[0].ast);
 		}
 	}
-#line 1956 "parser.tab.c"
+#line 1958 "parser.tab.c"
     break;
 
   case 51: /* Trm: Trm TIMES Factor  */
-#line 833 "parser.y"
+#line 835 "parser.y"
                            {
 		
 		char newVal[5];
@@ -1971,11 +1973,11 @@ yyreduce:
 		(yyval.ast) = AST_assignment("int", "", newVal);
 
 	}
-#line 1975 "parser.tab.c"
+#line 1977 "parser.tab.c"
     break;
 
   case 52: /* Trm: Trm DIVIDE Factor  */
-#line 848 "parser.y"
+#line 850 "parser.y"
                             {
 		
 		char newVal[5];
@@ -1990,62 +1992,62 @@ yyreduce:
 		(yyval.ast) = AST_assignment("int", "", newVal);
 
 	}
-#line 1994 "parser.tab.c"
+#line 1996 "parser.tab.c"
     break;
 
   case 53: /* Factor: ID  */
-#line 865 "parser.y"
+#line 867 "parser.y"
            {
 		(yyval.ast) = AST_assignment("id", "" , (yyvsp[0].string));
 	}
-#line 2002 "parser.tab.c"
+#line 2004 "parser.tab.c"
     break;
 
   case 54: /* Factor: INTEGER  */
-#line 869 "parser.y"
+#line 871 "parser.y"
                   {
 		// printf("int detected\n");
 		char numVal[10];
 		sprintf(numVal, "%d", (yyvsp[0].number));
 		(yyval.ast) = AST_assignment("int", "", numVal);
 	}
-#line 2013 "parser.tab.c"
+#line 2015 "parser.tab.c"
     break;
 
   case 55: /* Factor: LPAREN MathExpr RPAREN  */
-#line 876 "parser.y"
+#line 878 "parser.y"
                                  {
 		(yyval.ast) = AST_assignment("int", "", (yyvsp[-1].ast)->RHS);
 	}
-#line 2021 "parser.tab.c"
+#line 2023 "parser.tab.c"
     break;
 
   case 56: /* ParamList: %empty  */
-#line 881 "parser.y"
+#line 883 "parser.y"
                 {}
-#line 2027 "parser.tab.c"
+#line 2029 "parser.tab.c"
     break;
 
   case 57: /* $@2: %empty  */
-#line 882 "parser.y"
+#line 884 "parser.y"
                   {printf("\nRECOGNIZED RULE: Parameter\n");}
-#line 2033 "parser.tab.c"
+#line 2035 "parser.tab.c"
     break;
 
   case 58: /* ParamList: Primary $@2 ParamList  */
-#line 882 "parser.y"
+#line 884 "parser.y"
                                                                         {}
-#line 2039 "parser.tab.c"
+#line 2041 "parser.tab.c"
     break;
 
   case 59: /* UnaryOp: MINUS  */
-#line 890 "parser.y"
+#line 892 "parser.y"
                {printf("\nRECOGNIZED RULE: Unary Operation, NEGATIVE VALUE %s\n", (yyvsp[0].string));}
-#line 2045 "parser.tab.c"
+#line 2047 "parser.tab.c"
     break;
 
 
-#line 2049 "parser.tab.c"
+#line 2051 "parser.tab.c"
 
       default: break;
     }
@@ -2238,7 +2240,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 898 "parser.y"
+#line 900 "parser.y"
 
 
 int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {

@@ -1,20 +1,12 @@
 int x;
-char myChar;
-myChar = 'a';
-
-func int myFunc() {
-	x = 2;
-	int foo[3];
-	foo[1] = 10;
-	write 10;
-	return 0;
-}
+x = 2;
 
 func int main(int z) {
-	myFunc();
 	int help;
-	x = 5;
-	write myChar;
+	while (x == 5) {
+		write x;
+	}
+	x = 10;
 	help = (1 + 8) / 3;
 	test = myArray[0];
 	write help;

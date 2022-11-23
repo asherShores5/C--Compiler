@@ -88,6 +88,12 @@ boolean     [true] */
 			return IF;
 		}
 
+"while" 	{words++; chars += strlen(yytext);
+			printf("%s : WHILE\n", yytext);
+			yylval.string = strdup(yytext); 
+			return WHILE;
+		}
+
 "else" 		{words++; chars += strlen(yytext);
 			printf("%s : ELSE\n", yytext);
 			yylval.string = strdup(yytext); 

@@ -63,23 +63,24 @@ extern int yydebug;
     FUNC = 264,                    /* FUNC  */
     IF = 265,                      /* IF  */
     ELSE = 266,                    /* ELSE  */
-    PLUS = 267,                    /* PLUS  */
-    MINUS = 268,                   /* MINUS  */
-    TIMES = 269,                   /* TIMES  */
-    DIVIDE = 270,                  /* DIVIDE  */
-    LOGICOP = 271,                 /* LOGICOP  */
-    LBRACKET = 272,                /* LBRACKET  */
-    RBRACKET = 273,                /* RBRACKET  */
-    LPAREN = 274,                  /* LPAREN  */
-    RPAREN = 275,                  /* RPAREN  */
-    LCURLY = 276,                  /* LCURLY  */
-    RCURLY = 277,                  /* RCURLY  */
-    INT = 278,                     /* INT  */
-    CHAR = 279,                    /* CHAR  */
-    FLOAT = 280,                   /* FLOAT  */
-    RETURN = 281,                  /* RETURN  */
-    WRITELN = 282,                 /* WRITELN  */
-    CHARACTER = 283                /* CHARACTER  */
+    WHILE = 267,                   /* WHILE  */
+    PLUS = 268,                    /* PLUS  */
+    MINUS = 269,                   /* MINUS  */
+    TIMES = 270,                   /* TIMES  */
+    DIVIDE = 271,                  /* DIVIDE  */
+    LOGICOP = 272,                 /* LOGICOP  */
+    LBRACKET = 273,                /* LBRACKET  */
+    RBRACKET = 274,                /* RBRACKET  */
+    LPAREN = 275,                  /* LPAREN  */
+    RPAREN = 276,                  /* RPAREN  */
+    LCURLY = 277,                  /* LCURLY  */
+    RCURLY = 278,                  /* RCURLY  */
+    INT = 279,                     /* INT  */
+    CHAR = 280,                    /* CHAR  */
+    FLOAT = 281,                   /* FLOAT  */
+    RETURN = 282,                  /* RETURN  */
+    WRITELN = 283,                 /* WRITELN  */
+    CHARACTER = 284                /* CHARACTER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -97,7 +98,7 @@ union YYSTYPE
 	char* string;
 	struct AST* ast;
 
-#line 101 "parser.tab.h"
+#line 102 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

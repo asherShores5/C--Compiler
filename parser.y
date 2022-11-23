@@ -58,6 +58,7 @@ int count = 0;
 %token <string> FUNC
 %token <string> IF
 %token <string> ELSE
+%token <string> WHILE
 
 %token <string> PLUS
 %token <string> MINUS
@@ -95,7 +96,7 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } INTEGER;
 
 //All the program grammar that will come up
-%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList IfStmt Condition Else ArrayExpr Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
+%type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList IfStmt WhileLoop Condition Else ArrayExpr Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
 
 %start Program
 
@@ -419,6 +420,8 @@ Stmt:
 		printf("\nRECOGNIZED RULE: SEMICOLON %s\n", $1);	
 	} 
 
+	| WhileLoop {}
+
 
 	/* | IfStmt {
 		printf("Found an IF Statement!\n");
@@ -504,6 +507,8 @@ IfStmt:
 	}
 
 ;
+
+	WhileLoop: WHILE LPAREN Condition RPAREN Block {}
 
 Condition: 
 	Primary LOGICOP Primary {

@@ -209,14 +209,45 @@ void emitMIPSFunc (char func[50]) {
 
 }
 
-void emitMIPSReturnInt (int rv) {
+void emitMIPSReturn (char rv[50], char type[50]) {
 
     funcs = fopen("funcs.asm", "a");
 
-    fprintf(funcs, "");
-    fprintf(funcs, "jr  $ra");
+    fprintf(funcs, "li $v1, %s\n", rv);
 
+    // if (strcmp(type, "int") == 0) {
+    //     // printf("printing an integer----->\n");
+
+    //     fprintf(funcs, "li $v1, %s\n", rv);
+    // } 
+
+    // //if value is a character
+    // else if (strcmp(type, "char") == 0) {
+    //     // printf("printing a char\n");
+        
+    // }
+
+    fprintf(funcs, "jr  $ra");
+    
 }
+
+// void emitMIPSReturnChar (char rv) {
+
+//     funcs = fopen("funcs.asm", "a");
+
+//     fprintf(funcs, "");
+//     fprintf(funcs, "jr  $ra");
+
+// }
+
+// void emitMIPSReturnID (char rv) {
+
+//     funcs = fopen("funcs.asm", "a");
+
+//     fprintf(funcs, "");
+//     fprintf(funcs, "jr  $ra");
+
+// }
 
 
 void endOfFunction () {

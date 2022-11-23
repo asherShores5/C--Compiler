@@ -440,12 +440,16 @@ Stmt:
 
 
 		// ---- CODE GENERATION ---- //
+		char *returnType = $2->nodeType;
+		// printf("value test = %d\n", atoi($2->RHS));
+		printf("Return type: %s\n", returnType);
 
 		// ---- IR CODE ---- //
 
 
 		// ---- MIPS CODE ---- //
-		// TODO figure out how we want to determine return type smile
+		emitMIPSReturn($2->RHS, returnType);
+
 
 	}
 

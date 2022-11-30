@@ -159,8 +159,8 @@ char* getVariableType(char itemName[50], char scope[50]){
         int str2 = strcmp(symTabItems[i].scope,scope);
         //printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
         if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
-			// printf("Debug\n\n");
             return symTabItems[i].itemType; // found the ID in the table
+			// printf("Debug\n\n");
         }
     }
     return NULL;

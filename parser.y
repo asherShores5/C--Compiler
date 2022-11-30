@@ -155,10 +155,10 @@ Decl:
 	| StmtList {
 	}
 
-	| IfStmt {
-		// printf("pls help\n");
-	}
+	| IfStmt {}
 	/* | FunDecl */
+
+	| WhileStart {}
 	
 ;
 
@@ -512,16 +512,41 @@ IfStmt:
 
 ;
 
-	WhileLoop: WHILE LPAREN Condition RPAREN Block {}
+WhileStart: WHILE LPAREN {printf("Hi Evan");} WhileLoop;
 
-Condition: 
+WhileLoop: Condition RPAREN Block {printf("Hi Asher");}
+
+Condition:
 	Primary LOGICOP Primary {
 
 		// ----- SEMANTIC CHECKS ----- //
 
-		// TODO 1.If primaries are ID's, check 
-		// if they have been declared
-		// 2. Make sure primaries are of same type
+		symTabAccess();
+
+		int inSymTab = found($1, currentScope);
+		int inSymTab2 = found($3, currentScope);
+
+		if (inSymTab != 0 && inSymTab2 != 0) {
+			printf("\nSEMANTIC ERROR: ARR %s is NOT in the symbol table\n", $2);
+			semanticCheckPassed = 0;
+		} else {
+			printf("\nSEMANTIC CHECK PASSED\n");
+			
+			//emitArrayAssignment();
+		}
+
+		//check if types match
+		if (strcmp(getVariableType($1->RHS, currentScope), $3->nodeType) == 0) {
+
+			printf("TYPES ARE COMPATIBLE\n");
+
+		} else {
+
+			printf("Error: INCOMPATIBLE TYPES\n");
+			semanticCheckPassed = 0;
+		}
+
+		//ToDo: Check for arrays semantics
 
 		int cond = evalCondition($1, $3, $2);
 
@@ -542,19 +567,13 @@ Condition:
 
 Else: 
 	// EPSILON
-
+	
 	| ELSE Block {
 		// DO STUFF
+		// printf("else{%s}", code);
 		//big brain time
 	}
 
-;
-
-// ID logicOp ID
-// ID LogicOp Number
-// LogicalExpr
-
-// LogicalExpr: Expr LogicOp Expr
 ;
 
 //==========================================
@@ -773,7 +792,7 @@ Primary:
 	}
 	
 	| INTEGER {
-		// printf("int detected\n");
+		printf("int detected\n");
 		char numVal[10];
 		sprintf(numVal, "%d", $1);
 		$$ = AST_assignment("int", "", numVal);
@@ -894,7 +913,7 @@ ParamList:	{}
 ;
 
 
-//==========================================
+//=================================================================================================
 
 
 
@@ -909,20 +928,36 @@ BinOp: PLUS {}
 %%
 
 int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {
-	int val1; int val2;
-	if (x->nodeType == "id") {
 
+	int val1; int val2;
+	if (!strcmp(x->nodeType, "id") && !strcmp(y->nodeType, "id")) {
+		val1 = atoi(getValue(x->RHS, currentScope));
+		val2 = getValue(y->RHS, currentScope);
+	} 
+	else if (!strcmp(x->nodeType, "id")) {
+		val1 = atoi(getValue(x->RHS, currentScope));
+		val2 = atoi(y->RHS);
 	}
-	val1 = atoi(x->RHS);
-	val2 = atoi(y->RHS);
+	else if (!strcmp(y->nodeType, "id")) {
+		val1 = atoi(x->RHS);
+		val2 = atoi(getValue(y->RHS, currentScope));
+	} 
+	/* else {
+		printf("changing the values");
+		val1 = atoi(x->RHS);
+		val2 = atoi(y->RHS); 
+	} */
+
+	int test = strcmp(x->RHS, y->RHS);
+	printf("val1 = %d | val2 = %d\n", val1, val2); 
 
 	if (!strcmp(logOp, "==")) {
-		if (!strcmp(x, y)) {
+		if (!strcmp(x->RHS, y->RHS) || val1 == val2) {
 			return 1;
 		}
 	} 
 	else if (!strcmp(logOp, "!=")) {
-		if (strcmp(x, y)) {
+		if (!strcmp(x->RHS, y->RHS) || val1 == val2) {
 			return 1;
 		}
 	}

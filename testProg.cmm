@@ -1,14 +1,13 @@
 int x;
-x = 2;
+x = 5;
 
 func int main(int z) {
 	int help;
-	while (x == 5) {
+	if (x == 5) {
 		write x;
 	}
-	x = 10;
-	help = (1 + 8) / 3;
+	/*help = (1 + 8) / 3;
 	test = myArray[0];
 	write help;
-	return 0;
+	return 0;*/
 }

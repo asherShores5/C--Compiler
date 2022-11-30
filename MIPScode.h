@@ -22,7 +22,6 @@ void  initAssemblyFile(){
     fprintf(dataMIPS, ".data\n");
     fprintf(dataMIPS, "newLine: .asciiz \"\\n\"\n");
 
-
     fclose(mainMIPS);
     fclose(dataMIPS);
     fclose(funcs);

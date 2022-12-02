@@ -55,10 +55,10 @@ extern int yydebug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     ID = 258,                      /* ID  */
-    SEMICOLON = 259,               /* SEMICOLON  */
-    EQ = 260,                      /* EQ  */
-    INTEGER = 261,                 /* INTEGER  */
-    DECIMAL = 262,                 /* DECIMAL  */
+    INTEGER = 259,                 /* INTEGER  */
+    DECIMAL = 260,                 /* DECIMAL  */
+    SEMICOLON = 261,               /* SEMICOLON  */
+    EQ = 262,                      /* EQ  */
     WRITE = 263,                   /* WRITE  */
     FUNC = 264,                    /* FUNC  */
     IF = 265,                      /* IF  */
@@ -89,7 +89,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 41 "parser.y"
+#line 37 "parser.y"
 
 	//Tokens declared in C so we can declare them in C--... I think
 	int number;

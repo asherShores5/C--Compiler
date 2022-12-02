@@ -2,10 +2,6 @@
 // CST-405: Compilers
 // Professor Isac Artzi
 
-/* %code requires
-  {
-    #define YYSTYPE double
-  } */
 %{
 //Standard libs
 #include <stdio.h>
@@ -34,7 +30,7 @@ int gotToElse = 0;
 char typeTemp[50];
 struct AST * lastVar; 
 
-int count = 0;
+int count = 0; //This is unused guys
 
 %}
 
@@ -49,12 +45,15 @@ int count = 0;
 
 //Tokes declared in Parser so we can look for them
 //%token <string> TYPE
+
 %token <string> ID
-%token <string> SEMICOLON
-%token <string> EQ
 %token <number> INTEGER
 %token <floatValue> DECIMAL
+
+%token <string> SEMICOLON
+%token <string> EQ
 %token <string> WRITE
+
 %token <string> FUNC
 %token <string> IF
 %token <string> ELSE
@@ -86,7 +85,7 @@ int count = 0;
 %token <string> CHARACTER
 
 //Math
-%left PLUS
+%left PLUS //why do we have %token and %left Math Ops?
 %left MINUS
 %left TIMES
 %left DIVIDE
@@ -96,46 +95,47 @@ int count = 0;
 %printer { fprintf(yyoutput, "%d", $$); } INTEGER;
 
 //All the program grammar that will come up
+//This doesn't seem actually necessary
 %type <ast> Program DeclList Decl VarDeclList FunDeclList VarDecl FunDecl ParamDecList Block ParamDecListTail ParamDecl Type Stmt StmtList IfStmt WhileLoop Condition Else ArrayExpr Expr MathExpr Trm Factor ParamList Primary UnaryOp BinOp 
 
 %start Program
 
 %%
 
+//Head of program
+//Everything must tie back here
 Program: 
-
 	DeclList {
-		
 		$$ = $1;
 		// printAST($$, 3);
-
 	}
-;
+;//Program --> DeclList
 
 DeclList:	
 	Decl DeclList { 
-
 		// printf("\nTest debug DECLDECLLIST\n");
 		$1->right = $2;
 		$$ = $1;
 		// printf("LINK DECLLIST\n");
 		// printNode($$->right);
-
 	} 
-
 	| Decl {
 		$$ = $1;
 		// printf("DECL\n");
 	}
+
+	|
 	
 	| FunDeclList
+;//DeclList --> Decl
 
-;
+Decl: 		
+	VarDecl {}
 
-//==========================================
+	| StmtList {
+	}
+;//Decl --> VarDecl & StmtList
 
-//VarDeclList --> epsilon 
-//                VarDecl VarDeclList
 VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
 
 	|	VarDecl VarDeclList	{
@@ -144,28 +144,9 @@ VarDeclList: /* EPSILON */ { /*printf("\nNo VarDeclList (EPSILON)\n");*/}
 	}
 
 	| VarDecl 
-
 ;
+//This is unreachable-->Big Pogs
 
-
-Decl: 		
-	VarDecl {}
-
-
-	| StmtList {
-	}
-
-	| IfStmt {}
-	/* | FunDecl */
-
-	| WhileStart {}
-	
-;
-
-//==========================================
-
-//VarDecl ------> Type id ;
-//               Type id [num] ; // array fdecl
 VarDecl: 
 	Type ID SEMICOLON {
 
@@ -422,10 +403,7 @@ Stmt:
 
 	| WhileLoop {}
 
-
-	/* | IfStmt {
-		printf("Found an IF Statement!\n");
-	} */
+	| IfStmt {}
 
 	| Expr SEMICOLON {}
 
@@ -543,6 +521,9 @@ Condition:
 		} else {
 
 			printf("Error: INCOMPATIBLE TYPES\n");
+			printf("\nTypes are %s", $1->nodeType);
+			printf("\nTypes are %s", $3->nodeType);
+			printf("\n");
 			semanticCheckPassed = 0;
 		}
 
@@ -935,7 +916,7 @@ int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {
 	int val1; int val2;
 	if (!strcmp(x->nodeType, "id") && !strcmp(y->nodeType, "id")) {
 		val1 = atoi(getValue(x->RHS, currentScope));
-		val2 = getValue(y->RHS, currentScope);
+		val2 = atoi(getValue(y->RHS, currentScope));
 	} 
 	else if (!strcmp(x->nodeType, "id")) {
 		val1 = atoi(getValue(x->RHS, currentScope));

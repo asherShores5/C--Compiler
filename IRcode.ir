@@ -4,10 +4,6 @@ MAIN:
 LOAD V0, 1
 LOAD WORD: A0, x
 SYSTEM CALL
-# Printing -----------
-LOAD V0, 1
-LOAD WORD: A0, help
-SYSTEM CALL
 # -----------------
 #  Done, terminate program.
 

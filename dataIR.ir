@@ -1,6 +1,5 @@
 DATA:
-x:   WORD  2
-x:   WORD  10
-help:   WORD  3
+x:   WORD  5
+y:   WORD  3
 
-€FF°÷
+

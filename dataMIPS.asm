@@ -1,7 +1,7 @@
 .data
 newLine: .asciiz "\n"
-x:   .word  2
-help:   .word  3
+x:   .word  5
+y:   .word  3
 
 .text
 main:
@@ -18,11 +18,4 @@ main:
 # Printing -----------
 li $v0, 1
 lw $a0, x
-syscall
-la $a0, x #get address
-li $a1, 10 #new value
-sw $a1 0($a0) #save new value
-# Printing -----------
-li $v0, 1
-lw $a0, help
 syscall

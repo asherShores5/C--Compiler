@@ -190,7 +190,16 @@ void setIntVar(char id[50], int val) {
 
 }
 
+void emitMIPSParameters(char *param, int count) {
 
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "li $a%d, %s", count, param);
+
+}
 
 void emitMIPSFunc (char func[50]) {
 

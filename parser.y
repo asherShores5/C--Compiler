@@ -1,4 +1,4 @@
-//Asher Shores, Riley Monwai, Even Klever
+//Asher Shores, Even Klever, Riley Monwai
 // CST-405: Compilers
 // Professor Isac Artzi
 
@@ -26,7 +26,9 @@ void yyerror(const char* s);
 char currentScope[50] = "GLOBAL"; // global or the name of the function
 char currReturnType[10];
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
-int gotToElse = 0;
+int goToElse = 0;	// is the condition of if() true?
+int onElse = 0;		// is parser on the else statement
+int maxParam = 0; 	//max of 4 paramaters
 char typeTemp[50];
 struct AST * lastVar; 
 
@@ -249,12 +251,12 @@ FunDeclList:
 FunDecl:
 	FUNC Type ID LPAREN {
 
-		printf("\nRECOGNIZED RULE: FUNCTION declaration %s\n\n", $3);
+		printf(BGREEN "\nRECOGNIZED RULE: FUNCTION declaration %s\n\n" RESET, $3);
 		printf("ID = %s\n", $3);
 		strcpy(currentScope, $3);
-		printf("\n------------------- Scope Change --> ");
+		printf(BORANGE "\n------------------- Scope Change --> ");
 		printf("%s", currentScope);
-		printf(" -------------------\n");
+		printf(" -------------------\n" RESET);
 
 
 		// ----- SYMBOL TABLE ----- //
@@ -265,7 +267,6 @@ FunDecl:
  		if (inSymTab == 0) {
 			
 			addItem($3, "FUNC", $2->nodeType, currentScope);
-			showSymTable();
 
 		} 
 		else {
@@ -278,6 +279,8 @@ FunDecl:
 	} 
 
 	ParamDecList RPAREN Block {
+
+		showSymTable(); //updates for function and parameters
 
 		// ----- AST ----- //
 		if (semanticCheckPassed) {
@@ -296,6 +299,7 @@ FunDecl:
 		endOfFunction();
 	
 		semanticCheckPassed = 1;
+		maxParam = 0;
 
 	}
 ;
@@ -308,7 +312,10 @@ FunDecl:
 //                  ParamDeclListTail
 ParamDecList: /* EPSILON */ {printf("No ParamDeclList (EPSILON)\n\n");}
 
-	| ParamDecListTail {}
+	| ParamDecListTail {
+		printf("Parameters Detected--->\n");
+		$$ = $1;
+	}
 
 ;
 
@@ -317,9 +324,19 @@ ParamDecList: /* EPSILON */ {printf("No ParamDeclList (EPSILON)\n\n");}
 //ParamDeclListTail --> ParamDecl 
 //                      ParamDecl, ParamDeclListTail 
 ParamDecListTail: 
-	ParamDecl {}
+	ParamDecl {	
 
-	| ParamDecl ParamDecListTail {$1->right = $2; $$ = $1;}
+		if (maxParam < 4) {
+			maxParam++;
+		} else {
+			printf(RED "WARNING!! Too many parameters in FunDecl" RESET);
+		}
+	}
+
+	| ParamDecl ParamDecListTail {
+		$1->right = $2; 
+		$$ = $1;
+	}
 
 ;
 
@@ -330,11 +347,11 @@ ParamDecListTail:
 ParamDecl: 
 	Type ID {
 
-		printf("\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n", $2);
+		printf(BCYAN "\nRECOGNIZED RULE: Parameter VARIABLE declaration %s\n\n" RESET, $2);
 
 		//Asher's Semantic Checks
 		// ---- Symbol Table ---- //
-		symTabAccess();
+		// symTabAccess();
 
 		//Var Decl Check
 		int inSymTab = found($2, currentScope);
@@ -426,6 +443,7 @@ Stmt:
 
 
 		// ---- MIPS CODE ---- //
+
 		emitMIPSReturn($2->RHS, returnType);
 
 
@@ -476,13 +494,16 @@ Stmt:
 IfStmt:	
 	IF LPAREN Condition RPAREN Block Else {
 
-		if ($3) {
-			
-			printf("IfStmt Executed ----->\n");			
-			
+		if (!goToElse) {			
+			onElse = 0;
+			$$ = AST_assignment("IF", "COND", "BLOCK");
+			$$->left = $3;
+			$$->right = $5;
+			printf("IfStmt Executed ----->\n");					
 		}
 
 		else {
+			onElse = 1;
 			printf("GoTo Else statment----->\n");
 		}		
 
@@ -535,11 +556,11 @@ Condition:
 
 		if (cond) {
 			printf("True\n");
-			$$ = 1;
+			goToElse = 0;
 		}
 		 else {
 			printf("False\n");
-			$$ = 0;
+			goToElse = 1;
 		}
 	}
 
@@ -755,11 +776,27 @@ Expr:
 		semanticCheckPassed = 1;
 	}
 
-	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
+	| ID LPAREN ParamList RPAREN {
+
+		printf("\nRECOGNIZED RULE: Function Call %s\n", $1);
+
+		// ---- SEMANTIC CHECKS ---- //
+		//TODO make sure types are same 
+		
+	}
 	
 	
 	| ID LBRACKET INTEGER RBRACKET
 
+	| ID EQ ID LPAREN ParamList RPAREN {
+		printf("FUNCTION CALL DETECTED\n\n");
+	}
+
+
+;
+
+FunCall:
+	ID LPAREN ParamList RPAREN
 
 ;
 
@@ -769,14 +806,14 @@ Primary:
 	}
 
 	| DECIMAL {
-		printf("float detected: %f\n", $1);
+		// printf("float detected: %f\n", $1);
 		char numVal[10];
 		sprintf(numVal, "%f", $1);
 		$$ = AST_assignment("float", "", numVal);
 	}
 	
 	| INTEGER {
-		printf("int detected\n");
+		// printf("int detected\n");
 		char numVal[10];
 		sprintf(numVal, "%d", $1);
 		$$ = AST_assignment("int", "", numVal);
@@ -819,7 +856,7 @@ MathExpr:
 		sprintf(opArray, "%s", $2);
 
 		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
-		// printf("newVal = %s\n", newVal);
+		printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
 
@@ -833,7 +870,7 @@ Trm:
 		if (strcmp($1->nodeType,"id") == 0) {
 			// printf("ID Found!\n");
 			sprintf(numVal, "%s", getValue($1->RHS, currentScope));
-			$$ = AST_assignment("=", $1->RHS, atoi(numVal));
+			$$ = AST_assignment("=", $1->RHS, numVal);
 
 			// Set item to used 
 			setItemUsed($1->RHS, currentScope);
@@ -888,12 +925,34 @@ Factor:
 	}
 
 	| LPAREN MathExpr RPAREN {
+		// printf("Factor test\n");
+		printf("MathExpr = %s\n", $2->RHS);
 		$$ = AST_assignment("int", "", $2->RHS);
 	}
-
+;
 
 ParamList:	{}
-	| Primary {printf("\nRECOGNIZED RULE: Parameter\n");} ParamList {}
+	| Primary {
+
+		// printf("\nRECOGNIZED RULE: Parameter\n");
+
+		char *paramValue;
+		if (!strcmp($1->nodeType, "id")) {
+			char *idVal = getValue($1->RHS, currentScope);
+			paramValue = malloc((int)strlen(idVal)+1);
+			strcpy(paramValue, idVal);
+		} 
+		else {
+			int size = sizeof($1->RHS) / sizeof($1->RHS)[0]; 
+			paramValue = (char*)malloc(size*sizeof(char));
+			strcpy(paramValue, $1->RHS);
+		}
+		 
+		printf(BCYAN "ParamValue = %s\n" RESET, paramValue);
+
+		emitMIPSParameters(paramValue, maxParam);
+
+	} ParamList {}
 ;
 
 
@@ -979,22 +1038,22 @@ int computeEquation(int val1, int val2, char operator) {
 		case '+':
 			newVal = val1 + val2;
 			/* sprintf(newVal, "%d", val1 + val2); */
-			printf("Addtion Expr found!\n");
+			/* printf("Addtion Expr found!\n"); */
 			break;
 		case '-':
 			newVal = val1 - val2;
 			/* sprintf(newVal, "%d", val1 - val2); */
-			printf("Subtraction Expr found!\n");
+			/* printf("Subtraction Expr found!\n"); */
 			break;
 		case '*':
 			newVal = val1 * val2;
 			/* sprintf(newVal, "%d", val1 * val2); */
-			printf("Multiplication Expr found!\n");
+			/* printf("Multiplication Expr found!\n"); */
 			break;
 		case '/':
 			newVal = val1 / val2;
 			/* sprintf(newVal, "%d", val1 / val2); */
-			printf("Division Expr found!\n");
+			/* printf("Division Expr found!\n"); */
 			break;
 	}
 

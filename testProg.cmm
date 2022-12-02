@@ -3,7 +3,7 @@ x = 5;
 
 func int main(int z) {
 	int help;
-	if (x == 5) {
+	if (x < z) {
 		write x;
 	}
 	/*help = (1 + 8) / 3;

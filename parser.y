@@ -775,6 +775,9 @@ Expr:
 	}
 
 	| ID LPAREN ParamList RPAREN {printf("\nRECOGNIZED RULE: Function Call %s\n", $1);}
+	
+	
+	| ID LBRACKET INTEGER RBRACKET
 
 
 ;

@@ -331,7 +331,7 @@ void appendFiles() {
     while((ch = getc(funcs)) != EOF)
         putc(ch, dataMIPS);
  
-    printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n");
+    // printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n");
     fclose(mainMIPS);
     fclose(funcs);
     fclose(dataMIPS);

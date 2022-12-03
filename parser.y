@@ -859,42 +859,8 @@ Expr:
 
 		semanticCheckPassed = 1;
 	}
-
-	/* | ID EQ FunCall {
-
-		printf(BPINK"ID ASSIGNMENT RECOGNIZED ---->\n"RESET);
-
-		// ---- SEMANTIC CHECKS ---- //
-
-		char *type1 = getVariableType($1, currentScope);
-		char *type2 = getVariableType($3->RHS, currentScope);
-
-		if (!compareTypes($1, $3->RHS, currentScope)) {
-			printf(RED"ERROR Type Mismatch: Attempting to assign %s to %s"RESET, type2, type1);
-			semanticCheckPassed = 0; 
-		}
-
-		// ---- CODE GENERATION ---- //
-
-		// ---- IR CODE ---- //
-
-
-		// ---- MIPS CODE ---- //
-		if (semanticCheckPassed) {
-			
-		}		
-
-		semanticCheckPassed = 1;
-
-	}	 */
 	
 	| ID LBRACKET INTEGER RBRACKET
-
-
-	/* | ID EQ ID LPAREN ParamList RPAREN {
-		printf("FUNCTION CALL DETECTED\n\n");
-	} */
-
 
 ;
 
@@ -1203,7 +1169,11 @@ int main(int argc, char**argv)
 	yyparse();
 
 	emitEndOfAssemblyCode();
+
+	printf(PINK"\n##### IR CODE GENERATED #####\n\n"RESET);
+
 	emitEndOfAssemblyCodeIR();
+	printf(PINK"\n##### MIPS CODE GENERATED #####\n\n"RESET);
 
 	// Merge data and main sections in MIPS
 	/* addMainToData(); */
@@ -1212,7 +1182,7 @@ int main(int argc, char**argv)
 	addMainToDataIR();
 
 	/* showSymTable(); */
-	printf("\n\n##### COMPILER ENDED #####\n\n");
+	printf(PINK"\n##### COMPILER ENDED #####\n\n"RESET);
 
 
 	/* fprintf (GarbageMIPS, "syscall\n"); */

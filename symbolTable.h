@@ -32,7 +32,7 @@ int symTabIndex = 0;
 int SYMTAB_SIZE = 20;
 
 void symTabAccess(void){
-	printf("\n::::> Symbol table accessed.\n\n");
+	printf(GRAY "::::> Symbol table accessed.\n\n" RESET);
 }
 
 void addItem(char itemName[50], char itemKind[8], char itemType[8], char scope[50]){
@@ -91,7 +91,7 @@ int getSymTabIndex() {
 }
 
 // Adds value to an ID in the symbol table
-int setItemValue(char itemName[50], char itemValue[50], char scope[50]) {
+int setItemValue(char itemName[50], char itemValue[8], char scope[50]) {
 	
 	for (int i = 0; i < SYMTAB_SIZE; i++) {
 		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
@@ -100,13 +100,13 @@ int setItemValue(char itemName[50], char itemValue[50], char scope[50]) {
 		
 		if (str1 == 0 && (isGlobal == 0 || str2 == 0)) {
 			strcpy(symTabItems[i].itemValue, itemValue);
-			printf("\nValue: %s added to item: %s\n\n", itemValue, symTabItems[i].itemName);
+			printf(BGREEN"\nSetting value of %s to %s ---->\n\n"RESET, symTabItems[i].itemName, itemValue);
 			showSymTable();
 			return 1; //value added 
 		}
 	}
 
-	printf("Item %s was not found\n", itemName);	
+	printf(RED"ERROR: Item %s was not found\n" RESET, itemName);	
 	return 0;
 }
 
@@ -129,9 +129,7 @@ int setItemUsed(char itemName[50],  char scope[50]) {
 }
 
 // Returns the value of a given ID
-const char* getValue(char itemName[50], char scope[50]) {
-
-	const char *returnValue;
+char *getValue(char itemName[50], char scope[50]) {
 
 	for(int i=0; i<100; i++) {
 		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
@@ -139,9 +137,8 @@ const char* getValue(char itemName[50], char scope[50]) {
 		int str2 = strcmp(symTabItems[i].scope,scope);
 
 		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
-			returnValue = (symTabItems[i].itemValue);
-			// printf("Item Value:%d\n", returnValue);
-			return returnValue;
+			// printf("Item Value:%s\n", symTabItems[i].itemValue);
+			return symTabItems[i].itemValue;
 		}
 	}
 
@@ -167,18 +164,17 @@ char* getVariableType(char itemName[50], char scope[50]){
     //char *name = "int";
     //return name;
     for(int i=0; i<SYMTAB_SIZE; i++){
-
 		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
         int str1 = strcmp(symTabItems[i].itemName, itemName);
         //printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
         int str2 = strcmp(symTabItems[i].scope,scope);
         //printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
         if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
-            return symTabItems[i].itemType; // found the ID in the table
-			// printf("Debug\n\n");
+			// printf("Debug: %s\n\n", symTabItems[i].itemType);
+            return symTabItems[i].itemType; 
         }
     }
-    return NULL;
+    return NULL;// ID not found in the table
 }
 
 int compareTypes(char itemName1[50], char itemName2[50], char scope[50]){

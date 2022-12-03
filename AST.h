@@ -107,31 +107,3 @@ void printNode(struct AST* node) {
     printf("%s %s\n\n", node->LHS, node->RHS);
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    

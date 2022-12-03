@@ -1,15 +1,28 @@
 int x;
-x = 5;
+x = 1;
 int y;
 y = 3;
+char rv;
 
-func int main(int z) {
+func int test() {
 	int help;
-	if (x < z) {
-		write x;
+	if (x < y) {
+		x = 0;
+	} 
+	else {
+		x = 5;
 	}
+	return x;
 	/*help = (1 + 8) / 3;
 	test = myArray[0];
 	write help;
 	return 0;*/
 }
+func int main () {
+
+	rv = test();
+	write rv;
+
+}
+/*
+*/

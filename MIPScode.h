@@ -190,6 +190,54 @@ void setIntVar(char id[50], int val) {
 
 }
 
+void emitMIPSIfStmt(int ifNum) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "\nfalse%d:\n", ifNum);
+
+    fclose(mainMIPS);
+
+}
+
+void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "li $t0, %s\n", var1);
+    fprintf(mainMIPS, "li $t1, %s\n", var2);
+
+
+    // Basically we use the reverse of the operator becuase
+    // the "if" block executes before the "else" block
+    if (!strcmp(operator, "!=")) {
+        fprintf(mainMIPS, "beq $t0, $t1, false%d\n", n);
+	} 
+	else if (!strcmp(operator, "==")) {
+		fprintf(mainMIPS, "bne $t0, $t1, false%d\n", n);
+	}
+	else if (!strcmp(operator, ">=")) {
+		fprintf(mainMIPS, "ble $t0, $t1, false%d\n", n);
+	}
+	else if (!strcmp(operator, "<=")) {
+		fprintf(mainMIPS, "bge $t0, $t1, false%d\n", n);
+	}
+	else if (!strcmp(operator, ">")) {
+		fprintf(mainMIPS, "blt $t0, $t1, false%d\n", n);
+	}
+	else if (!strcmp(operator, "<")) {
+		fprintf(mainMIPS, "bgt $t0, $t1, false%d\n", n);
+	}
+    fclose(mainMIPS);
+
+}
+
 void emitMIPSParameters(char *param, int count) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
@@ -210,7 +258,7 @@ void emitMIPSFunc (char func[50]) {
 
     fprintf(mainMIPS, "jal  %s\n", func);
 
-    fprintf(funcs, "%s:\n", func);
+    fprintf(funcs, "\n%s:\n", func);
 
     fclose(funcs);
     fclose(mainMIPS);
@@ -223,46 +271,31 @@ void emitMIPSReturn (char rv[50], char type[50]) {
 
     fprintf(funcs, "li $v1, %s\n", rv);
 
-    // if (strcmp(type, "int") == 0) {
-    //     // printf("printing an integer----->\n");
+    fprintf(funcs, "jr  $ra\n");
 
-    //     fprintf(funcs, "li $v1, %s\n", rv);
-    // } 
-
-    // //if value is a character
-    // else if (strcmp(type, "char") == 0) {
-    //     // printf("printing a char\n");
-        
-    // }
-
-    fprintf(funcs, "jr  $ra");
+    fclose(funcs);
     
 }
 
-// void emitMIPSReturnChar (char rv) {
+void emitMIPSGetReturn () {
 
-//     funcs = fopen("funcs.asm", "a");
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
 
-//     fprintf(funcs, "");
-//     fprintf(funcs, "jr  $ra");
+    fclose(mainMIPS);;
 
-// }
-
-// void emitMIPSReturnID (char rv) {
-
-//     funcs = fopen("funcs.asm", "a");
-
-//     fprintf(funcs, "");
-//     fprintf(funcs, "jr  $ra");
-
-// }
+}
 
 
-void endOfFunction () {
+void endOfMIPSFunction (char funcName[50]) {
 
     funcs = fopen("funcs.asm", "a");
-    fprintf(funcs, "\n");
+    fprintf(funcs, ".end %s\n", funcName);
     inFunc = 0;
+
+    fclose(funcs);
 
 }
 
@@ -298,7 +331,7 @@ void appendFiles() {
     while((ch = getc(funcs)) != EOF)
         putc(ch, dataMIPS);
  
-    printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n\n");
+    printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n");
     fclose(mainMIPS);
     fclose(funcs);
     fclose(dataMIPS);

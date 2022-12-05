@@ -870,10 +870,10 @@ FunCall:
 		printf("\nRECOGNIZED RULE: Function Call ----> %s\n", $1);
 
 		char returnName[8];
-		sprintf(returnName, "%sReturn", $1);
+		(returnName, "%sReturn", $1);
 		char *returnType = getVariableType(returnName, currentScope);
 		char *returnVal = getValue(returnName, currentScope);
-		$$ = AST_assignment(returnType, "", returnVal);
+		$$ = AST_assignment(&returnType, "", &returnVal);
 
 		// ---- SEMANTIC CHECKS ---- //
 		//TODO make sure types are same 

@@ -1,6 +1,7 @@
 .text
 main:
 # -----------------------
+jal  test
 jal  main
 # -----------------
 #  Done, terminate program.

@@ -1,31 +1,19 @@
-int aNumber;
-float secNum;
-char someLetter;  /* unused variable */
-char message[10];
-
-func int displayMes(){
-	message[0] = 'p';
-	message[1] = 'r';
-	message[2] = 'i';
-	message[3] = 'n';
-	message[4] = 't';
-	return (0);
-}
-
-func float ambFunc (float a float b float c){
-
-   /* great optimization opportunity */
-
-   float result;
- 
-   result = (average(a b c) + average(a b c))/2.0;
-
-   return result;
-}
+int x;
+x = 1;
+int y;
+y = 3;
 
 func int main() {
-justAverage = average(12.5 13.7 25.8);
-aNumber = displayMes();
-write justAverage;
-writeln;
+	int help;
+	if (x < y) {
+		x = 0;
+	} 
+	else {
+		x = 10;
+	}
+	return x;
+	help = (1 + 8) / 3;
+	testVar = myArray[0];
+	write help;
+	return 0;
 }

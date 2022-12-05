@@ -1,5 +1,8 @@
 DATA:
-x:   WORD  5
+x:   WORD  1
 y:   WORD  3
+x:   WORD  0
+x:   WORD  5
+help:   WORD  1
 
 

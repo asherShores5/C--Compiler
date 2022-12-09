@@ -52,6 +52,21 @@ void emitMIPSConstantIntAssignment (int id1, char id2[50]){
     fclose(mainMIPS);
 }
 
+void emitMIPSNewLine () {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "li $v0, 4\n");
+    fprintf(mainMIPS, "la $a0, newLine\n");
+    fprintf(mainMIPS, "syscall\n");
+
+    fclose(mainMIPS);
+
+}
+
 void emitMIPSWriteInt(int n){
 
     mainMIPS = fopen("MIPScode.asm", "a");
@@ -190,17 +205,43 @@ void setIntVar(char id[50], int val) {
 
 }
 
-void emitMIPSIfStmt(int ifNum) {
+void emitMIPSElseStmt(int ifNum) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
     }
 
-    fprintf(mainMIPS, "\nfalse%d:\n", ifNum);
+    fprintf(mainMIPS, "\n# --- ELSE STMT --- #\n");
+    fprintf(mainMIPS, "false%d:\n", ifNum);
 
     fclose(mainMIPS);
 
+}
+
+void emitMIPSEndOfIfBlock(int ifNum) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "# --- JUMP PAST ELSE --- #\n");
+    fprintf(mainMIPS, "beq $0, $0, jumpElse%d\n", ifNum);
+
+    fclose(mainMIPS);
+}
+
+void emitMIPSJumpElse(int ifNum) {
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "# ---PAST ELSE--->\n");
+    fprintf(mainMIPS, "jumpElse%d:\n", ifNum);
+
+    fclose(mainMIPS);
 }
 
 void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
@@ -212,6 +253,7 @@ void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
     fprintf(mainMIPS, "li $t0, %s\n", var1);
     fprintf(mainMIPS, "li $t1, %s\n", var2);
+    fprintf(mainMIPS, "# --- IF STMT --- #\n");
 
 
     // Basically we use the reverse of the operator becuase

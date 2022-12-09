@@ -6,22 +6,23 @@ int rv;
 
 func int test() {
 	int help;
-	if (x < y) {
+	if (x == y) {
 		x = 0;
+		write x;
+		writeln;
 	} 
 	else {
 		x = 5;
+		write y;
+		writeln;
 	}
-	return x;
-	help = (1 + 8) / 3;
-	testVar = myArray[0];
-	write help;
+	help = (1 + 8) / y;
 	return 0;
 }
-func int main () {
+func int mainFunc() {
 
 	rv = test();
-	write rv;
+	write x;
 
 }
 /*

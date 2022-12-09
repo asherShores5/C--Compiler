@@ -516,7 +516,12 @@ Stmt:
 
 
 	| WRITELN SEMICOLON {
+
 		printf("\nRECOGNIZED RULE: Write Line %s\n", $1);
+
+	 	$$ = AST_assignment("WRITELN", "", "");
+
+		emitMIPSNewLine();
 	}
 
 ;
@@ -524,7 +529,8 @@ Stmt:
 IfStmt:	
 	IF LPAREN Condition RPAREN Block {
 
-			emitMIPSIfStmt(ifCount);
+			emitMIPSEndOfIfBlock(ifCount);
+			emitMIPSElseStmt(ifCount);
 
 		}
 
@@ -534,9 +540,6 @@ IfStmt:
 		$$ = AST_assignment("IF", "COND", "BLOCK");
 		$$->left = $3;
 		$$->right = $5;
-
-		// printf("IfStmt Executed ----->\n");		
-
 
 		// ---- May go back to this implementation....
 		// ---- using MIPS atm ---->
@@ -655,6 +658,7 @@ Else:
 		// DO STUFF
 		// printf("else{%s}", code);
 		//big brain time
+		emitMIPSJumpElse(ifCount);
 	}
 
 ;
@@ -873,7 +877,7 @@ FunCall:
 		(returnName, "%sReturn", $1);
 		char *returnType = getVariableType(returnName, currentScope);
 		char *returnVal = getValue(returnName, currentScope);
-		$$ = AST_assignment(&returnType, "", &returnVal);
+		$$ = AST_assignment(returnType, "", returnVal);
 
 		// ---- SEMANTIC CHECKS ---- //
 		//TODO make sure types are same 
@@ -996,7 +1000,12 @@ Trm:
 
 Factor:
 	ID {
-		$$ = AST_assignment("id", "" , $1);
+		char val[25];
+		strcpy(val, getValue($1, currentScope));
+		if (!strcmp(val, "NULL")) {
+			printf(RED"ERROR: ID %s is null"RESET, $1);
+		}
+		$$ = AST_assignment("id", $1 , val);
 	}
 
 	| INTEGER {

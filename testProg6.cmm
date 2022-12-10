@@ -1,0 +1,25 @@
+/* Loop */
+
+int x;
+int num1;
+int num2;
+char y;
+x = 10;
+num1 = 5;
+num2 = 20;
+
+
+func int addValue(){
+     int result;
+     result = num1 + num2;
+     return result;
+}
+func int main(){
+     int result1;
+     while (x > 0){
+        if (x == 10) {
+          write x;
+        }
+        x = x - 5;
+     }
+}

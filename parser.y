@@ -28,10 +28,10 @@ char currReturnType[10];
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
 int goToElse = 0;	// is the condition of if() true?
 int onElse = 0;		// is parser on the else statement
-int maxParam = 0; 	//max of 4 paramaters
+int maxParam = 0; 	//max of 3 paramaters
 int ifCount = 0;
-char typeTemp[50];
-struct AST * lastVar; 
+int whileCount = 0;
+// char typeTemp[50];
 
 
 %}
@@ -125,8 +125,6 @@ DeclList:
 		$$ = $1;
 		// printf("DECL\n");
 	}
-
-	|
 	
 	| FunDeclList
 ;//DeclList --> Decl
@@ -529,12 +527,15 @@ Stmt:
 IfStmt:	
 	IF LPAREN Condition RPAREN Block {
 
-			emitMIPSEndOfIfBlock(ifCount);
-			emitMIPSElseStmt(ifCount);
+		//skip mips else if condidtion is true
+		ifCount++;
 
-		}
+		emitMIPSEndOfIfBlock(ifCount);
 
-		Else {
+		emitMIPSElseStmt(ifCount);
+		
+
+	} Else {
 
 		printf(BPINK "IF STATEMENT RECOGNIZED ---->\n" RESET);
 		$$ = AST_assignment("IF", "COND", "BLOCK");
@@ -553,15 +554,38 @@ IfStmt:
 		// }	
 
 		semanticCheckPassed = 1;
-		ifCount++;	
 
+	}
+
+;
+
+Else: 
+	// EPSILON
+	{printf("NO ELSE STATEMENT\n\n");}
+	
+	| ELSE  Block {
+		// DO STUFF
+		// printf("else{%s}", code);
+		//big brain time
+		printf("");
+		emitMIPSPassElse(ifCount);
 	}
 
 ;
 
 WhileStart: WHILE LPAREN {printf("Hi Evan");} WhileLoop;
 
-WhileLoop: Condition RPAREN Block {printf("Hi Asher");}
+WhileLoop: 
+	WHILE LPAREN Condition RPAREN Block {
+		
+		// ----- CODE GENERATION ----- //
+
+		// ---- MIPS CODE ---- //
+		// emitMIPSWhile(whileCount);
+		
+		
+		printf("Hi Asher");
+	}
 
 Condition:
 	Primary LOGICOP Primary {
@@ -646,19 +670,6 @@ Condition:
 
 		semanticCheckPassed = 1;
 
-	}
-
-;
-
-
-Else: 
-	// EPSILON
-	
-	| ELSE Block {
-		// DO STUFF
-		// printf("else{%s}", code);
-		//big brain time
-		emitMIPSJumpElse(ifCount);
 	}
 
 ;
@@ -763,7 +774,7 @@ Expr:
 		int inSymTab = found($2->RHS, currentScope);
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
 		if (inSymTab == 0) {
-			printf("\nSEMANTIC ERROR: Expr %s is NOT in the symbol table\n", $2->nodeType);
+			printf(RED"\nSEMANTIC ERROR: Expr %s is NOT in the symbol table\n" RESET, $2->nodeType);
 		}
 		showSymTable();
 
@@ -773,13 +784,14 @@ Expr:
 	}
 
 	| ID EQ Expr {
-
+		
 		printf("\nRECOGNIZED RULE: Assignment Statement ----> %s\n", $1);
 		int inSymTab = found($1, currentScope);
 
+		
 		// Variable to tell if value has been assigned yet
 		int isNullValue = strcmp(getValue($1, currentScope), "NULL");
-	
+
 
 		// ------ SEMANTIC CHECKS ------ //
 		if (!inSymTab) {
@@ -863,6 +875,25 @@ Expr:
 
 		semanticCheckPassed = 1;
 	}
+
+	// | ID PLUS PLUS {
+
+	// 	// ---- SEMANTIC CHECKS ---- //
+
+	// 	char idVal[25];
+	// 	strcpy(idVal, getValue($1, currentScope));
+
+	// 	if (!strcmp(idVal, "NULL")) {
+	// 		fprintf(RED "ERROR: ID %s is not defined" RESET, $1);
+	// 		semanticCheckPassed = 0;
+	// 	}
+
+	// 	// ---- CODE GENERATION ---- //
+
+	// 	// ---- MIPS CODE ---- //
+	// 	emitMIPSIncrement($1);
+
+	// }
 	
 	| ID LBRACKET INTEGER RBRACKET
 
@@ -878,7 +909,8 @@ FunCall:
 		char *returnType = getVariableType(returnName, currentScope);
 		char *returnVal = getValue(returnName, currentScope);
 		$$ = AST_assignment(returnType, "", returnVal);
-
+		
+		emitMIPSFuncCall($1);
 		// ---- SEMANTIC CHECKS ---- //
 		//TODO make sure types are same 
 		
@@ -941,6 +973,8 @@ MathExpr:
 		char opArray[3];
 		sprintf(opArray, "%s", $2);
 
+		printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
+
 		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
 		printf("newVal = %s\n", newVal);
 
@@ -955,11 +989,11 @@ Trm:
 		char numVal[10];
 		if (strcmp($1->nodeType,"id") == 0) {
 			// printf("ID Found!\n");
-			sprintf(numVal, "%s", getValue($1->RHS, currentScope));
-			$$ = AST_assignment("=", $1->RHS, numVal);
+			sprintf(numVal, "%s", getValue($1->LHS, currentScope));
+			$$ = AST_assignment("=", $1->LHS, numVal);
 
 			// Set item to used 
-			setItemUsed($1->RHS, currentScope);
+			//setItemUsed($1->RHS, currentScope);
 
 		} else {
 			//primary is a number, do nothing
@@ -1000,6 +1034,7 @@ Trm:
 
 Factor:
 	ID {
+		// printf("ID detected\n");
 		char val[25];
 		strcpy(val, getValue($1, currentScope));
 		if (!strcmp(val, "NULL")) {

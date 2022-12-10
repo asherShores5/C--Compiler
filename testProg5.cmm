@@ -1,0 +1,16 @@
+/* If Statements */
+
+int x;
+char y;
+x = 20;
+y = 'n';
+
+func int main(){
+     int result;
+     if (x > 0){
+        write result;
+     }
+     else{
+        write y;
+     }
+}

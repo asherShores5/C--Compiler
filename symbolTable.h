@@ -130,11 +130,15 @@ int setItemUsed(char itemName[50],  char scope[50]) {
 
 // Returns the value of a given ID
 char *getValue(char itemName[50], char scope[50]) {
-
-	for(int i=0; i<100; i++) {
+	for(int i=0; i<100-1; i++) {
 		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
 		int str1 = strcmp(symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[i].scope,scope);
+
+		//If the variable is referenced in the wrong scope, we print a message and then cry
+		if (str1 == 0 && str2 == 1){
+			printf("ERROR: variable %s does not exist in this scope %s.",itemName,scope);
+		}
 
 		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
 			// printf("Item Value:%s\n", symTabItems[i].itemValue);

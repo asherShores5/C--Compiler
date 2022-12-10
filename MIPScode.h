@@ -4,8 +4,11 @@
 FILE * mainMIPS;
 FILE * dataMIPS;
 FILE * funcs;
+FILE * loops;
 
 int inFunc = 0;
+int inLoop = 0;
+
 
 void  initAssemblyFile(){
     // Creates a MIPS file with a generic header that needs to be in every file
@@ -15,7 +18,7 @@ void  initAssemblyFile(){
     funcs = fopen("funcs.asm", "w");
     
     fprintf(mainMIPS, ".text\n");
-    fprintf(mainMIPS, "main:\n");
+    // fprintf(mainMIPS, "main:\n");
     fprintf(mainMIPS, "# -----------------------\n");
 
     // data
@@ -232,7 +235,7 @@ void emitMIPSEndOfIfBlock(int ifNum) {
     fclose(mainMIPS);
 }
 
-void emitMIPSJumpElse(int ifNum) {
+void emitMIPSPassElse(int ifNum) {
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
@@ -244,6 +247,30 @@ void emitMIPSJumpElse(int ifNum) {
     fclose(mainMIPS);
 }
 
+void emitMIPSIncrement(char id[10]) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+    
+    fprintf(mainMIPS, "lw $s0, %s\n", id);
+    fprintf(mainMIPS, "addi $s0, $s0, 1\n");
+
+    fclose(mainMIPS);
+
+}
+
+emitMIPSWhile(int n) {
+
+    loops = fopen("loops.asm", "a");
+
+    fprintf(loops, "while%d:", n);
+    inLoop = 1;
+
+    fclose(loops);
+}
+
 void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
@@ -253,7 +280,7 @@ void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
     fprintf(mainMIPS, "li $t0, %s\n", var1);
     fprintf(mainMIPS, "li $t1, %s\n", var2);
-    fprintf(mainMIPS, "# --- IF STMT --- #\n");
+    fprintf(mainMIPS, "# --- CONDITION --- #\n");
 
 
     // Basically we use the reverse of the operator becuase
@@ -293,16 +320,25 @@ void emitMIPSParameters(char *param, int count) {
 
 void emitMIPSFunc (char func[50]) {
 
-    mainMIPS = fopen("MIPScode.asm", "a");
     funcs = fopen("funcs.asm", "a");
-    
-    inFunc = 1;
+    mainMIPS = fopen("MIPScode.asm", "a");
 
-    fprintf(mainMIPS, "jal  %s\n", func);
-
-    fprintf(funcs, "\n%s:\n", func);
-
+    if (strcmp(func, "main")) {
+        inFunc = 1;
+        fprintf(funcs, "\n%s:\n", func);
+    } 
+    else {
+        fprintf(mainMIPS, "\n%s:\n", func);
+    }
     fclose(funcs);
+    fclose(mainMIPS);
+
+}
+
+emitMIPSFuncCall (char func[50]) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    fprintf(mainMIPS, "jal  %s\n", func);
     fclose(mainMIPS);
 
 }
@@ -342,7 +378,7 @@ void endOfMIPSFunction (char funcName[50]) {
 }
 
 void emitEndOfAssemblyCode(){
-    mainMIPS = fopen("MIPScode.asm", "a");
+    mainMIPS = fopen("funcs.asm", "a");
 
     fprintf(mainMIPS, "# -----------------\n");
     fprintf(mainMIPS, "#  Done, terminate program.\n\n");
@@ -350,7 +386,7 @@ void emitEndOfAssemblyCode(){
     // fprintf(mainMIPS, "syscall      # system call (terminate)\n");
     fprintf(mainMIPS, "li $v0,10   # call code for terminate\n");
     fprintf(mainMIPS, "syscall      # system call (terminate)\n");
-    fprintf(mainMIPS, ".end main\n");
+    // fprintf(mainMIPS, ".end main\n");
 
     fclose(mainMIPS);    
 }
@@ -361,6 +397,7 @@ void appendFiles() {
 
     mainMIPS = fopen("MIPScode.asm", "r");
     funcs = fopen("funcs.asm", "r");
+    loops = fopen("loops.asm", "r");
     dataMIPS = fopen("dataMIPS.asm", "a");
 
     fprintf(dataMIPS, "\n");
@@ -372,10 +409,16 @@ void appendFiles() {
 
     while((ch = getc(funcs)) != EOF)
         putc(ch, dataMIPS);
+
+    fprintf(dataMIPS, "\n");
+
+    while((ch = getc(loops)) != EOF)
+        putc(ch, dataMIPS);
  
     // printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n");
     fclose(mainMIPS);
     fclose(funcs);
+    fclose(loops);
     fclose(dataMIPS);
 
 }

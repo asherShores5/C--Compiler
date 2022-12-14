@@ -576,12 +576,17 @@ Else:
 WhileStart: WHILE LPAREN {printf("Hi Evan");} WhileLoop;
 
 WhileLoop: 
-	WHILE LPAREN Condition RPAREN Block {
+	WHILE LPAREN {
+
+		printf("WHILE LOOP FOUND\n");
+
+	} Condition RPAREN Block {
+
 		
 		// ----- CODE GENERATION ----- //
 
 		// ---- MIPS CODE ---- //
-		// emitMIPSWhile(whileCount);
+		emitMIPSWhile(whileCount);
 		
 		
 		printf("Hi Asher");
@@ -619,10 +624,12 @@ Condition:
 		// if first primary is an id ---->
 		else if (!strcmp($1->nodeType, "id")) {
 			strcpy(type1, getVariableType($1->RHS, currentScope));
+			strcpy(type2, $3->nodeType);
 			strcpy(val1, getValue($1->RHS, currentScope));
 		}
 		// if second primary is an id ---->
 		else if (!strcmp($3->nodeType, "id")) {
+			strcpy(type1, $1->nodeType);
 			strcpy(type2, getVariableType($3->RHS, currentScope));
 			strcpy(val2, getValue($3->RHS, currentScope));
 		} 
@@ -645,6 +652,8 @@ Condition:
 
 		// may not need this if MIPS stuff works :) 
 		// also... Riley wants to smash his computer screen
+		// - (Riley 2 weeks later): MIPS works but we still need this
+		// and my computer is disfunctional now *smile*.
 		int cond = evalCondition($1, $3, $2);
 
 		printf("%s %s %s is ", $1->RHS, $2, $3->RHS);
@@ -660,13 +669,13 @@ Condition:
 
 		// ---- CODE GEN ---- //
 
-		if (semanticCheckPassed) {
+		if (semanticCheckPassed && !cond) {
 			// ---- IR CODE ---- //
 
 
 			// ---- MIPS CODE ---- //
 			emitMIPSCond(val1, val2, $2, ifCount);	
-		}
+		} 
 
 		semanticCheckPassed = 1;
 
@@ -1098,7 +1107,7 @@ BinOp: PLUS {}
 
 int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {
 
-	printf("Evaluating condition---->\n");
+	printf(ORANGE"Evaluating condition---->\n" RESET);
 
 	int val1; int val2;
 	if (!strcmp(x->nodeType, "id") && !strcmp(y->nodeType, "id")) {

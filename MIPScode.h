@@ -9,6 +9,8 @@ FILE * loops;
 int inFunc = 0;
 int inLoop = 0;
 
+char condString[20];
+
 
 void  initAssemblyFile(){
     // Creates a MIPS file with a generic header that needs to be in every file
@@ -263,15 +265,26 @@ void emitMIPSIncrement(char id[10]) {
 
 emitMIPSWhile(int n) {
 
-    loops = fopen("loops.asm", "a");
+    // loops = fopen("loops.asm", "a");
+    funcs = fopen("funcs.asm", "a");
 
-    fprintf(loops, "while%d:", n);
+    // fprintf(loops, "while%d:", n);
+    fprintf(funcs, "\nwhile%d:\n", n);
+    inFunc = 1;
     inLoop = 1;
 
-    fclose(loops);
+    // fclose(loops);
+    fclose(funcs);
 }
 
 void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
+
+    char op[5];
+    char loopType[5] = "false";
+    // printf("In loop = %d\n", inLoop);
+    if (inLoop) {
+        strcpy(loopType, "while");
+    }
 
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc == 1) {
@@ -286,23 +299,37 @@ void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     // Basically we use the reverse of the operator becuase
     // the "if" block executes before the "else" block
     if (!strcmp(operator, "!=")) {
-        fprintf(mainMIPS, "beq $t0, $t1, false%d\n", n);
+        strcpy(op, "beq");
+        fprintf(mainMIPS, "beq $t0, $t1, %s%d\n", loopType, n);
 	} 
 	else if (!strcmp(operator, "==")) {
-		fprintf(mainMIPS, "bne $t0, $t1, false%d\n", n);
+        strcpy(op, "bne");
+		fprintf(mainMIPS, "bne $t0, $t1, %s%d\n", loopType, n);
 	}
 	else if (!strcmp(operator, ">=")) {
-		fprintf(mainMIPS, "ble $t0, $t1, false%d\n", n);
+        strcpy(op, "ble");
+		fprintf(mainMIPS, "ble $t0, $t1, %s%d\n", loopType, n);
 	}
 	else if (!strcmp(operator, "<=")) {
-		fprintf(mainMIPS, "bge $t0, $t1, false%d\n", n);
+        strcpy(op, "bge");
+		fprintf(mainMIPS, "bge $t0, $t1, %s%d\n", loopType, n);
 	}
 	else if (!strcmp(operator, ">")) {
-		fprintf(mainMIPS, "blt $t0, $t1, false%d\n", n);
+        strcpy(op, "blt");
+		fprintf(mainMIPS, "blt $t0, $t1, %s%d\n", loopType, n);
 	}
 	else if (!strcmp(operator, "<")) {
-		fprintf(mainMIPS, "bgt $t0, $t1, false%d\n", n);
+        strcpy(op, "bgt");
+		fprintf(mainMIPS, "bgt $t0, $t1, %s%d\n", loopType, n);
 	}
+
+    // for while loops
+    if (inLoop) {
+        inLoop = 0;
+        sprintf(condString, "%s $t0, $t1, while%d", op, n);
+        fprintf(mainMIPS, "#While condition generated: %s\n", condString);
+    }
+
     fclose(mainMIPS);
 
 }
@@ -370,15 +397,25 @@ void emitMIPSGetReturn () {
 void endOfMIPSFunction (char funcName[50]) {
 
     funcs = fopen("funcs.asm", "a");
-    fprintf(funcs, ".end %s\n", funcName);
-    inFunc = 0;
+
+    if (inLoop) {
+        
+    }
+
+    if (strcmp(funcName, "main")) {
+
+        fprintf(funcs, "jr  $ra\n");
+        fprintf(funcs, ".end %s\n", funcName);
+        inFunc = 0;
+
+    }
 
     fclose(funcs);
 
 }
 
 void emitEndOfAssemblyCode(){
-    mainMIPS = fopen("funcs.asm", "a");
+    mainMIPS = fopen("MIPScode.asm", "a");
 
     fprintf(mainMIPS, "# -----------------\n");
     fprintf(mainMIPS, "#  Done, terminate program.\n\n");
@@ -386,7 +423,7 @@ void emitEndOfAssemblyCode(){
     // fprintf(mainMIPS, "syscall      # system call (terminate)\n");
     fprintf(mainMIPS, "li $v0,10   # call code for terminate\n");
     fprintf(mainMIPS, "syscall      # system call (terminate)\n");
-    // fprintf(mainMIPS, ".end main\n");
+    fprintf(mainMIPS, ".end main\n");
 
     fclose(mainMIPS);    
 }

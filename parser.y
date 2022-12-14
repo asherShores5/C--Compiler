@@ -20,7 +20,7 @@ extern int yyparse();
 extern FILE* yyin;
 
 //Some global variables
-int computeEquation(int val1, int val2, char operator);
+int computeEquation(struct AST* num1, struct AST* num2, char operator);
 int evalCondition(struct AST* x, struct AST* y, char logOp[5]);
 void yyerror(const char* s);
 char currentScope[50] = "GLOBAL"; // global or the name of the function
@@ -32,7 +32,9 @@ int maxParam = 0; 	//max of 3 paramaters
 int ifCount = 0;
 int whileCount = 0;
 int onWhile = 0;
-char condString[20];
+int inFunction = 0;
+char mathVal1[10]; char mathVal2[10];
+char conditionString[50];
 // char typeTemp[50];
 
 
@@ -251,6 +253,8 @@ FunDeclList:
 FunDecl:
 	FUNC Type ID LPAREN {
 
+		inFunction = 1;
+
 		printf(BBLUE "\nRECOGNIZED RULE: Function Declaration \"%s\"\n\n" RESET, $3);
 		printf("ID = %s\n", $3);
 		strcpy(currentScope, $3);
@@ -304,6 +308,7 @@ FunDecl:
 		endOfMIPSFunction($3);
 	
 		semanticCheckPassed = 1;
+		inFunction = 0;
 		maxParam = 0;
 
 	}
@@ -571,7 +576,6 @@ Else:
 		// DO STUFF
 		// printf("else{%s}", code);
 		//big brain time
-		printf("");
 		// emitMIPSPassElse(ifCount);
 	}
 
@@ -592,8 +596,17 @@ WhileLoop:
 		// ----- CODE GENERATION ----- //
 
 		// ---- MIPS CODE ---- //
+		// printNode($);
+		char type1[8]; char type2[8];
+		char val1[10]; char val2[10];
+		strcpy(type1, $4->left->nodeType); 
+		strcpy(type2, $4->right->nodeType); 
+		strcpy(val1, $4->LHS);
+		strcpy(val2, $4->RHS);
+
+		loadMIPSVarCond(val1, val2, type1, type2);
 		emitMIPSEndWhile(whileCount);
-		printf("condString = %s\n", condString);
+		// printf("condString = %s\n", condString);
 
 		printf(BGREEN"Emmiting end of while loop!\n"RESET);
 		
@@ -643,6 +656,7 @@ Condition:
 			strcpy(val2, getValue($3->RHS, currentScope));
 		} 
 
+
 		//check if types match
 		if (!strcmp(type1, type2)) {
 
@@ -657,7 +671,14 @@ Condition:
 			semanticCheckPassed = 0;
 		}
 
-		//TODO: Check for arrays semantics	
+		// ---- AST ---- //
+		$$ = AST_assignment($2, $1->RHS, $3->RHS);
+		$$->left = $1->nodeType;
+		$$->right = $3->nodeType;
+		// printNode($$->left);
+		// printNode($$->right);
+		// printNode($$);
+
 
 		// may not need this if MIPS stuff works :) 
 		// also... Riley wants to smash his computer screen
@@ -678,12 +699,21 @@ Condition:
 
 		// ---- CODE GEN ---- //
 
-		if (semanticCheckPassed && cond) {
+		if (semanticCheckPassed) {
 			// ---- IR CODE ---- //
 
 
 			// ---- MIPS CODE ---- //
-			emitMIPSCond(val1, val2, $2, ifCount);	
+			if (onWhile) {
+				loadMIPSVarCond($1->RHS, $3->RHS, $1->nodeType, $3->nodeType);
+				emitMIPSCond(val1, val2, $2, ifCount);	
+				onWhile = 0;
+			} 
+			
+			else if(!cond) {
+				loadMIPSVarCond($1->RHS, $3->RHS, $1->nodeType, $3->nodeType);
+				emitMIPSCond(val1, val2, $2, ifCount);
+			}
 		} 
 
 		semanticCheckPassed = 1;
@@ -838,7 +868,6 @@ Expr:
 
 		// ------- SYMBOL TABLE ------- //
 		if (semanticCheckPassed) {
-			// printNode($3);
 			setItemValue($1, $3->RHS, currentScope);
 		}
 		
@@ -864,10 +893,14 @@ Expr:
 				// ---- IR CODE ---- // 
 				emitIRCharDecl($1, $3->RHS);
 				
-
+				
 				// ---- MIPS CODE ---- // 
+				// if (inFunction) {
+				// 	setIntVar($1, "s9");
+				// }
+
 				if(isNullValue) { //if val isn't null
-					setIntVar($1, $3->RHS);
+					setCharVar($1, $3->RHS);
 				} else {
 					emitMIPSCharDecl($1, $3->RHS);
 				}
@@ -878,14 +911,15 @@ Expr:
 			else if (!strcmp(test, "int")) {
 
 				// ---- IR CODE ---- //
+
 				emitIntVarIR($1, atoi($3->RHS));
 
 
 				// ---- MIPS CODE ---- //
 				if(isNullValue) { //if val isn't null
-					setIntVar($1, atoi($3->RHS));
+					setIntVar($1, $3->RHS);
 				} else {
-					emitIntVar($1, atoi($3->RHS));
+					emitIntVar($1, $3->RHS);
 				}
 			}
 
@@ -976,7 +1010,13 @@ MathExpr:
 		char opArray[3];
 		sprintf(opArray, "%s", $2);
 
-		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+		if (inFunction) {
+			emitMIPSEquation($1->RHS, $3->RHS, $2);
+		} 
+
+		sprintf(newVal, "%d", computeEquation($1, $3, opArray[0]));
+		// sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
@@ -984,6 +1024,7 @@ MathExpr:
 	}
 
 	| MathExpr PLUS Trm {
+
 		
 		char newVal[5];
 
@@ -991,10 +1032,15 @@ MathExpr:
 		char opArray[3];
 		sprintf(opArray, "%s", $2);
 
-		printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
+		// printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
 
-		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
-		printf("newVal = %s\n", newVal);
+		if (inFunction) {
+			emitMIPSEquation($1->RHS, $3->RHS, opArray[0]);
+		}
+		
+		sprintf(newVal, "%d", computeEquation($1, $3, opArray[0]));
+		// sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
 
@@ -1004,19 +1050,21 @@ MathExpr:
 
 Trm: 
 	Factor {
-		char numVal[10];
-		if (strcmp($1->nodeType,"id") == 0) {
-			// printf("ID Found!\n");
-			sprintf(numVal, "%s", getValue($1->LHS, currentScope));
-			$$ = AST_assignment("=", $1->LHS, numVal);
+		// -- THIS IS COMMENTED OUT FOR MIPS PURPOSES, I DON'T REMEMBER WHAT IT DID LOL - Riley
+		// ----------------------------------------------------->
+		// char numVal[10];
+		// if (strcmp($1->nodeType,"id") == 0) {
+		// 	// printf("ID Found!\n");
+		// 	// sprintf(numVal, "%s", getValue($1->LHS, currentScope));
+		// 	// $$ = AST_assignment("=", $1->LHS, numVal);
 
-			// Set item to used 
-			//setItemUsed($1->RHS, currentScope);
+		// 	// Set item to used 
+		// 	//setItemUsed($1->RHS, currentScope);
 
-		} else {
-			//primary is a number, do nothing
-			$$ = $1;
-		}
+		// } else {
+		// 	//primary is a number, do nothing
+		// 	$$ = $1;
+		// }
 	}	
 
 	| Trm TIMES Factor {
@@ -1027,7 +1075,7 @@ Trm:
 		char opArray[3];
 		sprintf(opArray, "%s", $2);
 
-		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+		// sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
@@ -1042,7 +1090,7 @@ Trm:
 		char opArray[3];
 		sprintf(opArray, "%s", $2);
 
-		sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
+		// sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
@@ -1052,11 +1100,13 @@ Trm:
 
 Factor:
 	ID {
+
 		// printf("ID detected\n");
 		char val[25];
 		strcpy(val, getValue($1, currentScope));
 		if (!strcmp(val, "NULL")) {
 			printf(RED"ERROR: ID %s is null"RESET, $1);
+			exit;
 		}
 		$$ = AST_assignment("id", $1 , val);
 	}
@@ -1141,7 +1191,7 @@ int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {
 		}
 	} 
 	else if (!strcmp(logOp, "!=")) {
-		if (!strcmp(x->RHS, y->RHS) || val1 == val2) {
+		if (val1 != val2) {
 			return 1;
 		}
 	}
@@ -1169,7 +1219,28 @@ int evalCondition(struct AST* x, struct AST* y, char logOp[5]) {
 	return 0;
 }
 
-int computeEquation(int val1, int val2, char operator) {
+int computeEquation(struct AST* num1, struct AST* num2, char operator) {
+	char mipsVal1[10];
+	char mipsVal2[10];
+	int val1; int val2;	
+	val1 = atoi(num1->RHS);
+	val2 = atoi(num2->RHS);
+	
+	if (!strcmp(num1->nodeType, "id")) {
+		strcpy(mipsVal1, num1->LHS);
+	} else {
+		strcpy(mipsVal1, num1->RHS);
+	}
+
+	if (!strcmp(num2->nodeType, "id")) {
+		strcpy(mipsVal2, num2->LHS);
+	} else {
+		strcpy(mipsVal2, num2->RHS);
+	}
+	
+	if (inFunction) {
+		emitMIPSEquation(mipsVal1, mipsVal2, operator);
+	}
 
 	/* char newVal[3]; */
 	int newVal;
@@ -1238,12 +1309,8 @@ int main(int argc, char**argv)
 	printf(PINK"\n##### MIPS CODE GENERATED #####\n\n"RESET);
 
 	// Merge data and main sections in MIPS
-	/* addMainToData(); */
 	appendFiles();
 
-	addMainToDataIR();
-
-	/* showSymTable(); */
 	printf(PINK"\n##### COMPILER ENDED #####\n\n"RESET);
 
 

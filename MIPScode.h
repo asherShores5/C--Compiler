@@ -9,8 +9,7 @@ FILE * loops;
 int inFunc = 0;
 int inLoop = 0;
 
-char condString[20];
-
+char condString[32];
 
 void  initAssemblyFile(){
     // Creates a MIPS file with a generic header that needs to be in every file
@@ -181,29 +180,31 @@ void setCharVar(char id[50], char c[5]) {
 
 }
 
-void emitIntVar(char id[50], int val) {
+void emitIntVar(char id[50], char val[10]) {
+    printf("Debug test\n");
     // if (inFunc == 1) {
     //     mainMIPS = fopen("funcs.asm", "a");
     // }
 
     dataMIPS = fopen("dataMIPS.asm", "a");
 
-    fprintf(dataMIPS, "%s:   .word  %d\n", id, val);
+    fprintf(dataMIPS, "%s:   .word  %s\n", id, val);
 
     fclose(dataMIPS); 
 
 }
 
-void setIntVar(char id[50], int val) {
+void setIntVar(char id[50], char val[10]) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
 
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
     }
-
+    
+    printf("Val[0] = %c", id[0]);
     fprintf(mainMIPS, "la $a0, %s #get address\n", id);
-    fprintf(mainMIPS, "li $a1, %d #new value\n", val);
+    fprintf(mainMIPS, "li $a1, %s #new value\n", val);
     fprintf(mainMIPS, "sw $a1 0($a0) #save new value\n");
 
     fclose(mainMIPS);
@@ -290,6 +291,30 @@ void emitMIPSEndWhile(int n) {
     fclose(mainMIPS);
 } 
 
+void loadMIPSVarCond(char var1[10], char var2[10], char type1[10], char type2[10]) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+    // printf("type1=%s , type2=%s", type1, type2);
+
+    if (!strcmp(type1, "id")) {
+        fprintf(mainMIPS, "lw $t0, %s\n", var1);
+    } else {
+        fprintf(mainMIPS, "li $t0, %s\n", var1);        
+    }
+
+    if (!strcmp(type2, "id")) {
+        fprintf(mainMIPS, "lw $t1, %s\n", var2);
+    } else {
+        fprintf(mainMIPS, "li $t1, %s\n", var2);        
+    }
+
+    fclose(mainMIPS);    
+
+}
+
 char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
     char op[5];
@@ -301,9 +326,10 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
         mainMIPS = fopen("funcs.asm", "a");
     }
 
-    fprintf(mainMIPS, "li $t0, %s\n", var1);
-    fprintf(mainMIPS, "li $t1, %s\n", var2);
-    fprintf(mainMIPS, "# --- CONDITION --- #\n");
+
+    // fprintf(mainMIPS, "li $t0, %s\n", var1);
+    // fprintf(mainMIPS, "li $t1, %s\n", var2);
+    fprintf(mainMIPS, "# --- IF STMT --- #\n");
 
     if (!strcmp(operator, "!=")) {
         strcpy(op, "beq");
@@ -334,7 +360,7 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     // for while loops
     else  {
         inLoop = 0;
-        sprintf(condString, "%s $t0, $t1, while%d", op, n);
+        sprintf(condString, "%s $t1, $t0, while%d", op, n);
         fprintf(mainMIPS, "\nwhile%d:\n", n);
     }
 
@@ -372,7 +398,7 @@ void emitMIPSFunc (char func[50]) {
 
 }
 
-emitMIPSFuncCall (char func[50]) {
+void emitMIPSFuncCall (char func[50]) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
     fprintf(mainMIPS, "jal  %s\n", func);
@@ -436,6 +462,30 @@ void emitEndOfAssemblyCode(){
     fprintf(mainMIPS, ".end main\n");
 
     fclose(mainMIPS);    
+}
+
+void emitMIPSEquation(char var1[10], char var2[10], char op) {
+
+    // printf("input: var1=%s | Var2=%s | op=%c", var1, var2, op);
+    funcs = fopen("funcs.asm", "a");
+
+    switch (op) {
+		case '+':
+			
+			break;
+		case '-':
+			
+			break;
+		case '*':
+			
+			break;
+		case '/':
+			
+			break;
+	}
+    
+    fclose(funcs);
+
 }
 
 void appendFiles() {

@@ -263,29 +263,39 @@ void emitMIPSIncrement(char id[10]) {
 
 }
 
-emitMIPSWhile(int n) {
+void emitMIPSWhile(int n) {
 
     // loops = fopen("loops.asm", "a");
-    funcs = fopen("funcs.asm", "a");
+    mainMIPS = fopen("MIPScode.asm", "a");
 
     // fprintf(loops, "while%d:", n);
-    fprintf(funcs, "\nwhile%d:\n", n);
+    fprintf(mainMIPS, "jal while%d\n", n);
     inFunc = 1;
     inLoop = 1;
 
-    // fclose(loops);
-    fclose(funcs);
+    fclose(mainMIPS);
 }
 
-void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
+void emitMIPSEndWhile(int n) {
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, "%s", condString);
+    inFunc = 0;
+    inLoop = 0;
+
+    fclose(mainMIPS);
+} 
+
+char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
     char op[5];
     char loopType[5] = "false";
     // printf("In loop = %d\n", inLoop);
-    if (inLoop) {
-        strcpy(loopType, "while");
-    }
-
+    
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
@@ -295,42 +305,42 @@ void emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     fprintf(mainMIPS, "li $t1, %s\n", var2);
     fprintf(mainMIPS, "# --- CONDITION --- #\n");
 
-
-    // Basically we use the reverse of the operator becuase
-    // the "if" block executes before the "else" block
     if (!strcmp(operator, "!=")) {
         strcpy(op, "beq");
-        fprintf(mainMIPS, "beq $t0, $t1, %s%d\n", loopType, n);
-	} 
-	else if (!strcmp(operator, "==")) {
+    } 
+    else if (!strcmp(operator, "==")) {
         strcpy(op, "bne");
-		fprintf(mainMIPS, "bne $t0, $t1, %s%d\n", loopType, n);
-	}
-	else if (!strcmp(operator, ">=")) {
+    }
+    else if (!strcmp(operator, ">=")) {
         strcpy(op, "ble");
-		fprintf(mainMIPS, "ble $t0, $t1, %s%d\n", loopType, n);
-	}
-	else if (!strcmp(operator, "<=")) {
+    }
+    else if (!strcmp(operator, "<=")) {
         strcpy(op, "bge");
-		fprintf(mainMIPS, "bge $t0, $t1, %s%d\n", loopType, n);
-	}
-	else if (!strcmp(operator, ">")) {
+    }
+    else if (!strcmp(operator, ">")) {
         strcpy(op, "blt");
-		fprintf(mainMIPS, "blt $t0, $t1, %s%d\n", loopType, n);
-	}
-	else if (!strcmp(operator, "<")) {
+    }
+    else if (!strcmp(operator, "<")) {
         strcpy(op, "bgt");
-		fprintf(mainMIPS, "bgt $t0, $t1, %s%d\n", loopType, n);
-	}
+    }
+    if (!inLoop) {
+        // strcpy(loopType, "while");
+        fprintf(mainMIPS, "%s $t0, $t1, %s%d\n", op,  loopType, n);
+        
+        // Basically we use the reverse of the operator becuase
+        // the "if" block executes before the "else" block
+    }
 
     // for while loops
-    if (inLoop) {
+    else  {
         inLoop = 0;
         sprintf(condString, "%s $t0, $t1, while%d", op, n);
-        fprintf(mainMIPS, "#While condition generated: %s\n", condString);
+        fprintf(mainMIPS, "\nwhile%d:\n", n);
     }
 
     fclose(mainMIPS);
+
+    return condString;
 
 }
 

@@ -31,6 +31,8 @@ int onElse = 0;		// is parser on the else statement
 int maxParam = 0; 	//max of 3 paramaters
 int ifCount = 0;
 int whileCount = 0;
+int onWhile = 0;
+char condString[20];
 // char typeTemp[50];
 
 
@@ -528,8 +530,6 @@ IfStmt:
 	IF LPAREN Condition RPAREN Block {
 
 		//skip mips else if condidtion is true
-		ifCount++;
-
 		emitMIPSEndOfIfBlock(ifCount);
 
 		emitMIPSElseStmt(ifCount);
@@ -553,6 +553,10 @@ IfStmt:
 		// 	printf("GoTo Else statment----->\n");
 		// }	
 
+		emitMIPSPassElse(ifCount);
+
+		ifCount++;
+
 		semanticCheckPassed = 1;
 
 	}
@@ -568,17 +572,19 @@ Else:
 		// printf("else{%s}", code);
 		//big brain time
 		printf("");
-		emitMIPSPassElse(ifCount);
+		// emitMIPSPassElse(ifCount);
 	}
 
 ;
-
-WhileStart: WHILE LPAREN {printf("Hi Evan");} WhileLoop;
 
 WhileLoop: 
 	WHILE LPAREN {
 
 		printf("WHILE LOOP FOUND\n");
+
+		onWhile = 1;
+
+		emitMIPSWhile(whileCount); //all this does is change the 'inLoop' value to true
 
 	} Condition RPAREN Block {
 
@@ -586,11 +592,14 @@ WhileLoop:
 		// ----- CODE GENERATION ----- //
 
 		// ---- MIPS CODE ---- //
-		emitMIPSWhile(whileCount);
+		emitMIPSEndWhile(whileCount);
+		printf("condString = %s\n", condString);
+
+		printf(BGREEN"Emmiting end of while loop!\n"RESET);
 		
-		
-		printf("Hi Asher");
 	}
+
+;
 
 Condition:
 	Primary LOGICOP Primary {
@@ -669,7 +678,7 @@ Condition:
 
 		// ---- CODE GEN ---- //
 
-		if (semanticCheckPassed && !cond) {
+		if (semanticCheckPassed && cond) {
 			// ---- IR CODE ---- //
 
 

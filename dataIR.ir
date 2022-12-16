@@ -1,21 +1,3 @@
 DATA:
-x:   WORD  10
-num1:   WORD  5
-num2:   WORD  20
-result:   WORD  25
-x:   WORD  5
-
-MAIN:
-# -----------------------
-# Printing -----------
-LOAD V0, 1
-LOAD WORD: A0, x
-SYSTEM CALL
-# -----------------
-#  Done, terminate program.
-
-LOAD V0,10   # call code for terminate
-SYSTEM CALL      # system call (terminate)
-END MAIN
-END MAIN
-
+x:   WORD  20
+y  BYTE   'T'

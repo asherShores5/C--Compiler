@@ -14,6 +14,7 @@ int lines = 0;
 
 %}
 
+string		"\""([^\n\"\\]*(\\[.\n])*)*"\"" 
 letter      [a-zA-Z]
 digit       [0-9]
 ID          {letter}({letter}|{digit})*
@@ -62,6 +63,12 @@ boolean     [true] */
 			printf("%s : WRITE\n", yytext);
 			yylval.string = strdup(yytext); 
 			return WRITE;
+		}
+
+"swrite"	{words++; chars += strlen(yytext);
+			printf("%s : SWRITE\n", yytext);
+			yylval.string = strdup(yytext); 
+			return SWRITE;
 		}
 
 "return"	{words++; chars += strlen(yytext);
@@ -123,6 +130,13 @@ boolean     [true] */
 			  yylval.character = strdup(yytext); 
 			  return CHARACTER;
 			}
+
+{string}	{words++; chars += strlen(yytext);
+			  printf("%s : string\n",yytext);
+			  yylval.character = strdup(yytext); 
+			  return STRING;
+			}
+
 			
 ";"		{chars++;
 		  //printf("%s : SEMICOLON\n", yytext);

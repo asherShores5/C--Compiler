@@ -2,7 +2,11 @@ MAIN:
 # -----------------------
 # Printing -----------
 LOAD V0, 1
-LOAD WORD: A0, x
+LOAD WORD: A0, result
+SYSTEM CALL
+# Printing -----------
+LOAD V0, 4
+LOAD AD: A0, y
 SYSTEM CALL
 # -----------------
 #  Done, terminate program.

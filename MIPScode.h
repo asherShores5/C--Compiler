@@ -9,7 +9,34 @@ FILE * loops;
 int inFunc = 0;
 int inLoop = 0;
 
+
 char condString[32];
+
+void emitMIPSString(char myString[50], int stringCount) {
+    //do some shit
+    // char label[50] = "msg" ;
+    // char labelNum[50] = sprintf(labelNum, "%d", stringCount);
+    // strcpy(label, labelNum);
+
+    dataMIPS = fopen("dataMIPS.asm", "a");
+
+    fprintf(dataMIPS, "msg%d: .asciiz %s\n", stringCount, myString);
+
+    fclose(dataMIPS);
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+
+    
+    /*
+    li	$v0, 4		# code for print_str
+	la	$a0, msg	# point to string
+	syscall
+    */
+    fprintf(mainMIPS, "li $v0, 4\n");
+    fprintf(mainMIPS, "la $a0, msg%d\n", stringCount);
+    fprintf(mainMIPS, "syscall\n");
+    fclose(mainMIPS);
+}
 
 void  initAssemblyFile(){
     // Creates a MIPS file with a generic header that needs to be in every file

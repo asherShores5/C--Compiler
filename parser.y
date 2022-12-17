@@ -37,6 +37,9 @@ char mathVal1[10]; char mathVal2[10];
 char conditionString[50];
 // char typeTemp[50];
 
+int stringCount = 0;
+// count strings for   p r i n t i n g !
+
 
 %}
 
@@ -55,10 +58,13 @@ char conditionString[50];
 %token <string> ID
 %token <number> INTEGER
 %token <floatValue> DECIMAL
+%token <string> STRING
 
 %token <string> SEMICOLON
 %token <string> EQ
 %token <string> WRITE
+%token <string> SWRITE
+
 
 %token <string> FUNC
 %token <string> IF
@@ -521,6 +527,16 @@ Stmt:
 	 	$$ = AST_assignment("WRITELN", "", "");
 
 		emitMIPSNewLine();
+	}
+
+	| SWRITE STRING SEMICOLON {
+
+		printf("\nRECOGNIZED RULE: Write String %s\n", $2);
+
+		emitMIPSString($2, stringCount);
+
+		stringCount++;
+
 	}
 
 ;

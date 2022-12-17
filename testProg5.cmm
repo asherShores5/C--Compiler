@@ -13,4 +13,5 @@ func int main(){
      else{
         write y;
      }
+   swrite "Success";
 }

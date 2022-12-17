@@ -32,13 +32,14 @@ void  initAssemblyFile(){
 
 }
 
-void emitMIPSAssignment(char * id1, char * id2){
-    mainMIPS = fopen("MIPScode.asm", "a");
-  // This is the temporary approach, until register management is implemented
+void emitMIPSAssignment(char id1[10], char id2[10]){
 
-    fprintf(mainMIPS, "li $t1,%s\n", id1);
-    fprintf(mainMIPS, "li $t2,%s\n", id2);
-    fprintf(mainMIPS, "li $t2,$t1\n");
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    fprintf(mainMIPS, " ,%s\n", id1);
 
     fclose(mainMIPS);
 }
@@ -62,7 +63,7 @@ void emitMIPSNewLine () {
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
     }
-
+    fprintf(mainMIPS, "# PRINTING NEW LINE ---->\n");
     fprintf(mainMIPS, "li $v0, 4\n");
     fprintf(mainMIPS, "la $a0, newLine\n");
     fprintf(mainMIPS, "syscall\n");
@@ -181,7 +182,6 @@ void setCharVar(char id[50], char c[5]) {
 }
 
 void emitIntVar(char id[50], char val[10]) {
-    printf("Debug test\n");
     // if (inFunc == 1) {
     //     mainMIPS = fopen("funcs.asm", "a");
     // }
@@ -197,14 +197,17 @@ void emitIntVar(char id[50], char val[10]) {
 void setIntVar(char id[50], char val[10]) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
-
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
     }
     
-    printf("Val[0] = %c", id[0]);
+    char command[5];
+    if (!isdigit(val[0])) {
+        strcpy(command, "move");
+    }
+
     fprintf(mainMIPS, "la $a0, %s #get address\n", id);
-    fprintf(mainMIPS, "li $a1, %s #new value\n", val);
+    fprintf(mainMIPS, "%s $a1, %s #new value\n", command, val);
     fprintf(mainMIPS, "sw $a1 0($a0) #save new value\n");
 
     fclose(mainMIPS);
@@ -410,9 +413,13 @@ void emitMIPSReturn (char rv[50], char type[50]) {
 
     funcs = fopen("funcs.asm", "a");
 
-    fprintf(funcs, "li $v1, %s\n", rv);
+    if (!strcmp(type, "int")) {
+        fprintf(funcs, "li $v1, %s\n", rv);
+    } else {
+        fprintf(funcs, "lw $v1, %s\n", rv);
+    }
 
-    fprintf(funcs, "jr  $ra\n");
+    // fprintf(funcs, "jr  $ra\n");
 
     fclose(funcs);
     
@@ -425,7 +432,7 @@ void emitMIPSGetReturn () {
         mainMIPS = fopen("funcs.asm", "a");
     }
 
-    fclose(mainMIPS);;
+    fclose(mainMIPS);
 
 }
 
@@ -441,7 +448,7 @@ void endOfMIPSFunction (char funcName[50]) {
     if (strcmp(funcName, "main")) {
 
         fprintf(funcs, "jr  $ra\n");
-        fprintf(funcs, ".end %s\n", funcName);
+        fprintf(funcs, ".end %s\n\n", funcName);
         inFunc = 0;
 
     }
@@ -466,21 +473,37 @@ void emitEndOfAssemblyCode(){
 
 void emitMIPSEquation(char var1[10], char var2[10], char op) {
 
+    // int isDigit1 = isdigit(var1[0]);
+    // int isDigit2 = isdigit(var2[0]);
+
     // printf("input: var1=%s | Var2=%s | op=%c", var1, var2, op);
     funcs = fopen("funcs.asm", "a");
 
+    if (!isdigit(var1[0])) {       
+        fprintf(funcs, "lw $t0, %s\n", var1);
+    } else {
+        fprintf(funcs, "li $t0, %s\n", var1);
+    }
+
+    if (!isdigit(var2[0])) {       
+        fprintf(funcs, "lw $t1, %s\n", var2);
+    } else {
+        fprintf(funcs, "li $t1, %s\n", var2);
+    }
+
+    // all expression results are stored in $s1
     switch (op) {
 		case '+':
-			
+			fprintf(funcs, "add $s1, $t0, $t1\n");
 			break;
 		case '-':
-			
+			fprintf(funcs, "sub $s1, $t0, $t1\n");
 			break;
 		case '*':
-			
+			fprintf(funcs, "mul $s1, $t0, $t1\n");
 			break;
 		case '/':
-			
+			fprintf(funcs, "div $s1, $t0, $t1\n");
 			break;
 	}
     

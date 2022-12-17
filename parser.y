@@ -27,12 +27,12 @@ char currentScope[50] = "GLOBAL"; // global or the name of the function
 char currReturnType[10];
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
 int goToElse = 0;	// is the condition of if() true?
-int onElse = 0;		// is parser on the else statement
 int maxParam = 0; 	//max of 3 paramaters
 int ifCount = 0;
 int whileCount = 0;
 int onWhile = 0;
 int inFunction = 0;
+int hasMath = 0;
 char mathVal1[10]; char mathVal2[10];
 char conditionString[50];
 // char typeTemp[50];
@@ -432,7 +432,10 @@ Stmt:
 
 	| IfStmt {}
 
-	| Expr SEMICOLON {}
+	| Expr SEMICOLON {
+		hasMath = 0;
+		$$ = $1;
+	}
 
 	| RETURN Expr SEMICOLON {		
 
@@ -447,23 +450,14 @@ Stmt:
 		// printf("Return type: %s\n", returnType);
 
 		// ---- SYMBOL TABLE ---- //
-		char name[50];
-
-		//add value to symTab
-		char *val = (char*)malloc(8*sizeof(char));
-		if (!strcmp(returnType, "id") && found($2->RHS, currentScope)) {
-			// printf("Return is an ID\n");
+	
+		char val[25];
+		if (!strcmp(returnType, "id")) {
 			strcpy(val, getValue($2->RHS, currentScope));
-			strcpy(returnType, getVariableType($2->RHS, currentScope));
 		} else {
 			strcpy(val, $2->RHS);
 		}
-
-		sprintf(name, "%sReturn", currentScope); //create symTab name
-		addItem(name, "RETURN", returnType, "GLOBAL");
-
-		setItemValue(name, val, currentScope);
-
+		setItemValue(currentScope, val, currentScope);
 
 		// ---- CODE GENERATION ---- //
 		
@@ -472,13 +466,13 @@ Stmt:
 
 
 		// ---- MIPS CODE ---- //
-		if (!strcmp(returnType, "id") && found($2->RHS, currentScope)) {
-			emitMIPSReturn(getValue($2->RHS, currentScope), returnType);
-		}
-		else {
-			emitMIPSReturn($2->RHS, returnType);
-		}
+		// if (hasMath) {
+		// 	emitMIPSReturn("$s1", returnType);
+		// } else {
+		// }
+		emitMIPSReturn($2->RHS, returnType);
 
+		hasMath = 0;
 
 	}
 
@@ -704,7 +698,7 @@ Condition:
 
 
 			// ---- MIPS CODE ---- //
-			if (onWhile) {
+			if (onWhile || inFunction) {
 				loadMIPSVarCond($1->RHS, $3->RHS, $1->nodeType, $3->nodeType);
 				emitMIPSCond(val1, val2, $2, ifCount);	
 				onWhile = 0;
@@ -917,7 +911,11 @@ Expr:
 
 				// ---- MIPS CODE ---- //
 				if(isNullValue) { //if val isn't null
-					setIntVar($1, $3->RHS);
+					if (inFunction && hasMath) {
+						setIntVar($1, "$s1");
+					} else {
+						setIntVar($1, $3->RHS);
+					}
 				} else {
 					emitIntVar($1, $3->RHS);
 				}
@@ -1010,9 +1008,9 @@ MathExpr:
 		char opArray[3];
 		sprintf(opArray, "%s", $2);
 
-		if (inFunction) {
-			emitMIPSEquation($1->RHS, $3->RHS, $2);
-		} 
+		// if (inFunction) {
+		// 	emitMIPSEquation($1->RHS, $3->RHS, $2);
+		// } 
 
 		sprintf(newVal, "%d", computeEquation($1, $3, opArray[0]));
 		// sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
@@ -1020,6 +1018,7 @@ MathExpr:
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
+		hasMath = 1;
 
 	}
 
@@ -1034,15 +1033,14 @@ MathExpr:
 
 		// printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
 
-		if (inFunction) {
-			emitMIPSEquation($1->RHS, $3->RHS, opArray[0]);
-		}
+		// if (inFf
 		
 		sprintf(newVal, "%d", computeEquation($1, $3, opArray[0]));
 		// sprintf(newVal, "%d", computeEquation(atoi($1->RHS), atoi($3->RHS), opArray[0]));
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
+		hasMath = 1;
 
 	}
 
@@ -1079,6 +1077,8 @@ Trm:
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
+		hasMath = 1;
+
 
 	}
 
@@ -1094,6 +1094,8 @@ Trm:
 		// printf("newVal = %s\n", newVal);
 
 		$$ = AST_assignment("int", "", newVal);
+		hasMath = 1;
+
 
 	}
 ;

@@ -130,6 +130,8 @@ int setItemUsed(char itemName[50],  char scope[50]) {
 
 // Returns the value of a given ID
 char *getValue(char itemName[50], char scope[50]) {
+
+	// printf("itemName = %s\n", scope);
 	for(int i=0; i<100-1; i++) {
 		int isGlobal = strcmp(symTabItems[i].scope, "GLOBAL");
 		int str1 = strcmp(symTabItems[i].itemName, itemName);
@@ -141,7 +143,6 @@ char *getValue(char itemName[50], char scope[50]) {
 		}
 
 		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
-			// printf("Item Value:%s\n", symTabItems[i].itemValue);
 			return symTabItems[i].itemValue;
 		}
 	}

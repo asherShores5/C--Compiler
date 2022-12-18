@@ -13,10 +13,11 @@ int inLoop = 0;
 char condString[32];
 
 void emitMIPSString(char myString[50], int stringCount) {
-    //do some shit
-    // char label[50] = "msg" ;
-    // char labelNum[50] = sprintf(labelNum, "%d", stringCount);
-    // strcpy(label, labelNum);
+
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inFunc == 1) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
 
     dataMIPS = fopen("dataMIPS.asm", "a");
 
@@ -24,7 +25,7 @@ void emitMIPSString(char myString[50], int stringCount) {
 
     fclose(dataMIPS);
 
-    mainMIPS = fopen("MIPScode.asm", "a");
+    // mainMIPS = fopen("MIPScode.asm", "a");
 
     
     /*
@@ -402,12 +403,13 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
 void emitMIPSParameters(char *param, int count) {
 
-    mainMIPS = fopen("MIPScode.asm", "a");
-    if (inFunc == 1) {
-        mainMIPS = fopen("funcs.asm", "a");
-    }
+    // scrapped code
+    // mainMIPS = fopen("MIPScode.asm", "a");
+    // if (inFunc == 1) {
+    //     mainMIPS = fopen("funcs.asm", "a");
+    // }
 
-    fprintf(mainMIPS, "li $a%d, %s", count, param);
+    // fprintf(mainMIPS, "li $a%d, %s", count, param);
 
 }
 

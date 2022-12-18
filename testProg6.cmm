@@ -10,19 +10,22 @@ num2 = 20;
 
 
 func int addValue(){
-     int result;
-     result = num1 + num2;
-     return result;
+    int result;
+    result = num1 + num2;
+    return result;
 }
 
+
+
 func int main(){
-     int result1;
-     while (x > 0){
+    int result1;
+    while (x > 0){
         if (x == 10) {
+          writeln;
           write x;
-        }
+        } 
         x = x - 5;
         writeln;
         swrite "hello";
-     }
+    }
 } 

@@ -1,4 +1,4 @@
-//Asher Shores, Even Klever, Riley Monwai
+//Asher Shores, Even Kleaver, Riley Monwai
 // CST-405: Compilers
 // Professor Isac Artzi
 
@@ -969,12 +969,10 @@ FunCall:
 
 		printf("\nRECOGNIZED RULE: Function Call ----> %s\n", $1);
 
-		char returnName[8];
-		(returnName, "%sReturn", $1);
-		char *returnType = getVariableType(returnName, currentScope);
-		char *returnVal = getValue(returnName, currentScope);
-		$$ = AST_assignment(returnType, "", returnVal);
-		
+		char returnVal[25];
+		sprintf(returnVal, "%s", getValue($1, $1));
+		$$ = AST_assignment("int", "RETURN", returnVal);
+		printNode($$);
 		emitMIPSFuncCall($1);
 		// ---- SEMANTIC CHECKS ---- //
 		//TODO make sure types are same 

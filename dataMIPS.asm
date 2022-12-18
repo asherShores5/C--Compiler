@@ -1,35 +1,30 @@
 .data
 newLine: .asciiz "\n"
-x:   .word  20
-y:  .byte   'n'
-result:   .word  4
-msg0: .asciiz "Success"
+num1:   .word  20
+num2:   .word  49
+result:   .word  69
+result1:   .word  69
+msg0: .asciiz "Good Job"
+msg1: .asciiz "n i c e"
 
 .text
 # -----------------------
 
 main:
-lw $t0, x
-li $t1, 0
-# --- IF STMT --- #
-blt $t0, $t1, false0
+jal  addValue
 # Printing -----------
 li $v0, 1
-lw $a0, result
+lw $a0, result1
 syscall
-# --- JUMP PAST ELSE --- #
-beq $0, $0, jumpElse0
-
-# --- ELSE STMT --- #
-false0:
-# Printing -----------
-li $v0, 11
-lb $a0, y
+# PRINTING NEW LINE ---->
+li $v0, 4
+la $a0, newLine
 syscall
-# ---PAST ELSE--->
-jumpElse0:
 li $v0, 4
 la $a0, msg0
+syscall
+li $v0, 4
+la $a0, msg1
 syscall
 # -----------------
 #  Done, terminate program.
@@ -38,4 +33,14 @@ li $v0,10   # call code for terminate
 syscall      # system call (terminate)
 .end main
 
+
+addValue:
+lw $t0, num1
+lw $t1, num2
+add $s1, $t0, $t1
+lw $v1, result
+jr  $ra
+.end addValue
+
+li $v1, 0
 

@@ -4,7 +4,7 @@ int num1;
 int num2;
 
 num1 = 20;
-num2 = 5;
+num2 = 49;
 
 func int addValue(){
      int result;
@@ -14,7 +14,10 @@ func int addValue(){
 
 func int main(){
      int result1;
-     result1 = addValue();
+     result1 = addValue(); 
      write result1;
+     writeln;
+     swrite "Good Job";
+     swrite "n i c e";
      return 0;
 }

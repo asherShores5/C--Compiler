@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <ctype.h>
+// #include "symbolTable.h"
 
 // Set of functions to emit MIPS code
 FILE * mainMIPS;
@@ -201,10 +203,9 @@ void setCharVar(char id[50], char c[5]) {
         mainMIPS = fopen("funcs.asm", "a");
     }
 
-    fprintf(mainMIPS, "la $a0, %s #get address\n", id);
-    fprintf(mainMIPS, "li $a1, %s #new value\n", c);
-    fprintf(mainMIPS, "sw $a1 0($a0) #save new value\n");
-
+    fprintf(mainMIPS, "la $t0, %s #get address\n", id);
+    fprintf(mainMIPS, "li $t1, %s #new value\n", c);
+    fprintf(mainMIPS, "sw $t1 0($t0) #save new value\n");
     fclose(mainMIPS);
 
 }
@@ -230,13 +231,14 @@ void setIntVar(char id[50], char val[10]) {
     }
     
     char command[5];
+    strcpy(command, "li");
+
     if (!isdigit(val[0])) {
         strcpy(command, "move");
-    }
-
-    fprintf(mainMIPS, "la $a0, %s #get address\n", id);
-    fprintf(mainMIPS, "%s $a1, %s #new value\n", command, val);
-    fprintf(mainMIPS, "sw $a1 0($a0) #save new value\n");
+    } 
+    fprintf(mainMIPS, "la $t0, %s #get address\n", id);
+    fprintf(mainMIPS, "%s $t1, %s #new value\n", command, val);
+    fprintf(mainMIPS, "sw $t1 0($t0) #save new value\n");
 
     fclose(mainMIPS);
 
@@ -409,8 +411,22 @@ void emitMIPSParameters(char *param, int count) {
     //     mainMIPS = fopen("funcs.asm", "a");
     // }
 
-    // fprintf(mainMIPS, "li $a%d, %s", count, param);
+    dataMIPS = fopen("dataMIPS.asm", "a");
 
+    // fprintf(mainMIPS, "li $a%d, %s", count, param);
+    fprintf(dataMIPS, "%s: .word     0\n", param);
+
+    fclose(dataMIPS);
+}
+
+void editMIPSParameters(char *param, char *newVal) {
+
+    // funcs = fopen("funcs.asm", "a");
+
+    // fprintf(mainMIPS, "li $a%d, %s", count, param);
+    setIntVar(param, newVal);
+
+//     fclose(funcs);
 }
 
 void emitMIPSFunc (char func[50]) {
@@ -508,7 +524,11 @@ void emitMIPSEquation(char var1[10], char var2[10], char op) {
     // printf("input: var1=%s | Var2=%s | op=%c", var1, var2, op);
     funcs = fopen("funcs.asm", "a");
 
-    if (!isdigit(var1[0])) {       
+    if (!isdigit(var1[0])) {
+        // if (!strcmp(getItemKind(var1, "GLOBAL"), "PARAM")) {
+        //     printf(BGREEN"FOUND A PARAMETER\n"RESET);
+        //     fprintf(funcs, "move $t0, $a2\n");
+        // }
         fprintf(funcs, "lw $t0, %s\n", var1);
     } else {
         fprintf(funcs, "li $t0, %s\n", var1);

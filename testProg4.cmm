@@ -2,22 +2,23 @@
 
 int num1;
 int num2;
+int param; 
 
 num1 = 20;
 num2 = 49;
 
-func int addValue(){
+func int addValue(int z){
      int result;
-     result = num1 + num2;
+     result = z + num2;
      return result;
 }
 
 func int main(){
      int result1;
-     result1 = addValue(); 
+     param = 1;
+     result1 = addValue(param); 
      write result1;
      writeln;
      swrite "Good Job";
-     swrite "n i c e";
      return 0;
 }

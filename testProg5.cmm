@@ -3,17 +3,17 @@
 int x;
 char y;
 x = 20;
-y = 'n';
+y = 'e';
 
 func int main(){
-     int result;
-     result = 4;
-     if (x > 0){
-        write result;
-     }
-     else{
-        write y;
-     }
+      int result;
+      result = 4;
+      if (x > 0){
+         write result;
+      }
+      else{
+         write y;
+      }
    writeln;
    swrite "Success";
 }

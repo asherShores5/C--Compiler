@@ -1,4 +1,4 @@
-//Asher Shores, Even Kleaver, Riley Monwai
+//Even Kliewer, Asher Shores, Riley Monwai
 // CST-405: Compilers
 // Professor Isac Artzi
 
@@ -28,6 +28,7 @@ char currReturnType[10];
 int semanticCheckPassed = 1; // flags to record correctness of semantic checks
 int goToElse = 0;	// is the condition of if() true?
 int maxParam = 0; 	//max of 3 paramaters
+int paramCount = 0;
 int ifCount = 0;
 int whileCount = 0;
 int onWhile = 0;
@@ -171,7 +172,7 @@ VarDecl:
 
 		// ------ SEMANTIC CHECKS ------ //
 		if (inSymTab == 0)  {
-			addItem($2, "Var", $1->nodeType, currentScope);
+			addItem($2, "VAR", $1->nodeType, currentScope);
 			showSymTable();
 		}
 		else {
@@ -316,6 +317,7 @@ FunDecl:
 		semanticCheckPassed = 1;
 		inFunction = 0;
 		maxParam = 0;
+		paramCount = 0;
 
 	}
 ;
@@ -374,12 +376,17 @@ ParamDecl:
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
 
 		if (inSymTab == 0) {
-			addItem($2, "Var", $1->nodeType, currentScope);
+			addItem($2, "PARAM", $1->nodeType, currentScope);
 			showSymTable();
 		} 
 		else {
 			printf("\nSEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
 		} 
+
+		char paramName[50];
+		sprintf(paramName, "param%d", paramCount);
+		emitMIPSParameters(paramName, 0);
+		paramCount++;
 
 	}
 
@@ -1159,7 +1166,11 @@ ParamList:	{}
 		 
 		printf(BCYAN "ParamValue = %s\n" RESET, paramValue);
 
-		emitMIPSParameters(paramValue, maxParam);
+		//change values of parameters in main
+		char paramName[50];
+		sprintf(paramName, "param%d", paramCount);
+		setIntVar(paramName, paramValue);
+		paramCount++;
 
 	} ParamList {}
 ;

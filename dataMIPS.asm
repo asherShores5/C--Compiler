@@ -1,31 +1,16 @@
 .data
 newLine: .asciiz "\n"
-num1:   .word  20
-num2:   .word  49
-result:   .word  69
-result1:   .word  69
-msg0: .asciiz "Good Job"
-msg1: .asciiz "n i c e"
+x:   .word  10
+num1:   .word  5
+num2:   .word  20
+result:   .word  25
+msg0: .asciiz "hello"
 
 .text
 # -----------------------
 
 main:
-jal  addValue
-# Printing -----------
-li $v0, 1
-lw $a0, result1
-syscall
-# PRINTING NEW LINE ---->
-li $v0, 4
-la $a0, newLine
-syscall
-li $v0, 4
-la $a0, msg0
-syscall
-li $v0, 4
-la $a0, msg1
-syscall
+jal while0
 # -----------------
 #  Done, terminate program.
 
@@ -42,5 +27,43 @@ lw $v1, result
 jr  $ra
 .end addValue
 
-li $v1, 0
+lw $t0, x
+li $t1, 0
+# --- IF STMT --- #
 
+while0:
+lw $t0, x
+li $t1, 10
+# --- IF STMT --- #
+bne $t0, $t1, false0
+# PRINTING NEW LINE ---->
+li $v0, 4
+la $a0, newLine
+syscall
+# Printing -----------
+li $v0, 1
+lw $a0, x
+syscall
+# --- JUMP PAST ELSE --- #
+beq $0, $0, jumpElse0
+
+# --- ELSE STMT --- #
+false0:
+# ---PAST ELSE--->
+jumpElse0:
+lw $t0, x
+li $t1, 5
+sub $s1, $t0, $t1
+la $t0, x #get address
+move $t1, $s1 #new value
+sw $t1 0($t0) #save new value
+# PRINTING NEW LINE ---->
+li $v0, 4
+la $a0, newLine
+syscall
+li $v0, 4
+la $a0, msg0
+syscall
+lw $t0, x
+li $t1, 0
+blt $t1, $t0, while0

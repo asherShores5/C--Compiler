@@ -143,6 +143,7 @@ char *getValue(char itemName[50], char scope[50]) {
 		}
 
 		if( str1 == 0 && (str2 == 0 || isGlobal == 0)){
+			printf("Item Value:%s\n", symTabItems[i].itemValue);
 			return symTabItems[i].itemValue;
 		}
 	}

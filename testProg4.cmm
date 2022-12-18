@@ -1,24 +1,17 @@
 /* Functions */
 
-int num1;
-int num2;
-int param; 
+int x;
+char y;
+x = 20;
 
-num1 = 20;
-num2 = 49;
-
-func int addValue(int z){
+func int addValue(int num1 int num2){
      int result;
-     result = z + num2;
+     result = num1 + num2;
      return result;
 }
-
 func int main(){
      int result1;
-     param = 1;
-     result1 = addValue(param); 
+     result1 = addValue(x 5);
+     swrite "result:";
      write result1;
-     writeln;
-     swrite "Good Job";
-     return 0;
 }

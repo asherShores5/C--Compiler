@@ -1,33 +1,56 @@
-# CompilerButBad
+# **CompilerButBad**
 
-#instructions
+## Instructions
 
-Using an Ubuntu or similar Terminal (bash, zsh...)
-    - install make 
-    - install flex
-    - install bison
-    - install gcc
+### *Using an Ubuntu or similar Terminal (bash, zsh...)*
 
-Download code zip file or clone Github Repo
+- Ubuntu Commands:  
+     - *install make*    
+     - *install flex*     
+     - *install bison*    
+     - *install gcc* 
 
-Navigate to the directory
+- Download code zip file or clone Github Repo
 
-Use command "code ." to open in VSCode (ensure VSCode is downloaded and installed)
+- Navigate to the directory
 
-To run program:
+- Use command `code .` to open in VSCode (ensure VSCode is downloaded and installed)
 
-Use "make 1" to run the first program "Functions"
 
-Use "make 2" to run the first program "Ifs"
 
-Use "make 3" to run the first program "Loops"
+# **Running the Program**
 
-After each make, copy contents of "dataMIPS.asm" file to a text (or asm) file saved locally to your PC
+- Make Commands:
 
-Open QTSpim or MARS and run the text file
+    Use `make 1` to run the first program "Functions"    
+    Use `make 2` to run the first program "Ifs"     
+    Use `make 3` to run the first program "Loops"
 
-Check output from console
+- After each make, copy contents of "dataMIPS.asm" file to a text (or asm) file saved locally to your PC
 
+- Open QTSpim or MARS and run the text file
+
+- Check output from console
+
+---
+
+## **GOOD TO KNOW**
+
+- Functions are declared in python syntax with keyword `func`
+
+- Parameters are separated by whitespace instead of commas
+- Strings can be printed with command  `swrite stringval` 
+- All funcs must have a return type
+- **All the test programs have been changed to our syntax and are stored in testPrograms 4, 5, and 6**
+
+### Things that don't work
+
+- We have issues declaring the same variables across different functions in MIPS, the values have been changed in the source code to make the programs work
+
+-  Negative numbers in math
+
+---
+            
 Thanks!
 
 https://github.com/asherShores5/CompilerButBad

@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <ctype.h>
-// #include "symbolTable.h"
+
+#ifndef SYMBOLTABLE_H
+
+#endif // !SYMBOLTABLE_H
 
 // Set of functions to emit MIPS code
 FILE * mainMIPS;
@@ -11,7 +14,7 @@ FILE * loops;
 int inFunc = 0;
 int inLoop = 0;
 
-
+char paramArray [4][50];
 char condString[32];
 
 void emitMIPSString(char myString[50], int stringCount) {
@@ -236,6 +239,7 @@ void setIntVar(char id[50], char val[10]) {
     if (!isdigit(val[0])) {
         strcpy(command, "move");
     } 
+    
     fprintf(mainMIPS, "la $t0, %s #get address\n", id);
     fprintf(mainMIPS, "%s $t1, %s #new value\n", command, val);
     fprintf(mainMIPS, "sw $t1 0($t0) #save new value\n");
@@ -303,7 +307,7 @@ void emitMIPSWhile(int n) {
     mainMIPS = fopen("MIPScode.asm", "a");
 
     // fprintf(loops, "while%d:", n);
-    fprintf(mainMIPS, "jal while%d\n", n);
+    // fprintf(mainMIPS, "jal while%d\n", n);
     inFunc = 1;
     inLoop = 1;
 
@@ -317,7 +321,8 @@ void emitMIPSEndWhile(int n) {
         mainMIPS = fopen("funcs.asm", "a");
     }
 
-    fprintf(mainMIPS, "%s", condString);
+    fprintf(mainMIPS, "%s\n", condString);
+    fprintf(mainMIPS, ".end while%d\n", n);
     inFunc = 0;
     inLoop = 0;
 
@@ -327,7 +332,7 @@ void emitMIPSEndWhile(int n) {
 void loadMIPSVarCond(char var1[10], char var2[10], char type1[10], char type2[10]) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
-    if (inFunc == 1) {
+    if (inFunc == 1 && !inLoop) {
         mainMIPS = fopen("funcs.asm", "a");
     }
     // printf("type1=%s , type2=%s", type1, type2);
@@ -356,13 +361,15 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc == 1) {
+        // fprintf(mainMIPS, "jal while%d\n", n);      
+        // fclose (mainMIPS);  
         mainMIPS = fopen("funcs.asm", "a");
     }
 
 
     // fprintf(mainMIPS, "li $t0, %s\n", var1);
     // fprintf(mainMIPS, "li $t1, %s\n", var2);
-    fprintf(mainMIPS, "# --- IF STMT --- #\n");
+    fprintf(mainMIPS, "# --- CONDITION --- #\n");
 
     if (!strcmp(operator, "!=")) {
         strcpy(op, "beq");
@@ -383,7 +390,6 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
         strcpy(op, "bgt");
     }
     if (!inLoop) {
-        // strcpy(loopType, "while");
         fprintf(mainMIPS, "%s $t0, $t1, %s%d\n", op,  loopType, n);
         
         // Basically we use the reverse of the operator becuase
@@ -392,7 +398,7 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
     // for while loops
     else  {
-        inLoop = 0;
+        // inLoop = 0;
         sprintf(condString, "%s $t1, $t0, while%d", op, n);
         fprintf(mainMIPS, "\nwhile%d:\n", n);
     }
@@ -403,7 +409,7 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
 
 }
 
-void emitMIPSParameters(char *param, int count) {
+void emitMIPSParameters(char param[50], int count) {
 
     // scrapped code
     // mainMIPS = fopen("MIPScode.asm", "a");
@@ -413,20 +419,30 @@ void emitMIPSParameters(char *param, int count) {
 
     dataMIPS = fopen("dataMIPS.asm", "a");
 
-    // fprintf(mainMIPS, "li $a%d, %s", count, param);
     fprintf(dataMIPS, "%s: .word     0\n", param);
+    strcpy(paramArray[count], param);
+    printf("paramArray[%d] = %s\n", count, paramArray[count]);
 
     fclose(dataMIPS);
 }
 
-void editMIPSParameters(char *param, char *newVal) {
+void setMIPSParameters(char *param, int n) {
 
-    // funcs = fopen("funcs.asm", "a");
+    mainMIPS = fopen("MIPScode.asm", "a");
+    if (inLoop) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
 
-    // fprintf(mainMIPS, "li $a%d, %s", count, param);
-    setIntVar(param, newVal);
+    if (!isdigit(param[0])) {
 
-//     fclose(funcs);
+        fprintf(mainMIPS, "lw $a%d, %s\n", n, param);
+
+    } else {
+
+        fprintf(mainMIPS, "li $a%d, %s\n", n, param);
+    }
+
+    fclose(mainMIPS);
 }
 
 void emitMIPSFunc (char func[50]) {
@@ -448,7 +464,11 @@ void emitMIPSFunc (char func[50]) {
 
 void emitMIPSFuncCall (char func[50]) {
 
+
     mainMIPS = fopen("MIPScode.asm", "a");
+    if (inLoop) {
+        mainMIPS = fopen("funcs.asm", "a");
+    }
     fprintf(mainMIPS, "jal  %s\n", func);
     fclose(mainMIPS);
 
@@ -476,6 +496,8 @@ void emitMIPSGetReturn () {
     if (inFunc == 1) {
         mainMIPS = fopen("funcs.asm", "a");
     }
+
+    
 
     fclose(mainMIPS);
 
@@ -525,17 +547,27 @@ void emitMIPSEquation(char var1[10], char var2[10], char op) {
     funcs = fopen("funcs.asm", "a");
 
     if (!isdigit(var1[0])) {
-        // if (!strcmp(getItemKind(var1, "GLOBAL"), "PARAM")) {
-        //     printf(BGREEN"FOUND A PARAMETER\n"RESET);
-        //     fprintf(funcs, "move $t0, $a2\n");
-        // }
-        fprintf(funcs, "lw $t0, %s\n", var1);
+        int index = getParamNum(var1);
+        if (index != -1) {
+            fprintf(funcs, "move $t0, $a%d\n", index);
+        } 
+        else {
+            fprintf(funcs, "lw $t0, %s\n", var1);
+        }
+    // digit load
     } else {
         fprintf(funcs, "li $t0, %s\n", var1);
     }
 
     if (!isdigit(var2[0])) {       
-        fprintf(funcs, "lw $t1, %s\n", var2);
+        int index = getParamNum(var2);
+        if (index != -1) {
+            fprintf(funcs, "move $t1, $a%d\n", index);
+        } 
+        else {
+            fprintf(funcs, "lw $t1, %s\n", var1);
+        }
+    // digit load
     } else {
         fprintf(funcs, "li $t1, %s\n", var2);
     }
@@ -588,4 +620,17 @@ void appendFiles() {
     fclose(funcs);
     fclose(dataMIPS);
 
+}
+
+int getParamNum (char name[50]) {
+
+    for (size_t i = 0; i < 4; i++) {
+        if (!strcmp(paramArray[i], name)) {
+            printf("currIndex = %s", paramArray[i]);
+            return i; 
+            break;
+        }
+    }
+
+    return -1;   
 }

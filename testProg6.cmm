@@ -1,31 +1,23 @@
-/* Loop */
+/* Loops */
 
 int x;
-int num1;
-int num2;
 char y;
-x = 10;
-num1 = 5;
-num2 = 20;
+x = 20;
 
-
-func int addValue(){
-    int result;
-    result = num1 + num2;
-    return result;
+func int addValue(int num1 int num2){
+   int result;
+   result = num1 + num2;
+   return result;
 }
 
-
-
 func int main(){
-    int result1;
-    while (x > 0){
-        if (x == 10) {
-          writeln;
-          write x;
-        } 
-        x = x - 5;
-        writeln;
-        swrite "hello";
-    }
-} 
+   int result1;
+   while (x > 0){
+      result1 = addValue(x 5);
+      swrite "result:";
+      write result1;
+      writeln;
+      x = x - 5;
+   }
+   return 0;
+}

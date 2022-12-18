@@ -376,16 +376,14 @@ ParamDecl:
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
 
 		if (inSymTab == 0) {
-			addItem($2, "PARAM", $1->nodeType, currentScope);
-			showSymTable();
+			// addItem($2, "PARAM", $1->nodeType, currentScope);
+			// showSymTable();
 		} 
 		else {
 			printf("\nSEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
 		} 
 
-		char paramName[50];
-		sprintf(paramName, "param%d", paramCount);
-		emitMIPSParameters(paramName, 0);
+		emitMIPSParameters($2, paramCount);
 		paramCount++;
 
 	}
@@ -393,7 +391,7 @@ ParamDecl:
 	/* | Type ID LBRACKET RBRACKET {
 		printf("\n RECOGNIZED RULE: Parameter ARRAY declaration %s\n", $2);
 		//Asher's Semantic Checks
-		//Symbol Table
+		//Symbol Table	
 		symTabAccess();
 		int inSymTab = found($2, currentScope);
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
@@ -481,16 +479,17 @@ Stmt:
 		// ---- MIPS CODE ---- //
 		// if (hasMath) {
 		// 	emitMIPSReturn("$s1", returnType);
-		// } else {
-		// }
-		emitMIPSReturn($2->RHS, returnType);
+		// } 
+		if (strcmp(currentScope, "main")) {
+			emitMIPSReturn($2->RHS, returnType);
+		}
 
 		hasMath = 0;
 
 	}
 
 
-	|WRITE  Expr SEMICOLON {
+	| WRITE Expr SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 
 
@@ -607,10 +606,7 @@ WhileLoop:
 
 		emitMIPSWhile(whileCount); //all this does is change the 'inLoop' value to true
 
-	} Condition RPAREN Block {
-
-		
-		// ----- CODE GENERATION ----- //
+	} Condition RPAREN {
 
 		// ---- MIPS CODE ---- //
 		// printNode($);
@@ -621,7 +617,15 @@ WhileLoop:
 		strcpy(val1, $4->LHS);
 		strcpy(val2, $4->RHS);
 
-		loadMIPSVarCond(val1, val2, type1, type2);
+		// loadMIPSVarCond(val1, val2, type1, type2);
+		
+		
+	} Block {
+
+		
+		// ----- CODE GENERATION ----- //
+
+		
 		emitMIPSEndWhile(whileCount);
 		// printf("condString = %s\n", condString);
 
@@ -692,14 +696,10 @@ Condition:
 		$$ = AST_assignment($2, $1->RHS, $3->RHS);
 		$$->left = $1->nodeType;
 		$$->right = $3->nodeType;
-		// printNode($$->left);
-		// printNode($$->right);
-		// printNode($$);
-
 
 		// may not need this if MIPS stuff works :) 
 		// also... Riley wants to smash his computer screen
-		// - (Riley 2 weeks later): MIPS works but we still need this
+		// (Riley 2 weeks later) - MIPS works but we still need this
 		// and my computer is disfunctional now *smile*.
 		int cond = evalCondition($1, $3, $2);
 
@@ -721,6 +721,9 @@ Condition:
 
 
 			// ---- MIPS CODE ---- //
+			// OPTIMIZATION --->MIPS for if conditions will only generate
+			// if condition is true or if they are in a function/loop
+
 			if (onWhile || inFunction) {
 				loadMIPSVarCond($1->RHS, $3->RHS, $1->nodeType, $3->nodeType);
 				emitMIPSCond(val1, val2, $2, ifCount);	
@@ -829,7 +832,7 @@ Expr:
 
 	| ArrayExpr
 
-	| FunCall
+	| FunCall {paramCount = 0; $$ = $1;}
 
 	| UnaryOp Expr { 
 
@@ -854,8 +857,9 @@ Expr:
 		int inSymTab = found($1, currentScope);
 
 		
-		// Variable to tell if value has been assigned yet
-		int isNullValue = strcmp(getValue($1, currentScope), "NULL");
+		// Variable to tell if value has been assigned yet; 1 is true
+		int isNullValue = !strcmp(getValue($1, currentScope), "NULL");
+		int isFuncCall = !strcmp($3->LHS, "RETURN");
 
 
 		// ------ SEMANTIC CHECKS ------ //
@@ -932,14 +936,37 @@ Expr:
 
 
 				// ---- MIPS CODE ---- //
-				if(isNullValue) { //if val isn't null
+				if(!isNullValue) { //if val isn't null
+
 					if (inFunction && hasMath) {
+						// printf("Setting new var for int\n");
 						setIntVar($1, "$s1");
-					} else {
+					} 					
+
+					else if (isFuncCall) {
+						setIntVar($1, "$v1");
+					}
+
+					else {
 						setIntVar($1, $3->RHS);
 					}
-				} else {
+					
+				} else if (inFunction && hasMath) {
+
+					// printf("Setting new var for int\n");
 					emitIntVar($1, $3->RHS);
+					setIntVar($1, "$s1");
+
+				} else if (isFuncCall) {
+
+					emitIntVar($1, $3->RHS);
+					setIntVar($1, "$v1");
+				
+				}else {
+
+					printf(BBLUE"generating mips var\n"RESET);
+					emitIntVar($1, $3->RHS);
+
 				}
 			}
 
@@ -979,8 +1006,8 @@ FunCall:
 		char returnVal[25];
 		sprintf(returnVal, "%s", getValue($1, $1));
 		$$ = AST_assignment("int", "RETURN", returnVal);
-		printNode($$);
 		emitMIPSFuncCall($1);
+		emitMIPSGetReturn();
 		// ---- SEMANTIC CHECKS ---- //
 		//TODO make sure types are same 
 		
@@ -1043,8 +1070,7 @@ MathExpr:
 	}
 
 	| MathExpr PLUS Trm {
-
-		
+			
 		char newVal[5];
 
 		// Evaluate expression
@@ -1127,8 +1153,8 @@ Factor:
 		char val[25];
 		strcpy(val, getValue($1, currentScope));
 		if (!strcmp(val, "NULL")) {
-			printf(RED"ERROR: ID %s is null"RESET, $1);
-			exit;
+			printf(RED"ERROR: ID %s is null\n"RESET, $1);
+			// exit;
 		}
 		$$ = AST_assignment("id", $1 , val);
 	}
@@ -1150,26 +1176,27 @@ Factor:
 ParamList:	{}
 	| Primary {
 
-		// printf("\nRECOGNIZED RULE: Parameter\n");
+		printf("\nRECOGNIZED RULE: Parameter\n");
 
 		char *paramValue;
 		if (!strcmp($1->nodeType, "id")) {
 			char *idVal = getValue($1->RHS, currentScope);
 			paramValue = malloc((int)strlen(idVal)+1);
 			strcpy(paramValue, idVal);
+			setMIPSParameters($1->RHS, paramCount);
 		} 
 		else {
 			int size = sizeof($1->RHS) / sizeof($1->RHS)[0]; 
 			paramValue = (char*)malloc(size*sizeof(char));
 			strcpy(paramValue, $1->RHS);
+			setMIPSParameters(paramValue, paramCount);
 		}
 		 
 		printf(BCYAN "ParamValue = %s\n" RESET, paramValue);
 
 		//change values of parameters in main
-		char paramName[50];
-		sprintf(paramName, "param%d", paramCount);
-		setIntVar(paramName, paramValue);
+		// char paramName[50];
+		// sprintf(paramName, "param%d", paramCount);
 		paramCount++;
 
 	} ParamList {}
@@ -1263,7 +1290,6 @@ int computeEquation(struct AST* num1, struct AST* num2, char operator) {
 	} else {
 		strcpy(mipsVal2, num2->RHS);
 	}
-	
 	if (inFunction) {
 		emitMIPSEquation(mipsVal1, mipsVal2, operator);
 	}

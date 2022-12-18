@@ -1,19 +1,24 @@
-/* If Statements */
+/* IF's and Else's */
 
 int x;
 char y;
 x = 20;
-y = 'e';
 
-func int main(){
-      int result;
-      result = 4;
-      if (x > 0){
-         write result;
-      }
-      else{
-         write y;
-      }
-   writeln;
-   swrite "Success";
+func int addValue(int num1 int num2){
+    int result;
+    result = num1 + num2;
+    return result;
 }
+func int main(){
+    int result1;
+    if (x > 0){
+        result1 = addValue(x 5);
+        swrite "result:";
+        write result1;
+    }
+    else{
+        swrite "no change";
+    }
+    return 0;
+}
+

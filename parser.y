@@ -483,7 +483,7 @@ Stmt:
 	}
 
 
-	| WRITE Expr SEMICOLON {
+	|WRITE  Expr SEMICOLON {
 		printf("\nRECOGNIZED RULE: Write Statement\n");
 
 
@@ -902,7 +902,6 @@ Expr:
 
 				// ---- IR CODE ---- // 
 				emitIRCharDecl($1, $3->RHS);
-				
 				
 				// ---- MIPS CODE ---- // 
 				// if (inFunction) {

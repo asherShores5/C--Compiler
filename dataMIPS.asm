@@ -1,13 +1,18 @@
 .data
 newLine: .asciiz "\n"
 x:   .word  20
-y  .byte   'n'
-msg0: .asciiz 
+y:  .byte   'n'
+result:   .word  4
+msg0: .asciiz "Success"
 
 .text
 # -----------------------
 
 main:
+lw $t0, x
+li $t1, 0
+# --- IF STMT --- #
+blt $t0, $t1, false0
 # Printing -----------
 li $v0, 1
 lw $a0, result

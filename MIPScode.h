@@ -188,7 +188,7 @@ void emitMIPSCharDecl (char id[50], char c[5]) {
 
     dataMIPS = fopen("dataMIPS.asm", "a");
 
-    fprintf(dataMIPS, "%s  .byte   %s\n", id, c);
+    fprintf(dataMIPS, "%s:  .byte   %s\n", id, c);
 
     fclose(dataMIPS);
 }
@@ -544,7 +544,6 @@ void appendFiles() {
 
     mainMIPS = fopen("MIPScode.asm", "r");
     funcs = fopen("funcs.asm", "r");
-    loops = fopen("loops.asm", "r");
     dataMIPS = fopen("dataMIPS.asm", "a");
 
     fprintf(dataMIPS, "\n");
@@ -559,13 +558,12 @@ void appendFiles() {
 
     fprintf(dataMIPS, "\n");
 
-    while((ch = getc(loops)) != EOF)
-        putc(ch, dataMIPS);
+    // while((ch = getc(loops)) != EOF)
+    //     putc(ch, dataMIPS);
  
     // printf("\nCONTENTS COPIED TO FILE: \"dataMIPS.asm\"\n");
     fclose(mainMIPS);
     fclose(funcs);
-    fclose(loops);
     fclose(dataMIPS);
 
 }

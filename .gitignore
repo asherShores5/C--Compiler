@@ -4,7 +4,6 @@ parser.tab.c
 parser.tab.h
 dataIR.ir
 funcs.asm
-dataMIPS.asm
 lex.yy.c
 .DS_Store
 .vscode

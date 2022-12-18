@@ -7,6 +7,7 @@ y = 'n';
 
 func int main(){
      int result;
+     result = 4;
      if (x > 0){
         write result;
      }

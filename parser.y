@@ -249,7 +249,6 @@ FunDeclList:
 
 	| FunDecl FunDeclList {
 		
-		//TODO AST stuff idk what to do about this yet
 
 	}
 ;
@@ -376,8 +375,8 @@ ParamDecl:
 		//printf("looking for %s in symtab - found: %d \n", $2, inSymTab);
 
 		if (inSymTab == 0) {
-			// addItem($2, "PARAM", $1->nodeType, currentScope);
-			// showSymTable();
+			addItem($2, "PARAM", $1->nodeType, currentScope);
+			showSymTable();
 		} 
 		else {
 			printf("\nSEMANTIC ERROR: Var %s is already in the symbol table\n", $2);
@@ -606,7 +605,10 @@ WhileLoop:
 
 		emitMIPSWhile(whileCount); //all this does is change the 'inLoop' value to true
 
-	} Condition RPAREN {
+	} Condition RPAREN Block {
+
+		
+		// ----- CODE GENERATION ----- //
 
 		// ---- MIPS CODE ---- //
 		// printNode($);
@@ -616,17 +618,8 @@ WhileLoop:
 		strcpy(type2, $4->right->nodeType); 
 		strcpy(val1, $4->LHS);
 		strcpy(val2, $4->RHS);
-
-		// loadMIPSVarCond(val1, val2, type1, type2);
 		
-		
-	} Block {
-
-		
-		// ----- CODE GENERATION ----- //
-
-		
-		emitMIPSEndWhile(whileCount);
+		emitMIPSEndWhile(val1, val2, type1, type2, whileCount);
 		// printf("condString = %s\n", condString);
 
 		printf(BGREEN"Emmiting end of while loop!\n"RESET);
@@ -846,9 +839,6 @@ Expr:
 		}
 		showSymTable();
 
-		//TODO fix negative numbers :)
-		// $$ = $2;
-
 	}
 
 	| ID EQ Expr {
@@ -962,7 +952,7 @@ Expr:
 					emitIntVar($1, $3->RHS);
 					setIntVar($1, "$v1");
 				
-				}else {
+				} else {
 
 					printf(BBLUE"generating mips var\n"RESET);
 					emitIntVar($1, $3->RHS);
@@ -1009,7 +999,6 @@ FunCall:
 		emitMIPSFuncCall($1);
 		emitMIPSGetReturn();
 		// ---- SEMANTIC CHECKS ---- //
-		//TODO make sure types are same 
 		
 	}
 

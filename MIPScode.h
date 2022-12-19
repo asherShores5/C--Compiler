@@ -314,11 +314,23 @@ void emitMIPSWhile(int n) {
     fclose(mainMIPS);
 }
 
-void emitMIPSEndWhile(int n) {
+void emitMIPSEndWhile(char var1[10], char var2[10], char type1[10], char type2[10], int n) {
 
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc) {
         mainMIPS = fopen("funcs.asm", "a");
+    }
+
+    if (!strcmp(type1, "id")) {
+        fprintf(mainMIPS, "lw $t0, %s\n", var1);
+    } else {
+        fprintf(mainMIPS, "li $t0, %s\n", var1);        
+    }
+
+    if (!strcmp(type2, "id")) {
+        fprintf(mainMIPS, "lw $t1, %s\n", var2);
+    } else {
+        fprintf(mainMIPS, "li $t1, %s\n", var2);        
     }
 
     fprintf(mainMIPS, "%s\n", condString);
@@ -348,7 +360,7 @@ void loadMIPSVarCond(char var1[10], char var2[10], char type1[10], char type2[10
     } else {
         fprintf(mainMIPS, "li $t1, %s\n", var2);        
     }
-
+    
     fclose(mainMIPS);    
 
 }
@@ -361,6 +373,7 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     
     mainMIPS = fopen("MIPScode.asm", "a");
     if (inFunc == 1) {
+        //TODO fix this now
         // fprintf(mainMIPS, "jal while%d\n", n);      
         // fclose (mainMIPS);  
         mainMIPS = fopen("funcs.asm", "a");
@@ -389,6 +402,7 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     else if (!strcmp(operator, "<")) {
         strcpy(op, "bgt");
     }
+
     if (!inLoop) {
         fprintf(mainMIPS, "%s $t0, $t1, %s%d\n", op,  loopType, n);
         
@@ -397,10 +411,12 @@ char* emitMIPSCond(char var1[10], char var2[10], char operator[5], int n) {
     }
 
     // for while loops
-    else  {
-        // inLoop = 0;
+    else {
         sprintf(condString, "%s $t1, $t0, while%d", op, n);
         fprintf(mainMIPS, "\nwhile%d:\n", n);
+        fclose(mainMIPS);
+        mainMIPS = fopen("MIPScode.asm", "a");
+        fprintf(mainMIPS, "%s $t1, $t0, while%d\n", op, n);
     }
 
     fclose(mainMIPS);
@@ -626,7 +642,7 @@ int getParamNum (char name[50]) {
 
     for (size_t i = 0; i < 4; i++) {
         if (!strcmp(paramArray[i], name)) {
-            printf("currIndex = %s", paramArray[i]);
+            // printf("currIndex = %s", paramArray[i]);
             return i; 
             break;
         }

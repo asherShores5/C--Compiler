@@ -435,7 +435,6 @@ void emitMIPSParameters(char param[50], int count) {
 
     dataMIPS = fopen("dataMIPS.asm", "a");
 
-    fprintf(dataMIPS, "%s: .word     0\n", param);
     strcpy(paramArray[count], param);
     printf("paramArray[%d] = %s\n", count, paramArray[count]);
 
